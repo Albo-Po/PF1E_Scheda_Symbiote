@@ -15,6 +15,7 @@
   --c-talenti:#9333ea;       /* viola */
   --c-equip:#d97706;         /* arancione */
   --c-mitico:#c026d3;        /* magenta */
+   --c-compagno:#0891b2; /* azzurro/teal */
   --c-note:#0f766e;          /* teal */
 
   /* theme tokens */
@@ -47,6 +48,7 @@
   --c-talenti:#c084fc;
   --c-equip:#fbbf24;
   --c-mitico:#f472b6;
+   --c-compagno:#22d3ee;
   --c-note:#2dd4bf;
 }
 
@@ -199,6 +201,7 @@ body{
 #tab-equip[aria-selected="true"]{ background:var(--c-equip); }
 #tab-mitico[aria-selected="true"]{ background:var(--c-mitico); }
 #tab-note[aria-selected="true"]{ background:var(--c-note); }
+#tab-compagno[aria-selected="true"]{ background:var(--c-compagno); }
 
 /* Mitico disabilitata */
 .tab.is-disabled{
@@ -500,6 +503,13 @@ td input{
 /* Riga 2: DES | Taglia | Varie | Note (note più larga) */
 #ac-components .ac-row.row-2{
   grid-template-columns: 1fr 1fr 1fr 2fr;
+}
+
+#attacks-table td input{
+  border:0;
+  border-radius:0;
+  padding:0;
+  background:transparent;
 }
 
 /* IMPORTANTISSIMO: annulla la regola globale .field{grid-column: span 3} */

@@ -33,13 +33,14 @@
 
     <!-- TABS -->
     <nav class="tabs" role="tablist" aria-label="Pagine scheda personaggio">
-      <button type="button" class="tab" role="tab" aria-selected="true"  aria-controls="page-identita"      id="tab-identita"      data-target="page-identita">Identità</button>
-      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-combattimento" id="tab-combattimento" data-target="page-combattimento">Combattimento</button>
+      <button type="button" class="tab" role="tab" aria-selected="true"  aria-controls="page-identita"      id="tab-identita"      data-target="page-identita">Personaggio</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-mitico"        id="tab-mitico"        data-target="page-mitico">Mitico</button>
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-abilita"       id="tab-abilita"       data-target="page-abilita">Abilità</button>
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-talenti"       id="tab-talenti"       data-target="page-talenti">Talenti</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-combattimento" id="tab-combattimento" data-target="page-combattimento">Combattimento</button>
+      <button type="button" class="tab" role="tab"  aria-selected="false"  aria-controls="page-compagno"   id="tab-compagno"      data-target="page-compagno">Compagno</button>
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-equip"         id="tab-equip"         data-target="page-equip">Equip</button>
-      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-mitico"        id="tab-mitico"        data-target="page-mitico">Mitico</button>
-      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-note"          id="tab-note"          data-target="page-note">Note</button>
+     <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-note"          id="tab-note"          data-target="page-note">Note</button>
     </nav>
 
     <!-- PAGE: IDENTITÀ -->
@@ -108,7 +109,7 @@
             <div class="field span-4">
               <label>Categoria Mitica</label>
               <input class="small" id="mythic-tier-identita" type="number" min="0" max="10" step="1" placeholder="0" />
-              <div class="hint" id="mythic-badge" style="display:none;">🔒 Non mitico (Categoria = 0)</div>
+              <div class="hint" id="mythic-badge" style="display:none;">🔒 Non mitico</div>
             </div>
 
             <div class="field span-8">
@@ -190,101 +191,169 @@
     </section>
 
 
-    <!-- PAGE: COMBATTIMENTO -->
-<section class="page" id="page-combattimento" role="tabpanel" aria-labelledby="tab-combattimento">
+   <section class="page" id="page-combattimento" role="tabpanel" aria-labelledby="tab-combattimento">
   <div class="grid">
     <div class="card">
       <h2>Combattimento</h2>
 
-      <!-- PF (come già ti piace) -->
+      <!-- PF -->
       <div class="fields" style="margin-bottom:12px;">
         <div class="field span-4"><label>PF Totali</label><input id="hp-total" class="small" type="number" step="1" min="0" placeholder="—" /></div>
         <div class="field span-4"><label>PF Attuali</label><input id="hp-current" class="small" type="number" step="1" min="0" placeholder="—" /></div>
         <div class="field span-4"><label>Temp PF</label><input id="hp-temp" class="small" type="number" step="1" min="0" placeholder="0" /></div>
       </div>
 
-      <!-- Iniziativa / Velocità / RD-RI (stessa resa “a box”) -->
+      <!-- Iniziativa / Velocità / RD-RI -->
       <div class="fields" style="margin-bottom:12px;">
-        <div class="field span-4"><label>Iniziativa</label><input id="init-total" class="small" type="text" placeholder="+0" /></div>
+        <div class="field span-4">
+          <label>Iniziativa (calcolata)</label>
+          <input id="init-total" class="small" type="text" value="+0" readonly />
+                </div>
+
+        <div class="field span-4">
+          <label>Varie Iniziativa</label>
+          <input id="init-misc" class="small" type="number" step="1" value="0" />
+        </div>
+
         <div class="field span-4"><label>Velocità</label><input id="speed" class="small" type="text" placeholder="9 m" /></div>
-        <div class="field span-4"><label>RD / RI</label><input id="dr-sr" class="small" type="text" placeholder="—" /></div>
+      </div>
+
+      <div class="fields" style="margin-bottom:12px;">
+        <div class="field span-12"><label>RD / RI</label><input id="dr-sr" class="small" type="text" placeholder="—" /></div>
       </div>
 
       <div class="stack">
-        
-    <!-- Componenti CA -->
-<div id="ac-components" class="ac-grid">
 
-  <div class="ac-row row-1">
-    <div class="field compact">
-      <label>Armatura</label>
-      <input id="ac-armor" class="small" type="number" step="1" value="0" />
+        <!-- CA (già calcolata automaticamente) -->
+        <div class="card" style="padding:10px;">
+          <h2 style="margin-bottom:8px;">Classe Armatura (CA)</h2>
+
+          <div class="fields" style="margin-bottom:10px;">
+            <div class="field span-4">
+              <label>CA Totale</label>
+              <input id="ac-total" class="small" type="text" value="10" readonly />
+            </div>
+            <div class="field span-4">
+              <label>Contatto</label>
+              <input id="ac-touch" class="small" type="text" value="10" readonly />
+            </div>
+            <div class="field span-4">
+              <label>Impreparato</label>
+              <input id="ac-ff" class="small" type="text" value="10" readonly />
+            </div>
+          </div>
+
+          <!-- Componenti CA: usa il tuo blocco ac-components che già hai sistemato -->
+          <div id="ac-components" class="ac-grid">
+            <div class="ac-row row-1">
+              <div class="field compact">
+                <label>Armatura</label>
+                <input id="ac-armor" class="small" type="number" step="1" value="0" />
+              </div>
+
+              <div class="field compact">
+                <label>Scudo</label>
+                <div class="shield-inline">
+                  <input id="ac-shield" class="small" type="number" step="1" value="0" />
+                  <label class="shield-toggle">
+                    <input id="shield-off" type="checkbox" />
+                    Off
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="ac-row row-2">
+              <div class="field compact">
+                <label>DES</label>
+                <input id="ac-dex" class="small" type="number" step="1" value="0" readonly />
+              </div>
+              <div class="field compact">
+                <label>Taglia</label>
+                <input id="ac-size" class="small" type="number" step="1" value="0" />
+              </div>
+              <div class="field compact">
+                <label>Varie</label>
+                <input id="ac-misc" class="small" type="number" step="1" value="0" />
+              </div>
+              <div class="field compact wide">
+                <label>Note</label>
+                <input id="ac-notes" type="text" placeholder="Es. Schivare +1..." />
+              </div>
+            </div>
+          </div>
+
+          <div class="hint" style="margin-top:8px;">
+            Tot = 10 + Armatura + Scudo(attivo) + DES + Taglia + Varie • Contatto: no Armatura/Scudo • Impreparato: no DES
+          </div>
+        </div>
+
+        <div class="card" style="padding:10px;">
+  <h2 style="margin-bottom:8px;">Attacchi (calcolati)</h2>
+
+  <!-- Modificatori globali per attacco -->
+  <div class="fields" style="margin-bottom:10px;">
+    <div class="field span-4">
+      <label>BAB</label>
+      <input id="atk-bab" class="small" type="number" step="1" value="0" />
     </div>
-
-    <div class="field compact">
-      <label>Scudo</label>
-      <div class="shield-inline">
-        <input id="ac-shield" class="small" type="number" step="1" value="0" />
-        <label class="shield-toggle">
-          <input id="shield-off" type="checkbox" />
-          Off
-        </label>
-      </div>
-    </div>
-  </div>
-
-  <div class="ac-row row-2">
-    <div class="field compact">
-      <label>DES</label>
-      <input id="ac-dex" class="small" type="number" step="1" value="0" readonly />
-    </div>
-
-    <div class="field compact">
+    <div class="field span-4">
       <label>Taglia</label>
-      <input id="ac-size" class="small" type="number" step="1" value="0" />
+      <input id="atk-size" class="small" type="number" step="1" value="0" />
     </div>
-
-    <div class="field compact">
-      <label>Varie</label>
-      <input id="ac-misc" class="small" type="number" step="1" value="0" />
-    </div>
-
-    <div class="field compact wide">
-      <label>Note</label>
-      <input id="ac-notes" type="text" placeholder="Es. Schivare +1..." />
+    <div class="field span-4">
+      <label>Varie (globale)</label>
+      <input id="atk-misc" class="small" type="number" step="1" value="0" />
     </div>
   </div>
 
+  <div class="actions" style="margin-top:0;">
+    <button type="button" class="btn" id="add-attack-row">Aggiungi attacco</button>
+    <button type="button" class="btn" id="remove-attack-row">Rimuovi ultimo</button>
+  </div>
+
+  <div class="table-wrap" style="margin-top:10px;">
+    <table aria-label="Tabella Attacchi" id="attacks-table" style="min-width:560px;">
+      <thead>
+        <tr>
+          <th style="width:14%;">Tipo</th>
+          <th style="width:28%;">Arma / Attacco</th>
+          <th style="width:14%;">Danni</th>
+          <th style="width:12%;">Varie</th>
+          <th style="width:12%;">Tot</th>
+          <th style="width:20%;">Note</th>
+        </tr>
+      </thead>
+      <tbody id="attacks-tbody">
+        <tr class="attack-row">
+          <td>
+            <select class="select atk-type">
+              <option value="melee" selected>Mischia (FOR)</option>
+              <option value="ranged">Distanza (DES)</option>
+            </select>
+          </td>
+          <td><input class="atk-name" type="text" placeholder="Es. Spada lunga" /></td>
+          <td><input class="atk-dmg" type="text" placeholder="Es. 1d8+3" /></td>
+          <td><input class="small atk-row-misc" type="number" step="1" value="0" /></td>
+          <td><input class="small atk-total" type="text" value="+0" readonly /></td>
+          <td><input class="atk-notes" type="text" placeholder="crit, portata, proprietà..." /></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="hint" style="margin-top:10px;">
+    Tot = BAB + Mod(FOR/DES) + Taglia + Varie(globale) + Varie(riga).
+  </div>
 </div>
 
-        <!-- BAB & Manovre -->
+        <!-- CMB / DMC (in fondo) -->
         <div class="card" style="padding:10px;">
-          <h2 style="margin-bottom:8px;">BAB &amp; Manovre</h2>
+          <h2 style="margin-bottom:8px;">Manovre (CMB / DMC)</h2>
           <div class="fields">
-            <div class="field span-4"><label>BAB</label><input class="small" type="text" placeholder="+0" /></div>
-            <div class="field span-4"><label>CMB</label><input class="small" type="text" placeholder="+0" /></div>
-            <div class="field span-4"><label>DMC</label><input class="small" type="text" placeholder="10" /></div>
-            <div class="field span-12"><label>Modificatori / Note</label><input type="text" placeholder="Es. +2 in lotta quando..." /></div>
-          </div>
-        </div>
-
-        <!-- TS -->
-        <div class="card" style="padding:10px;">
-          <h2 style="margin-bottom:8px;">Tiri Salvezza</h2>
-          <div class="triple">
-            <div class="field"><label>Tempra (COS)</label><input class="small" type="text" placeholder="+0" /></div>
-            <div class="field"><label>Riflessi (DES)</label><input class="small" type="text" placeholder="+0" /></div>
-            <div class="field"><label>Volontà (SAG)</label><input class="small" type="text" placeholder="+0" /></div>
-          </div>
-        </div>
-
-        <!-- Attacchi -->
-        <div class="card" style="padding:10px;">
-          <h2 style="margin-bottom:8px;">Attacchi</h2>
-          <div class="fields">
-            <div class="field span-12"><label>Attacco in mischia</label><input type="text" placeholder="Es. spada lunga +5 (1d8+3/19-20)" /></div>
-            <div class="field span-12"><label>Attacco a distanza</label><input type="text" placeholder="Es. arco corto +4 (1d6/x3)" /></div>
-            <div class="field span-12"><label>Attacchi speciali</label><input type="text" placeholder="Es. furtivo +2d6, scacciare..." /></div>
+            <div class="field span-4"><label>CMB</label><input id="cmb" class="small" type="text" placeholder="+0" /></div>
+            <div class="field span-4"><label>DMC</label><input id="cmd" class="small" type="text" placeholder="10" /></div>
+            <div class="field span-4"><label>Note</label><input id="cmb-cmd-notes" class="small" type="text" placeholder="bonus situazionali..." /></div>
           </div>
         </div>
 
@@ -574,6 +643,112 @@
         </div>
       </div>
     </section>
+
+
+    <!-- PAGE: COMPAGNO ANIMALE -->
+<section class="page" id="page-compagno" role="tabpanel" aria-labelledby="tab-compagno">
+  <div class="grid">
+
+    <div class="card">
+      <h2>Compagno Animale</h2>
+      <div class="fields">
+        <div class="field span-12">
+          <label>Nome Compagno</label>
+          <input type="text" placeholder="Es. Zanna" />
+        </div>
+
+        <div class="field span-8">
+          <label>Tipo / Specie</label>
+          <input type="text" placeholder="Es. Lupo, Leopardo, Cavallo..." />
+        </div>
+        <div class="field span-4">
+          <label>Taglia</label>
+          <input class="small" type="text" placeholder="M" />
+        </div>
+
+        <div class="field span-4">
+          <label>Livello / DV</label>
+          <input class="small" type="number" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="field span-4">
+          <label>PF Totali</label>
+          <input class="small" type="number" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="field span-4">
+          <label>PF Attuali</label>
+          <input class="small" type="number" min="0" step="1" placeholder="0" />
+        </div>
+
+        <div class="field span-4">
+          <label>Iniziativa</label>
+          <input class="small" type="text" placeholder="+0" />
+        </div>
+        <div class="field span-4">
+          <label>Velocità</label>
+          <input class="small" type="text" placeholder="12 m" />
+        </div>
+        <div class="field span-4">
+          <label>RD / RI</label>
+          <input class="small" type="text" placeholder="—" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>CA &amp; Attacchi</h2>
+      <div class="fields">
+        <div class="field span-4"><label>CA</label><input class="small" type="text" placeholder="10" /></div>
+        <div class="field span-4"><label>Contatto</label><input class="small" type="text" placeholder="10" /></div>
+        <div class="field span-4"><label>Impreparato</label><input class="small" type="text" placeholder="10" /></div>
+
+        <div class="field span-12">
+          <label>Attacchi</label>
+          <input type="text" placeholder="Es. morso +6 (1d6+4), artigli..." />
+        </div>
+        <div class="field span-12">
+          <label>Attacchi speciali / Capacità</label>
+          <input type="text" placeholder="Es. afferrare, trip, compagno..." />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Caratteristiche &amp; TS</h2>
+      <div class="fields">
+        <div class="field span-4"><label>FOR</label><input class="small" type="number" step="1" placeholder="10" /></div>
+        <div class="field span-4"><label>DES</label><input class="small" type="number" step="1" placeholder="10" /></div>
+        <div class="field span-4"><label>COS</label><input class="small" type="number" step="1" placeholder="10" /></div>
+
+        <div class="field span-4"><label>INT</label><input class="small" type="number" step="1" placeholder="2" /></div>
+        <div class="field span-4"><label>SAG</label><input class="small" type="number" step="1" placeholder="12" /></div>
+        <div class="field span-4"><label>CAR</label><input class="small" type="number" step="1" placeholder="6" /></div>
+
+        <div class="field span-4"><label>Tempra</label><input class="small" type="text" placeholder="+0" /></div>
+        <div class="field span-4"><label>Riflessi</label><input class="small" type="text" placeholder="+0" /></div>
+        <div class="field span-4"><label>Volontà</label><input class="small" type="text" placeholder="+0" /></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Abilità, Trucchi, Equip</h2>
+      <div class="fields">
+        <div class="field span-12">
+          <label>Abilità (skills)</label>
+          <textarea placeholder="Percezione +..., Furtività +..., ecc."></textarea>
+        </div>
+        <div class="field span-12">
+          <label>Trucchi / Addestramento</label>
+          <textarea placeholder="Trucchi noti, comandi, addestramento..."></textarea>
+        </div>
+        <div class="field span-12">
+          <label>Note / Equipaggiamento</label>
+          <textarea placeholder="Bardatura, oggetti, condizioni, note varie..."></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
 
     <!-- PAGE: NOTE -->
     <section class="page" id="page-note" role="tabpanel" aria-labelledby="tab-note">

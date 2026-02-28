@@ -30,10 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (hash && document.getElementById(hash)) activate(hash, false);
 
 
-  /* =====================================
-     MODIFICATORI CARATTERISTICHE PF
-     mod = floor((score - 10) / 2)
-  ====================================== */
+
 /* =====================================
    MODIFICATORI CARATTERISTICHE PF (BIDIREZIONALE)
    - Score -> Mod: mod = floor((score - 10)/2)
@@ -142,6 +139,255 @@ if (cdpLevel){
     cdpLevel.value = val;
   });
 }
+
+/* =========================
+   COMBATTIMENTO — Iniziativa + Attacchi (calcolati)
+========================= */
+
+function num(v){
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+function fmtSigned(n){
+  const v = Math.trunc(num(n));
+  return (v >= 0 ? "+" : "") + String(v);
+}
+function getAbilityModByCode(code){
+  const stat = document.querySelector(`.stat[data-ability="${code}"]`);
+  if (!stat) return 0;
+  const modEl = stat.querySelector('.ability-mod');
+  if (!modEl) return 0;
+  const n = Number(modEl.value);
+  return Number.isFinite(n) ? n : 0;
+}
+function getMythicTier(){
+  // prova prima identità, poi mitico
+  const a = document.getElementById('mythic-tier-identita');
+  const b = document.getElementById('mythic-tier-mitico');
+  const va = a ? num(a.value) : 0;
+  const vb = b ? num(b.value) : 0;
+  return va || vb || 0;
+}
+
+/* Iniziativa: DES + misc + tier (solo se >2) */
+function recalcInitiative(){
+  const out = document.getElementById('init-total');
+  const miscEl = document.getElementById('init-misc');
+  if (!out) return;
+
+  const dex = getAbilityModByCode('DES');
+  const misc = miscEl ? num(miscEl.value) : 0;
+  const tier = getMythicTier();
+  const mythicBonus = tier > 2 ? tier : 0;
+
+  out.value = fmtSigned(dex + misc + mythicBonus);
+}
+
+/* Attacchi: BAB + (FOR/DES) + taglia + varie */
+function recalcAttacks(){
+  const babEl = document.getElementById('atk-bab');
+  const sizeEl = document.getElementById('atk-size');
+  const miscEl = document.getElementById('atk-misc');
+  const meleeOut = document.getElementById('atk-melee-total');
+  const rangedOut = document.getElementById('atk-ranged-total');
+  if (!babEl || !sizeEl || !miscEl || !meleeOut || !rangedOut) return;
+
+  const bab = num(babEl.value);
+  const size = num(sizeEl.value);
+  const misc = num(miscEl.value);
+
+  const str = getAbilityModByCode('FOR');
+  const dex = getAbilityModByCode('DES');
+
+  meleeOut.value = fmtSigned(bab + str + size + misc);
+  rangedOut.value = fmtSigned(bab + dex + size + misc);
+}
+
+// init
+recalcInitiative();
+recalcAttacks();
+
+// ricalcola quando cambiano i campi
+['init-misc','atk-bab','atk-size','atk-misc'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', () => { recalcInitiative(); recalcAttacks(); });
+  el.addEventListener('change', () => { recalcInitiative(); recalcAttacks(); });
+});
+
+// ricalcola quando cambiano FOR/DES (score o mod)
+document.addEventListener('input', (e) => {
+  const inStat = e.target && e.target.closest && e.target.closest('.stat[data-ability="FOR"], .stat[data-ability="DES"]');
+  if (inStat && (e.target.classList.contains('ability-score') || e.target.classList.contains('ability-mod'))){
+    recalcInitiative();
+    recalcAttacks();
+  }
+});
+
+// ricalcola quando cambia la categoria mitica (identità o mitico)
+['mythic-tier-identita','mythic-tier-mitico'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', recalcInitiative);
+  el.addEventListener('change', recalcInitiative);
+});
+
+
+/* =========================
+   ATTACCHI DINAMICI + CALCOLO (FOR/DES)
+========================= */
+const attacksTbody = document.getElementById('attacks-tbody');
+const addAtkBtn = document.getElementById('add-attack-row');
+const remAtkBtn = document.getElementById('remove-attack-row');
+
+const ATK_STORAGE_KEY = 'pf1e_attacks_extra_rows_v1';
+
+function num(v){
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+function fmtSigned(n){
+  const v = Math.trunc(num(n));
+  return (v >= 0 ? "+" : "") + String(v);
+}
+function getAbilityModByCode(code){
+  const stat = document.querySelector(`.stat[data-ability="${code}"]`);
+  if (!stat) return 0;
+  const modEl = stat.querySelector('.ability-mod');
+  if (!modEl) return 0;
+  const n = Number(modEl.value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function getAtkGlobals(){
+  const bab = num(document.getElementById('atk-bab')?.value);
+  const size = num(document.getElementById('atk-size')?.value);
+  const misc = num(document.getElementById('atk-misc')?.value);
+  return { bab, size, misc };
+}
+
+function recalcAttackRow(tr){
+  if (!tr) return;
+  const type = tr.querySelector('.atk-type')?.value || 'melee';
+  const rowMisc = num(tr.querySelector('.atk-row-misc')?.value);
+
+  const { bab, size, misc } = getAtkGlobals();
+  const abil = (type === 'ranged') ? getAbilityModByCode('DES') : getAbilityModByCode('FOR');
+
+  const total = bab + abil + size + misc + rowMisc;
+  const out = tr.querySelector('.atk-total');
+  if (out) out.value = fmtSigned(total);
+}
+
+function recalcAllAttacks(){
+  if (!attacksTbody) return;
+  attacksTbody.querySelectorAll('.attack-row').forEach(recalcAttackRow);
+}
+
+function getAtkExtraCount(){
+  return parseInt(localStorage.getItem(ATK_STORAGE_KEY) || '0', 10) || 0;
+}
+function setAtkExtraCount(n){
+  localStorage.setItem(ATK_STORAGE_KEY, String(Math.max(0, n)));
+}
+
+function makeAttackRow(){
+  const tr = document.createElement('tr');
+  tr.className = 'attack-row attack-row-extra';
+  tr.innerHTML = `
+    <td>
+      <select class="select atk-type">
+        <option value="melee" selected>Mischia (FOR)</option>
+        <option value="ranged">Distanza (DES)</option>
+      </select>
+    </td>
+    <td><input class="atk-name" type="text" placeholder="Es. Arma/Attacco" /></td>
+    <td><input class="atk-dmg" type="text" placeholder="Es. 1d6+2" /></td>
+    <td><input class="small atk-row-misc" type="number" step="1" value="0" /></td>
+    <td><input class="small atk-total" type="text" value="+0" readonly /></td>
+    <td><input class="atk-notes" type="text" placeholder="note..." /></td>
+  `;
+  return tr;
+}
+
+// ricostruisci righe extra all'avvio (solo struttura; i valori li recupera autosave già presente)
+function rebuildAttackExtraRows(){
+  if (!attacksTbody) return;
+  const n = getAtkExtraCount();
+  for (let i = 0; i < n; i++){
+    const tr = makeAttackRow();
+    attacksTbody.appendChild(tr);
+
+    // se hai applySavedValues/wireAutosave nel tuo file (come per skills), riusiamole:
+    if (typeof applySavedValues === 'function') applySavedValues(tr);
+    if (typeof wireAutosave === 'function') wireAutosave(tr);
+  }
+  recalcAllAttacks();
+}
+rebuildAttackExtraRows();
+
+// bottoni add/remove
+if (addAtkBtn && attacksTbody){
+  addAtkBtn.addEventListener('click', () => {
+    const tr = makeAttackRow();
+    attacksTbody.appendChild(tr);
+    setAtkExtraCount(getAtkExtraCount() + 1);
+
+    if (typeof applySavedValues === 'function') applySavedValues(tr);
+    if (typeof wireAutosave === 'function') wireAutosave(tr);
+
+    recalcAttackRow(tr);
+  });
+}
+
+if (remAtkBtn && attacksTbody){
+  remAtkBtn.addEventListener('click', () => {
+    const extras = attacksTbody.querySelectorAll('.attack-row-extra');
+    if (!extras.length) return;
+    extras[extras.length - 1].remove();
+    setAtkExtraCount(getAtkExtraCount() - 1);
+    recalcAllAttacks();
+  });
+}
+
+// listener: ricalcola quando tocchi campi globali
+['atk-bab','atk-size','atk-misc'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', recalcAllAttacks);
+  el.addEventListener('change', recalcAllAttacks);
+});
+
+// listener: ricalcola quando cambi tipo o misc riga
+document.addEventListener('input', (e) => {
+  const row = e.target?.closest?.('.attack-row');
+  if (!row) return;
+
+  if (
+    e.target.classList.contains('atk-row-misc') ||
+    e.target.classList.contains('atk-type')
+  ){
+    recalcAttackRow(row);
+  }
+});
+document.addEventListener('change', (e) => {
+  const row = e.target?.closest?.('.attack-row');
+  if (!row) return;
+  if (e.target.classList.contains('atk-type')) recalcAttackRow(row);
+});
+
+// ricalcola se cambiano FOR o DES nella tab Identità
+document.addEventListener('input', (e) => {
+  const stat = e.target?.closest?.('.stat[data-ability="FOR"], .stat[data-ability="DES"]');
+  if (!stat) return;
+
+  if (e.target.classList.contains('ability-score') || e.target.classList.contains('ability-mod')){
+    recalcAllAttacks();
+  }
+});
+
+// init finale
+recalcAllAttacks();
 
   /* =====================================
      SALVATAGGIO AUTOMATICO (localStorage)
