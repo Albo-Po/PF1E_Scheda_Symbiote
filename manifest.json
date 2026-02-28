@@ -1,0 +1,7 @@
+{
+  "manifestVersion": 1,
+  "name": "PF1E Character Sheet",
+  "entryPoint": "https://github.com/Albo-Po/PF1e-talespire-sheet.git",
+  "summary": "Scheda personaggio Pathfinder 1E con calcoli e roll d20",
+  "version": "1"
+}

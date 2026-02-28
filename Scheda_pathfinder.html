@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scheda Personaggio — Pathfinder 1E</title>
+
+  <!-- CSS esterno -->
+  <link rel="stylesheet" href="Scheda_pathfinder.css">
+</head>
+
+<body>
+  <main class="sheet">
+    <div class="topbar">
+      <div>
+        <div class="title">Scheda Personaggio — Pathfinder 1E</div>
+
+        <!-- Toggle Dark Mode -->
+        <div class="top-actions">
+          <span class="hint" id="theme-label">Tema</span>
+
+          <label class="switch" aria-label="Attiva/disattiva dark mode">
+            <input id="theme-toggle" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+
+          <span class="hint" id="theme-state">Light</span>
+        </div>
+      </div>
+
+      <div class="hint">HTML/CSS + JS</div>
+    </div>
+
+    <!-- TABS -->
+    <nav class="tabs" role="tablist" aria-label="Pagine scheda personaggio">
+      <button type="button" class="tab" role="tab" aria-selected="true"  aria-controls="page-identita"      id="tab-identita"      data-target="page-identita">Identità</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-combattimento" id="tab-combattimento" data-target="page-combattimento">Combattimento</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-abilita"       id="tab-abilita"       data-target="page-abilita">Abilità</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-talenti"       id="tab-talenti"       data-target="page-talenti">Talenti</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-equip"         id="tab-equip"         data-target="page-equip">Equip</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-mitico"        id="tab-mitico"        data-target="page-mitico">Mitico</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-note"          id="tab-note"          data-target="page-note">Note</button>
+    </nav>
+
+    <!-- PAGE: IDENTITÀ -->
+    <section class="page active" id="page-identita" role="tabpanel" aria-labelledby="tab-identita">
+      <div class="grid">
+        <div class="card">
+          <h2>Personaggio</h2>
+
+          <div class="fields">
+            <div class="field span-12">
+              <label>Nome PG</label>
+              <input type="text" placeholder="Es. Tharivol" />
+            </div>
+
+            <div class="field span-6">
+              <label>Razza</label>
+              <input type="text" placeholder="Es. Umano" />
+            </div>
+            <div class="field span-6">
+              <label>Allineamento</label>
+              <input type="text" placeholder="Es. LB" />
+            </div>
+
+            <div class="field span-8">
+              <label>Classe</label>
+              <input type="text" placeholder="Es. Guerriero 5 / Ladro 2" />
+            </div>
+            <div class="field span-4">
+              <label>Livello Totale</label>
+              <input class="small" type="number" min="1" step="1" placeholder="7" />
+            </div>
+
+
+            <div class="field span-8">
+              <label>Classe di Prestigio</label>
+              <input type="text" placeholder="Es. Cavaliere dell'Aquila 2" />
+            </div>
+           
+            <div class="field span-4">
+                <label>Livello CdP</label>
+                <input 
+                    id="cdp-level"
+                    class="small"
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="1"
+                    value="0"
+                />
+            </div>
+
+            <!-- Mitico (collegato con tab Mitico via JS) -->
+            <div class="field span-8">
+              <label>Percorso Mitico</label>
+              <select class="select" id="mythic-path-identita">
+                <option value="" selected>— Seleziona —</option>
+                <option value="Arcimago">Arcimago</option>
+                <option value="Campione">Campione</option>
+                <option value="Gerofante">Gerofante</option>
+                <option value="Maresciallo">Maresciallo</option>
+                <option value="Mistificatore">Mistificatore</option>
+                <option value="Protettore">Protettore</option>
+              </select>
+            </div>
+
+            <div class="field span-4">
+              <label>Categoria Mitica</label>
+              <input class="small" id="mythic-tier-identita" type="number" min="0" max="10" step="1" placeholder="0" />
+              <div class="hint" id="mythic-badge" style="display:none;">🔒 Non mitico (Categoria = 0)</div>
+            </div>
+
+            <div class="field span-8">
+              <label>Divinità</label>
+              <input type="text" placeholder="Es. Iomedae" />
+            </div>
+            <div class="field span-4">
+              <label>Taglia</label>
+              <input type="text" placeholder="Media" />
+            </div>
+
+                     <div class="field span-12">
+              <label>Lingue</label>
+              <input type="text" placeholder="Comune, ..." />
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Caratteristiche</h2>
+
+          <div class="stats">
+            <div class="stat" data-ability="FOR">
+              <div class="name">FOR</div>
+              <div class="row">
+                <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
+                <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>
+                <div><span>Temp</span><input class="small ability-temp" type="number" min="0" max="50" step="1" placeholder="—"></div>
+              </div>
+            </div>
+             <div class="stat" data-ability="INT">
+              <div class="name">INT</div>
+              <div class="row">
+                <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
+                <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div> 
+                <div><span>Temp</span><input class="small ability-temp" type="number" min="0" max="50" step="1" placeholder="—"></div>
+              </div>
+            </div>
+
+            <div class="stat" data-ability="DES">
+              <div class="name">DES</div>
+              <div class="row">
+                <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
+                 <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>
+                <div><span>Temp</span><input class="small ability-temp" type="number" min="0" max="50" step="1" placeholder="—"></div>
+              </div>
+            </div>
+
+              <div class="stat" data-ability="SAG">
+              <div class="name">SAG</div>
+              <div class="row">
+                <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
+                <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>                
+                <div><span>Temp</span><input class="small ability-temp" type="number" min="0" max="50" step="1" placeholder="—"></div>
+              </div>
+            </div>
+
+            <div class="stat" data-ability="COS">
+              <div class="name">COS</div>
+              <div class="row">
+                <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
+                <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>                
+                <div><span>Temp</span><input class="small ability-temp" type="number" min="0" max="50" step="1" placeholder="—"></div>
+              </div>
+            </div>
+
+            <div class="stat" data-ability="CAR">
+              <div class="name">CAR</div>
+              <div class="row">
+                <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
+                <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>                
+                <div><span>Temp</span><input class="small ability-temp" type="number" min="0" max="50" step="1" placeholder="—"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- PAGE: COMBATTIMENTO -->
+<section class="page" id="page-combattimento" role="tabpanel" aria-labelledby="tab-combattimento">
+  <div class="grid">
+    <div class="card">
+      <h2>Combattimento</h2>
+
+      <!-- PF (come già ti piace) -->
+      <div class="fields" style="margin-bottom:12px;">
+        <div class="field span-4"><label>PF Totali</label><input id="hp-total" class="small" type="number" step="1" min="0" placeholder="—" /></div>
+        <div class="field span-4"><label>PF Attuali</label><input id="hp-current" class="small" type="number" step="1" min="0" placeholder="—" /></div>
+        <div class="field span-4"><label>Temp PF</label><input id="hp-temp" class="small" type="number" step="1" min="0" placeholder="0" /></div>
+      </div>
+
+      <!-- Iniziativa / Velocità / RD-RI (stessa resa “a box”) -->
+      <div class="fields" style="margin-bottom:12px;">
+        <div class="field span-4"><label>Iniziativa</label><input id="init-total" class="small" type="text" placeholder="+0" /></div>
+        <div class="field span-4"><label>Velocità</label><input id="speed" class="small" type="text" placeholder="9 m" /></div>
+        <div class="field span-4"><label>RD / RI</label><input id="dr-sr" class="small" type="text" placeholder="—" /></div>
+      </div>
+
+      <div class="stack">
+        
+    <!-- Componenti CA -->
+<div id="ac-components" class="ac-grid">
+
+  <div class="ac-row row-1">
+    <div class="field compact">
+      <label>Armatura</label>
+      <input id="ac-armor" class="small" type="number" step="1" value="0" />
+    </div>
+
+    <div class="field compact">
+      <label>Scudo</label>
+      <div class="shield-inline">
+        <input id="ac-shield" class="small" type="number" step="1" value="0" />
+        <label class="shield-toggle">
+          <input id="shield-off" type="checkbox" />
+          Off
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="ac-row row-2">
+    <div class="field compact">
+      <label>DES</label>
+      <input id="ac-dex" class="small" type="number" step="1" value="0" readonly />
+    </div>
+
+    <div class="field compact">
+      <label>Taglia</label>
+      <input id="ac-size" class="small" type="number" step="1" value="0" />
+    </div>
+
+    <div class="field compact">
+      <label>Varie</label>
+      <input id="ac-misc" class="small" type="number" step="1" value="0" />
+    </div>
+
+    <div class="field compact wide">
+      <label>Note</label>
+      <input id="ac-notes" type="text" placeholder="Es. Schivare +1..." />
+    </div>
+  </div>
+
+</div>
+
+        <!-- BAB & Manovre -->
+        <div class="card" style="padding:10px;">
+          <h2 style="margin-bottom:8px;">BAB &amp; Manovre</h2>
+          <div class="fields">
+            <div class="field span-4"><label>BAB</label><input class="small" type="text" placeholder="+0" /></div>
+            <div class="field span-4"><label>CMB</label><input class="small" type="text" placeholder="+0" /></div>
+            <div class="field span-4"><label>DMC</label><input class="small" type="text" placeholder="10" /></div>
+            <div class="field span-12"><label>Modificatori / Note</label><input type="text" placeholder="Es. +2 in lotta quando..." /></div>
+          </div>
+        </div>
+
+        <!-- TS -->
+        <div class="card" style="padding:10px;">
+          <h2 style="margin-bottom:8px;">Tiri Salvezza</h2>
+          <div class="triple">
+            <div class="field"><label>Tempra (COS)</label><input class="small" type="text" placeholder="+0" /></div>
+            <div class="field"><label>Riflessi (DES)</label><input class="small" type="text" placeholder="+0" /></div>
+            <div class="field"><label>Volontà (SAG)</label><input class="small" type="text" placeholder="+0" /></div>
+          </div>
+        </div>
+
+        <!-- Attacchi -->
+        <div class="card" style="padding:10px;">
+          <h2 style="margin-bottom:8px;">Attacchi</h2>
+          <div class="fields">
+            <div class="field span-12"><label>Attacco in mischia</label><input type="text" placeholder="Es. spada lunga +5 (1d8+3/19-20)" /></div>
+            <div class="field span-12"><label>Attacco a distanza</label><input type="text" placeholder="Es. arco corto +4 (1d6/x3)" /></div>
+            <div class="field span-12"><label>Attacchi speciali</label><input type="text" placeholder="Es. furtivo +2d6, scacciare..." /></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+    <!-- PAGE: ABILITÀ (NUOVA, con CS/ACP/Car e pronta per autocalcolo+auto-CS) -->
+
+    
+    <section class="page" id="page-abilita" role="tabpanel" aria-labelledby="tab-abilita">
+      <div class="grid">
+        <div class="card">
+          <h2>Abilità (Skills)</h2>
+
+          <div class="field span-12">
+  <label>Classe (per abilità di classe / CS)</label>
+  <select class="select" id="pf-class-select">
+    <option value="" selected>— Seleziona —</option>
+    <option value="Barbaro">Barbaro</option>
+    <option value="Bardo">Bardo</option>
+    <option value="Chierico">Chierico</option>
+    <option value="Druido">Druido</option>
+    <option value="Guerriero">Guerriero</option>
+    <option value="Ladro">Ladro</option>
+    <option value="Mago">Mago</option>
+    <option value="Monaco">Monaco</option>
+    <option value="Paladino">Paladino</option>
+    <option value="Ranger">Ranger</option>
+    <option value="Stregone">Stregone</option>
+  </select>
+  <div class="hint">Se cambi classe, le abilità di classe (CS) vengono segnate automaticamente.</div>
+</div>
+
+          <div class="fields" style="margin-bottom:12px;">
+            <div class="field span-8">
+              <label>Cerca abilità</label>
+              <input id="skills-search" type="text" placeholder="Es. Percezione, Furtività, Conoscenze..." />
+            </div>
+            <div class="field span-4">
+              <label>ACP (Penalità Armatura)</label>
+              <input id="skills-acp" class="small" type="number" step="1" value="0" />
+            </div>
+
+            <div class="field span-12" style="display:flex; gap:12px; align-items:center;">
+              <label style="margin:0; display:flex; gap:8px; align-items:center; text-transform:none; letter-spacing:0;">
+                <input id="filter-class" type="checkbox" />
+                Mostra solo class skill (CS)
+              </label>
+
+              <label style="margin:0; display:flex; gap:8px; align-items:center; text-transform:none; letter-spacing:0;">
+                <input id="filter-trained" type="checkbox" />
+                Mostra solo abilità con gradi &gt; 0
+              </label>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn" id="add-skill-row">Aggiungi riga</button>
+            <button type="button" class="btn" id="remove-skill-row" title="Rimuove l’ultima riga aggiunta">Rimuovi ultima</button>
+            <button type="button" class="btn" id="reset-storage" title="Cancella tutti i dati salvati in questo browser">Reset dati</button>
+          </div>
+
+          <div class="table-wrap">
+            <table aria-label="Tabella Abilità" id="skills-table">
+              <thead>
+                <tr>
+                 <thead>
+                    <tr>
+                        <th style="width:6%;">CS</th>
+                        <th style="width:34%;">Abilità</th>
+                        <th style="width:10%;">Car</th>
+                        <th style="width:8%;">ACP</th>
+                        <th style="width:10%;">Gradi</th>
+                        <th style="width:12%;">Varie</th>
+                        <th style="width:10%;">Tot</th>
+                        <th style="width:10%;">Note</th>
+                        <th style="width:6%;">Roll</th>
+                    </tr>
+                    </thead>
+        
+              <tbody id="skills-tbody">
+                <tr class="skill-row">
+                  <td style="text-align:center;"><input class="skill-cs" type="checkbox" /></td>
+                  <td><input class="skill-name" type="text" value="Acrobazia" /></td>
+                  <td>
+                    <select class="select skill-abil">
+                      <option value="DES">DES</option>
+                      <option value="FOR">FOR</option>
+                      <option value="COS">COS</option>
+                      <option value="INT">INT</option>
+                      <option value="SAG">SAG</option>
+                      <option value="CAR">CAR</option>
+                    </select>
+                  </td>
+                  <td style="text-align:center;"><input class="skill-acp" type="checkbox" checked /></td>
+                  <td><input class="small skill-ranks" type="number" step="1" min="0" value="0" /></td>
+                  <td><input class="small skill-misc" type="number" step="1" value="0" /></td>
+                  <td><input class="small skill-total" type="text" value="+0" readonly /></td>
+                  <td><input class="skill-notes" type="text" placeholder="(bonus razziale...)" /></td>
+                <td><button type="button" class="btn roll-skill">🎲</button></td>
+                </tr>
+
+                <tr class="skill-row">
+                  <td style="text-align:center;"><input class="skill-cs" type="checkbox" /></td>
+                  <td><input class="skill-name" type="text" value="Percezione" /></td>
+                  <td>
+                    <select class="select skill-abil">
+                      <option value="SAG" selected>SAG</option>
+                      <option value="FOR">FOR</option>
+                      <option value="DES">DES</option>
+                      <option value="COS">COS</option>
+                      <option value="INT">INT</option>
+                      <option value="CAR">CAR</option>
+                    </select>
+                  </td>
+                  <td style="text-align:center;"><input class="skill-acp" type="checkbox" /></td>
+                  <td><input class="small skill-ranks" type="number" step="1" min="0" value="0" /></td>
+                  <td><input class="small skill-misc" type="number" step="1" value="0" /></td>
+                  <td><input class="small skill-total" type="text" value="+0" readonly /></td>
+                  <td><input class="skill-notes" type="text" /></td>
+                  <td style="text-align:center;">  <button type="button" class="roll-btn">🎲</button></td>
+                </tr>
+
+                <tr class="skill-row">
+                  <td style="text-align:center;"><input class="skill-cs" type="checkbox" /></td>
+                  <td><input class="skill-name" type="text" value="Furtività" /></td>
+                  <td>
+                    <select class="select skill-abil">
+                      <option value="DES" selected>DES</option>
+                      <option value="FOR">FOR</option>
+                      <option value="COS">COS</option>
+                      <option value="INT">INT</option>
+                      <option value="SAG">SAG</option>
+                      <option value="CAR">CAR</option>
+                    </select>
+                  </td>
+                  <td style="text-align:center;"><input class="skill-acp" type="checkbox" checked /></td>
+                  <td><input class="small skill-ranks" type="number" step="1" min="0" value="0" /></td>
+                  <td><input class="small skill-misc" type="number" step="1" value="0" /></td>
+                  <td><input class="small skill-total" type="text" value="+0" readonly /></td>
+                  <td><input class="skill-notes" type="text" /></td>
+                  <td style="text-align:center;">  <button type="button" class="roll-btn">🎲</button>
+</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="hint" style="margin-top:10px;">
+            Tot = Gradi + Mod Car + Varie + (CS +3 se Gradi&gt;0) − ACP (solo se l’abilità ha ACP).
+            La spunta CS può essere aggiornata automaticamente dalle classi scelte in Identità.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: TALENTI -->
+    <section class="page" id="page-talenti" role="tabpanel" aria-labelledby="tab-talenti">
+      <div class="grid">
+        <div class="card">
+          <h2>Talenti • Tratti • Capacità</h2>
+          <div class="grid" style="gap:12px;">
+            <div class="field span-12"><label>Talenti</label><textarea placeholder="Elenco talenti..."></textarea></div>
+            <div class="field span-12"><label>Tratti / Capacità di classe</label><textarea placeholder="Tratti, capacità, privilegi..."></textarea></div>
+            <div class="field span-12"><label>Debolezze / Condizioni / Resistenze</label><textarea placeholder="Note rapide..."></textarea></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: EQUIP -->
+    <section class="page" id="page-equip" role="tabpanel" aria-labelledby="tab-equip">
+      <div class="grid">
+
+        <div class="card equip-slots">
+          <h2>Equipaggiamento — Slot</h2>
+
+          <div class="table-wrap" style="overflow-x:visible;">
+            <table aria-label="Slot equipaggiabili">
+              <thead>
+                <tr>
+                  <th>Slot</th>
+                  <th>Oggetto equipaggiato</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Slot Testa</td><td><input type="text" placeholder="Es. elmo, fascia..." /></td></tr>
+                <tr><td>Slot Fronte</td><td><input type="text" placeholder="Es. diadema..." /></td></tr>
+                <tr><td>Slot Occhi</td><td><input type="text" placeholder="Es. lenti..." /></td></tr>
+                <tr><td>Slot Collo</td><td><input type="text" placeholder="Es. amuleto..." /></td></tr>
+                <tr><td>Slot Spalle</td><td><input type="text" placeholder="Es. mantello..." /></td></tr>
+                <tr><td>Slot Corpo</td><td><input type="text" placeholder="Es. armatura..." /></td></tr>
+                <tr><td>Slot Torace</td><td><input type="text" placeholder="Es. pettorale..." /></td></tr>
+                <tr><td>Slot Polsi</td><td><input type="text" placeholder="Es. bracciali..." /></td></tr>
+                <tr><td>Slot Mani</td><td><input type="text" placeholder="Es. guanti..." /></td></tr>
+                <tr><td>Slot Cintura</td><td><input type="text" placeholder="Es. cintura..." /></td></tr>
+                <tr><td>Slot Piedi</td><td><input type="text" placeholder="Es. stivali..." /></td></tr>
+
+                <tr>
+                  <td>Anelli (x2)</td>
+                  <td>
+                    <div class="ring-pair">
+                      <input type="text" placeholder="Anello 1" />
+                      <input type="text" placeholder="Anello 2" />
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="slot-notes">
+                  <td>Senza Slot</td>
+                  <td><textarea placeholder="Oggetti senza slot&#10;• ...&#10;• ..."></textarea></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="hint" style="margin-top:10px;">
+            “Senza Slot” include oggetti narrativi o che non rientrano negli slot standard.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Inventario</h2>
+          <div class="fields">
+            <div class="field span-12">
+              <label>Oggetti / Consumabili / Varie</label>
+              <textarea placeholder="Pozioni, pergamene, componenti, strumenti, materiali..."></textarea>
+            </div>
+            <div class="field span-12">
+              <label>Carico / Peso / Contenitori</label>
+              <textarea placeholder="Zaino, sacche, peso totale, limiti di carico..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Note Equipaggiamento</h2>
+          <textarea placeholder="Annotazioni libere: oggetti importanti, attivazioni, cariche..."></textarea>
+        </div>
+
+        <div class="card">
+          <h2>Ricchezza — Monete</h2>
+          <div class="fields">
+            <div class="field span-4"><label>MO</label><input class="small" type="text" placeholder="0" /></div>
+            <div class="field span-4"><label>MA</label><input class="small" type="text" placeholder="0" /></div>
+            <div class="field span-4"><label>MR</label><input class="small" type="text" placeholder="0" /></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE: MITICO -->
+    <section class="page" id="page-mitico" role="tabpanel" aria-labelledby="tab-mitico">
+      <div class="grid">
+        <div class="card">
+          <h2>Personaggio Mitico</h2>
+          <div class="fields">
+
+            <!-- Collegati con Identità via JS -->
+            <div class="field span-8">
+              <label>Percorso Mitico</label>
+              <select class="select" id="mythic-path-mitico">
+                <option value="" selected>— Seleziona —</option>
+                <option value="Arcimago">Arcimago</option>
+                <option value="Campione">Campione</option>
+                <option value="Gerofante">Gerofante</option>
+                <option value="Maresciallo">Maresciallo</option>
+                <option value="Mistificatore">Mistificatore</option>
+                <option value="Protettore">Protettore</option>
+              </select>
+            </div>
+
+            <div class="field span-4">
+              <label>Categoria Mitica</label>
+              <input class="small" id="mythic-tier-mitico" type="number" min="0" max="10" step="1" placeholder="0" />
+            </div>
+
+            <div class="field span-6"><label>Usi Potere Mitico</label><input class="small" type="number" min="0" step="1" placeholder="0" /></div>
+            <div class="field span-6"><label>Iniziativa Mitica / Bonus</label><input class="small" type="text" placeholder="—" /></div>
+
+            <div class="field span-12"><label>Capacità Mitiche</label><textarea placeholder="Capacità base e di percorso..."></textarea></div>
+            <div class="field span-12"><label>Oggetto Leggendario</label><textarea placeholder="Nome, oggetto base, capacità..."></textarea></div>
+            <div class="field span-12"><label>Cimenti</label><textarea placeholder="Cimenti completati..."></textarea></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: NOTE -->
+    <section class="page" id="page-note" role="tabpanel" aria-labelledby="tab-note">
+      <div class="grid">
+        <div class="card">
+          <h2>Note &amp; Background</h2>
+          <textarea placeholder="Aspetto, personalità, legami, note di campagna..."></textarea>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- JS esterno -->
+  <script src="Scheda_pathfinder.js"></script>
+</body>
+</html>
