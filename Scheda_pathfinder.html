@@ -6,7 +6,7 @@
   <title>Scheda Personaggio — Pathfinder 1E</title>
 
   <!-- CSS esterno -->
-  <link rel="stylesheet" href="Scheda_pathfinder.css">
+  <link rel="stylesheet" href="scheda_pathfinder.css">
 </head>
 
 <body>
@@ -417,23 +417,21 @@
             <button type="button" class="btn" id="reset-storage" title="Cancella tutti i dati salvati in questo browser">Reset dati</button>
           </div>
 
-          <div class="table-wrap">
-            <table aria-label="Tabella Abilità" id="skills-table">
-              <thead>
-                <tr>
-                 <thead>
-                    <tr>
-                        <th style="width:6%;">CS</th>
-                        <th style="width:34%;">Abilità</th>
-                        <th style="width:10%;">Car</th>
-                        <th style="width:8%;">ACP</th>
-                        <th style="width:10%;">Gradi</th>
-                        <th style="width:12%;">Varie</th>
-                        <th style="width:10%;">Tot</th>
-                        <th style="width:10%;">Note</th>
-                        <th style="width:6%;">Roll</th>
-                    </tr>
-                    </thead>
+
+          <table aria-label="Tabella Abilità" id="skills-table">
+  <thead>
+    <tr>
+      <th style="width:6%;">CS</th>
+      <th style="width:34%;">Abilità</th>
+      <th style="width:10%;">Car</th>
+      <th style="width:8%;">ACP</th>
+      <th style="width:10%;">Gradi</th>
+      <th style="width:12%;">Varie</th>
+      <th style="width:10%;">Tot</th>
+      <th style="width:10%;">Note</th>
+      <th style="width:6%;">Roll</th>
+    </tr>
+  </thead>
         
               <tbody id="skills-tbody">
                 <tr class="skill-row">
@@ -454,7 +452,7 @@
                   <td><input class="small skill-misc" type="number" step="1" value="0" /></td>
                   <td><input class="small skill-total" type="text" value="+0" readonly /></td>
                   <td><input class="skill-notes" type="text" placeholder="(bonus razziale...)" /></td>
-                <td><button type="button" class="btn roll-skill">🎲</button></td>
+                  <td style="text-align:center;"><button type="button" class="roll-btn" title="Tira 1d20 + Tot">🎲</button></td>                <td><button type="button" class="btn roll-skill">🎲</button></td>
                 </tr>
 
                 <tr class="skill-row">
@@ -475,7 +473,7 @@
                   <td><input class="small skill-misc" type="number" step="1" value="0" /></td>
                   <td><input class="small skill-total" type="text" value="+0" readonly /></td>
                   <td><input class="skill-notes" type="text" /></td>
-                  <td style="text-align:center;">  <button type="button" class="roll-btn">🎲</button></td>
+                  <td style="text-align:center;"><button type="button" class="roll-btn" title="Tira 1d20 + Tot">🎲</button></td>    <td style="text-align:center;">  <button type="button" class="roll-btn">🎲</button></td>
                 </tr>
 
                 <tr class="skill-row">
@@ -496,8 +494,7 @@
                   <td><input class="small skill-misc" type="number" step="1" value="0" /></td>
                   <td><input class="small skill-total" type="text" value="+0" readonly /></td>
                   <td><input class="skill-notes" type="text" /></td>
-                  <td style="text-align:center;">  <button type="button" class="roll-btn">🎲</button>
-</td>
+                 <td style="text-align:center;"><button type="button" class="roll-btn" title="Tira 1d20 + Tot">🎲</button></td>
                 </tr>
               </tbody>
             </table>
@@ -763,6 +760,6 @@
   </main>
 
   <!-- JS esterno -->
-  <script src="Scheda_pathfinder.js"></script>
+  <script src="scheda_pathfinder.js"></script>
 </body>
 </html>

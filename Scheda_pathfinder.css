@@ -15,7 +15,7 @@
   --c-talenti:#9333ea;       /* viola */
   --c-equip:#d97706;         /* arancione */
   --c-mitico:#c026d3;        /* magenta */
-   --c-compagno:#0891b2; /* azzurro/teal */
+  --c-compagno:#0891b2; /* azzurro/teal */
   --c-note:#0f766e;          /* teal */
 
   /* theme tokens */
@@ -48,7 +48,7 @@
   --c-talenti:#c084fc;
   --c-equip:#fbbf24;
   --c-mitico:#f472b6;
-   --c-compagno:#22d3ee;
+  --c-compagno:#22d3ee;
   --c-note:#2dd4bf;
 }
 
