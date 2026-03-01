@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="it">
 <head>
   <meta charset="utf-8" />
@@ -24,22 +24,22 @@
             <span class="slider"></span>
           </label>
 
-          <span class="hint" id="theme-state">Light</span>
+          <span class="hint" id="theme-state">Light ☀</span>
         </div>
       </div>
 
-      <div class="hint">HTML/CSS + JS</div>
     </div>
 
     <!-- TABS -->
     <nav class="tabs" role="tablist" aria-label="Pagine scheda personaggio">
       <button type="button" class="tab" role="tab" aria-selected="true"  aria-controls="page-identita"      id="tab-identita"      data-target="page-identita">Personaggio</button>
-      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-mitico"        id="tab-mitico"        data-target="page-mitico">Mitico</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-mitico"        id="tab-mitico"        data-target="page-mitico"> Rango Mitico</button>
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-abilita"       id="tab-abilita"       data-target="page-abilita">Abilità</button>
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-talenti"       id="tab-talenti"       data-target="page-talenti">Talenti</button>
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-combattimento" id="tab-combattimento" data-target="page-combattimento">Combattimento</button>
-      <button type="button" class="tab" role="tab"  aria-selected="false"  aria-controls="page-compagno"   id="tab-compagno"      data-target="page-compagno">Compagno</button>
-      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-equip"         id="tab-equip"         data-target="page-equip">Equip</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-incantesimi"   id="tab-incantesimi"   data-target="page-incantesimi" hidden>Incantesimi</button>
+      <button type="button" class="tab" role="tab"  aria-selected="false"  aria-controls="page-compagno"   id="tab-compagno"      data-target="page-compagno" hidden>Compagno Animale</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-equip"         id="tab-equip"         data-target="page-equip">Equipaggiamento</button>
      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-note"          id="tab-note"          data-target="page-note">Note</button>
     </nav>
 
@@ -55,7 +55,7 @@
               <input type="text" placeholder="Es. Tharivol" />
             </div>
 
-            <div class="field span-6">
+            <div class="field span-4">
               <label>Razza</label>
               <input type="text" placeholder="Es. Umano" />
             </div>
@@ -74,12 +74,12 @@
             </div>
 
 
-            <div class="field span-8">
+            <div class="field span-8 cdp-field">
               <label>Classe di Prestigio</label>
               <input type="text" placeholder="Es. Cavaliere dell'Aquila 2" />
             </div>
            
-            <div class="field span-4">
+            <div class="field span-4 cdp-field">
                 <label>Livello CdP</label>
                 <input 
                     id="cdp-level"
@@ -118,12 +118,31 @@
             </div>
             <div class="field span-4">
               <label>Taglia</label>
-              <input type="text" placeholder="Media" />
+              <select class="select size-select-sync" id="size-select-identita">
+                <option value="small">Piccola</option>
+                <option value="medium" selected>Media</option>
+                <option value="large">Grande</option>
+              </select>
             </div>
 
-                     <div class="field span-12">
+            <div class="field span-12">
               <label>Lingue</label>
               <input type="text" placeholder="Comune, ..." />
+            </div>
+
+            <div class="field span-12 identita-toggles">
+              <label class="identita-toggle-label">
+                <input id="enable-spells-tab" type="checkbox" />
+                <strong>Incantesimi</strong>
+              </label>
+              <label class="identita-toggle-label">
+                <input id="enable-companion-tab" type="checkbox" />
+                <strong>Compagno Animale</strong>
+              </label>
+              <label class="identita-toggle-label">
+                <input id="enable-cdp-section" type="checkbox" />
+                <strong>Classe di prestigio</strong>
+              </label>
             </div>
           </div>
         </div>
@@ -269,13 +288,24 @@
                 <input id="ac-dex" class="small" type="number" step="1" value="0" readonly />
               </div>
               <div class="field compact">
+                <label>Bonus Des Max</label>
+                <input id="ac-dex-max" class="small" type="number" step="1" placeholder="—" />
+              </div>
+              <div class="field compact">
                 <label>Taglia</label>
-                <input id="ac-size" class="small" type="number" step="1" value="0" />
+                <select class="select size-select-sync" id="size-select-ac">
+                  <option value="small">Piccola</option>
+                  <option value="medium" selected>Media</option>
+                  <option value="large">Grande</option>
+                </select>
               </div>
               <div class="field compact">
                 <label>Varie</label>
                 <input id="ac-misc" class="small" type="number" step="1" value="0" />
               </div>
+            </div>
+
+            <div class="ac-row row-3">
               <div class="field compact wide">
                 <label>Note</label>
                 <input id="ac-notes" type="text" placeholder="Es. Schivare +1..." />
@@ -284,7 +314,7 @@
           </div>
 
           <div class="hint" style="margin-top:8px;">
-            Tot = 10 + Armatura + Scudo(attivo) + DES + Taglia + Varie • Contatto: no Armatura/Scudo • Impreparato: no DES
+            Tot = 10 + Armatura + Scudo(attivo) + min(DES, Bonus Des Max) + Taglia + Varie • Contatto: no Armatura/Scudo • Impreparato: no DES
           </div>
         </div>
 
@@ -299,7 +329,11 @@
     </div>
     <div class="field span-4">
       <label>Taglia</label>
-      <input id="atk-size" class="small" type="number" step="1" value="0" />
+      <select class="select size-select-sync" id="size-select-atk">
+        <option value="small">Piccola</option>
+        <option value="medium" selected>Media</option>
+        <option value="large">Grande</option>
+      </select>
     </div>
     <div class="field span-4">
       <label>Varie (globale)</label>
@@ -321,7 +355,8 @@
           <th style="width:14%;">Danni</th>
           <th style="width:12%;">Varie</th>
           <th style="width:12%;">Tot</th>
-          <th style="width:20%;">Note</th>
+          <th style="width:12%;">Critico</th>
+          <th style="width:8%;">Tiro</th>
         </tr>
       </thead>
       <tbody id="attacks-tbody">
@@ -336,7 +371,8 @@
           <td><input class="atk-dmg" type="text" placeholder="Es. 1d8+3" /></td>
           <td><input class="small atk-row-misc" type="number" step="1" value="0" /></td>
           <td><input class="small atk-total" type="text" value="+0" readonly /></td>
-          <td><input class="atk-notes" type="text" placeholder="crit, portata, proprietà..." /></td>
+          <td><input class="small atk-crit" type="text" placeholder="19-20/x2" /></td>
+          <td style="text-align:center;"><button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button></td>
         </tr>
       </tbody>
     </table>
@@ -351,8 +387,8 @@
         <div class="card" style="padding:10px;">
           <h2 style="margin-bottom:8px;">Manovre (CMB / DMC)</h2>
           <div class="fields">
-            <div class="field span-4"><label>CMB</label><input id="cmb" class="small" type="text" placeholder="+0" /></div>
-            <div class="field span-4"><label>DMC</label><input id="cmd" class="small" type="text" placeholder="10" /></div>
+            <div class="field span-4"><label>CMB</label><input id="cmb" class="small" type="text" value="+0" readonly /></div>
+            <div class="field span-4"><label>DMC</label><input id="cmd" class="small" type="text" value="10" readonly /></div>
             <div class="field span-4"><label>Note</label><input id="cmb-cmd-notes" class="small" type="text" placeholder="bonus situazionali..." /></div>
           </div>
         </div>
@@ -369,140 +405,147 @@
         <div class="card">
           <h2>Abilità (Skills)</h2>
 
-          <div class="field span-12">
-  <label>Classe (per abilità di classe / CS)</label>
-  <select class="select" id="pf-class-select">
-    <option value="" selected>— Seleziona —</option>
-    <option value="Barbaro">Barbaro</option>
-    <option value="Bardo">Bardo</option>
-    <option value="Chierico">Chierico</option>
-    <option value="Druido">Druido</option>
-    <option value="Guerriero">Guerriero</option>
-    <option value="Ladro">Ladro</option>
-    <option value="Mago">Mago</option>
-    <option value="Monaco">Monaco</option>
-    <option value="Paladino">Paladino</option>
-    <option value="Ranger">Ranger</option>
-    <option value="Stregone">Stregone</option>
-  </select>
-  <div class="hint">Se cambi classe, le abilità di classe (CS) vengono segnate automaticamente.</div>
-</div>
+            <div class="fields skills-toolbar" style="margin-bottom:12px;">
+            <div class="field span-6 skills-filters-col">
+              <label>Classe</label>
+              <select class="select" id="pf-class-select">
+                <option value="" selected>— Seleziona —</option>
+                <option value="Barbaro">Barbaro</option>
+                <option value="Bardo">Bardo</option>
+                <option value="Chierico">Chierico</option>
+                <option value="Druido">Druido</option>
+                <option value="Guerriero">Guerriero</option>
+                <option value="Ladro">Ladro</option>
+                <option value="Mago">Mago</option>
+                <option value="Monaco">Monaco</option>
+                <option value="Paladino">Paladino</option>
+                <option value="Ranger">Ranger</option>
+                <option value="Stregone">Stregone</option>
+              </select>
 
-          <div class="fields" style="margin-bottom:12px;">
-            <div class="field span-8">
-              <label>Cerca abilità</label>
-              <input id="skills-search" type="text" placeholder="Es. Percezione, Furtività, Conoscenze..." />
+              <label class="skills-filter-label">
+                <input id="filter-class" type="checkbox" />
+                <strong>Mostra solo class skill (CS)</strong>
+              </label>
+
+              <label class="skills-filter-label">
+                <input id="filter-trained" type="checkbox" />
+                <strong>Mostra solo abilità con gradi &gt; 0</strong>
+              </label>
+
+              <div class="actions skills-reset-wrap">
+                <button type="button" class="btn btn-green btn-reset-skill" id="reset-storage" title="Cancella tutti i dati salvati in questo browser">Reset dati</button>
+              </div>
             </div>
-            <div class="field span-4">
-              <label>ACP (Penalità Armatura)</label>
+
+            <div class="field span-6">
+              <label>Penalità Armatura</label>
               <input id="skills-acp" class="small" type="number" step="1" value="0" />
             </div>
-
-            <div class="field span-12" style="display:flex; gap:12px; align-items:center;">
-              <label style="margin:0; display:flex; gap:8px; align-items:center; text-transform:none; letter-spacing:0;">
-                <input id="filter-class" type="checkbox" />
-                Mostra solo class skill (CS)
-              </label>
-
-              <label style="margin:0; display:flex; gap:8px; align-items:center; text-transform:none; letter-spacing:0;">
-                <input id="filter-trained" type="checkbox" />
-                Mostra solo abilità con gradi &gt; 0
-              </label>
-            </div>
           </div>
-
-          <div class="actions">
-            <button type="button" class="btn" id="add-skill-row">Aggiungi riga</button>
-            <button type="button" class="btn" id="remove-skill-row" title="Rimuove l’ultima riga aggiunta">Rimuovi ultima</button>
-            <button type="button" class="btn" id="reset-storage" title="Cancella tutti i dati salvati in questo browser">Reset dati</button>
-          </div>
-
-
           <table aria-label="Tabella Abilità" id="skills-table">
   <thead>
     <tr>
       <th style="width:6%;">CS</th>
       <th style="width:34%;">Abilità</th>
-      <th style="width:10%;">Car</th>
+      <th style="width:12%;">Car</th>
       <th style="width:8%;">ACP</th>
       <th style="width:10%;">Gradi</th>
       <th style="width:12%;">Varie</th>
       <th style="width:10%;">Tot</th>
-      <th style="width:10%;">Note</th>
-      <th style="width:6%;">Roll</th>
+      <th style="width:8%;">Tiro</th>
     </tr>
   </thead>
         
-              <tbody id="skills-tbody">
-                <tr class="skill-row">
-                  <td style="text-align:center;"><input class="skill-cs" type="checkbox" /></td>
-                  <td><input class="skill-name" type="text" value="Acrobazia" /></td>
-                  <td>
-                    <select class="select skill-abil">
-                      <option value="DES">DES</option>
-                      <option value="FOR">FOR</option>
-                      <option value="COS">COS</option>
-                      <option value="INT">INT</option>
-                      <option value="SAG">SAG</option>
-                      <option value="CAR">CAR</option>
-                    </select>
-                  </td>
-                  <td style="text-align:center;"><input class="skill-acp" type="checkbox" checked /></td>
-                  <td><input class="small skill-ranks" type="number" step="1" min="0" value="0" /></td>
-                  <td><input class="small skill-misc" type="number" step="1" value="0" /></td>
-                  <td><input class="small skill-total" type="text" value="+0" readonly /></td>
-                  <td><input class="skill-notes" type="text" placeholder="(bonus razziale...)" /></td>
-                  <td style="text-align:center;"><button type="button" class="roll-btn" title="Tira 1d20 + Tot">🎲</button></td>                <td><button type="button" class="btn roll-skill">🎲</button></td>
-                </tr>
-
-                <tr class="skill-row">
-                  <td style="text-align:center;"><input class="skill-cs" type="checkbox" /></td>
-                  <td><input class="skill-name" type="text" value="Percezione" /></td>
-                  <td>
-                    <select class="select skill-abil">
-                      <option value="SAG" selected>SAG</option>
-                      <option value="FOR">FOR</option>
-                      <option value="DES">DES</option>
-                      <option value="COS">COS</option>
-                      <option value="INT">INT</option>
-                      <option value="CAR">CAR</option>
-                    </select>
-                  </td>
-                  <td style="text-align:center;"><input class="skill-acp" type="checkbox" /></td>
-                  <td><input class="small skill-ranks" type="number" step="1" min="0" value="0" /></td>
-                  <td><input class="small skill-misc" type="number" step="1" value="0" /></td>
-                  <td><input class="small skill-total" type="text" value="+0" readonly /></td>
-                  <td><input class="skill-notes" type="text" /></td>
-                  <td style="text-align:center;"><button type="button" class="roll-btn" title="Tira 1d20 + Tot">🎲</button></td>    <td style="text-align:center;">  <button type="button" class="roll-btn">🎲</button></td>
-                </tr>
-
-                <tr class="skill-row">
-                  <td style="text-align:center;"><input class="skill-cs" type="checkbox" /></td>
-                  <td><input class="skill-name" type="text" value="Furtività" /></td>
-                  <td>
-                    <select class="select skill-abil">
-                      <option value="DES" selected>DES</option>
-                      <option value="FOR">FOR</option>
-                      <option value="COS">COS</option>
-                      <option value="INT">INT</option>
-                      <option value="SAG">SAG</option>
-                      <option value="CAR">CAR</option>
-                    </select>
-                  </td>
-                  <td style="text-align:center;"><input class="skill-acp" type="checkbox" checked /></td>
-                  <td><input class="small skill-ranks" type="number" step="1" min="0" value="0" /></td>
-                  <td><input class="small skill-misc" type="number" step="1" value="0" /></td>
-                  <td><input class="small skill-total" type="text" value="+0" readonly /></td>
-                  <td><input class="skill-notes" type="text" /></td>
-                 <td style="text-align:center;"><button type="button" class="roll-btn" title="Tira 1d20 + Tot">🎲</button></td>
-                </tr>
-              </tbody>
+              <tbody id="skills-tbody"></tbody>
             </table>
           </div>
 
-          <div class="hint" style="margin-top:10px;">
-            Tot = Gradi + Mod Car + Varie + (CS +3 se Gradi&gt;0) − ACP (solo se l’abilità ha ACP).
-            La spunta CS può essere aggiornata automaticamente dalle classi scelte in Identità.
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: INCANTESIMI -->
+    <section class="page" id="page-incantesimi" role="tabpanel" aria-labelledby="tab-incantesimi">
+      <div class="grid">
+        <div class="card">
+          <h2>Lancio Incantesimi</h2>
+          <div class="fields">
+            <div class="field span-4">
+              <label>Classe Incantatrice</label>
+              <select class="select" id="spellcaster-class">
+                <option value="" selected>— Seleziona —</option>
+                <option value="Alchimista">Alchimista</option>
+                <option value="Antipaladino">Antipaladino</option>
+                <option value="Bardo">Bardo</option>
+                <option value="Chierico">Chierico</option>
+                <option value="Convocatore">Convocatore</option>
+                <option value="Druido">Druido</option>
+                <option value="Fattucchiere">Fattucchiere</option>
+                <option value="Inquisitore">Inquisitore</option>
+                <option value="Magus">Magus</option>
+                <option value="Mago">Mago</option>
+                <option value="Oracolo">Oracolo</option>
+                <option value="Paladino">Paladino</option>
+                <option value="Ranger">Ranger</option>
+                <option value="Stregone">Stregone</option>
+              </select>
+            </div>
+            <div class="field span-4"><label>Caratteristica Chiave</label><input id="spellcasting-ability" type="text" value="—" readonly /></div>
+            <div class="field span-4"><label>Mod Caratteristica</label><input id="spellcasting-ability-mod" class="small" type="text" value="+0" readonly /></div>
+          </div>
+          <div class="fields" style="margin-top:10px;">
+            <div class="field span-4"><label>LI (Livello Incantatore)</label><input id="spellcaster-level" class="small" type="number" min="0" step="1" value="0" /></div>
+            <div class="field span-4"><label>Concentrazione</label><input class="small" type="text" value="+0" /></div>
+            <div class="field span-4"><label>Bonus Prove RM</label><input class="small" type="text" value="+0" /></div>
+            <div class="field span-4"><label>Incantesimi Noti</label><input class="small" type="number" min="0" step="1" value="0" /></div>
+            <div class="field span-4"><label>Incantesimi Preparati</label><input class="small" type="number" min="0" step="1" value="0" /></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Slot Giornalieri</h2>
+          <div class="table-wrap">
+            <table aria-label="Slot Incantesimi">
+              <thead>
+                <tr>
+                  <th>Livello</th>
+                  <th style="text-align:center;">CD</th>
+                  <th style="text-align:center;">Totali</th>
+                  <th style="text-align:center;">Usati</th>
+                  <th style="text-align:center;">Rimasti</th>
+                  <th style="text-align:center;">Bonus</th>
+                </tr>
+              </thead>
+              <tbody id="spell-slots-body">
+                <tr class="spell-slot-row" data-level="0"><td>0</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="1"><td>1</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="2"><td>2</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="3"><td>3</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="4"><td>4</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="5"><td>5</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="6"><td>6</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="7"><td>7</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="8"><td>8</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="9"><td>9</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Lista Incantesimi</h2>
+          <div class="spell-levels">
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 0</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-0" data-level="0">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-0" data-level="0">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-0"><input class="spell-name" type="text" placeholder="Incantesimo livello 0" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 1</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-1" data-level="1">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-1" data-level="1">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-1"><input class="spell-name" type="text" placeholder="Incantesimo livello 1" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 2</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-2" data-level="2">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-2" data-level="2">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-2"><input class="spell-name" type="text" placeholder="Incantesimo livello 2" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 3</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-3" data-level="3">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-3" data-level="3">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-3"><input class="spell-name" type="text" placeholder="Incantesimo livello 3" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 4</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-4" data-level="4">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-4" data-level="4">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-4"><input class="spell-name" type="text" placeholder="Incantesimo livello 4" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 5</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-5" data-level="5">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-5" data-level="5">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-5"><input class="spell-name" type="text" placeholder="Incantesimo livello 5" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 6</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-6" data-level="6">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-6" data-level="6">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-6"><input class="spell-name" type="text" placeholder="Incantesimo livello 6" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 7</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-7" data-level="7">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-7" data-level="7">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-7"><input class="spell-name" type="text" placeholder="Incantesimo livello 7" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 8</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-8" data-level="8">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-8" data-level="8">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-8"><input class="spell-name" type="text" placeholder="Incantesimo livello 8" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 9</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-9" data-level="9">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-9" data-level="9">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-9"><input class="spell-name" type="text" placeholder="Incantesimo livello 9" /></div></div></details>
           </div>
         </div>
       </div>
@@ -630,8 +673,108 @@
               <input class="small" id="mythic-tier-mitico" type="number" min="0" max="10" step="1" placeholder="0" />
             </div>
 
-            <div class="field span-6"><label>Usi Potere Mitico</label><input class="small" type="number" min="0" step="1" placeholder="0" /></div>
-            <div class="field span-6"><label>Iniziativa Mitica / Bonus</label><input class="small" type="text" placeholder="—" /></div>
+            <div class="field span-4"><label>Dado Impulso (attuale)</label><input class="small" id="mythic-surge-die" type="text" value="—" readonly /></div>            <div class="field span-4"><label>Usi Potere Mitico</label><input class="small" id="mythic-power-uses" type="text" value="0" readonly /></div>            <div class="field span-4"><label>Iniziativa Mitica / Bonus</label><input class="small" id="mythic-init-bonus" type="text" value="+0" readonly /></div>
+
+            <div class="field span-12">
+              <label>Reminder dado di impulso</label>
+              <input id="mythic-surge-reminder" type="text" value="Diventa mitico (Categoria 1) per ottenere il dado impulso." readonly />
+            </div>
+
+            <div class="field span-12">
+              <div class="table-wrap">
+                <table aria-label="Progressione dado impulso mitico">
+                  <thead>
+                    <tr>
+                      <th>Categoria Mitica</th>
+                      <th>Aumento Caratteristica</th>
+                      <th>Impulso Mitico</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>1</td><td>—</td><td>1d6</td></tr>
+                    <tr>
+                      <td>2</td>
+                      <td>
+                        <select class="select mythic-ability-pick" data-tier="2">
+                          <option value="" selected>— Seleziona —</option>
+                          <option value="FOR">FOR</option>
+                          <option value="DES">DES</option>
+                          <option value="COS">COS</option>
+                          <option value="INT">INT</option>
+                          <option value="SAG">SAG</option>
+                          <option value="CAR">CAR</option>
+                        </select>
+                      </td>
+                      <td>—</td>
+                    </tr>
+                    <tr><td>3</td><td>—</td><td>1d8</td></tr>
+                    <tr>
+                      <td>4</td>
+                      <td>
+                        <select class="select mythic-ability-pick" data-tier="4">
+                          <option value="" selected>— Seleziona —</option>
+                          <option value="FOR">FOR</option>
+                          <option value="DES">DES</option>
+                          <option value="COS">COS</option>
+                          <option value="INT">INT</option>
+                          <option value="SAG">SAG</option>
+                          <option value="CAR">CAR</option>
+                        </select>
+                      </td>
+                      <td>—</td>
+                    </tr>
+                    <tr><td>5</td><td>—</td><td>—</td></tr>
+                    <tr>
+                      <td>6</td>
+                      <td>
+                        <select class="select mythic-ability-pick" data-tier="6">
+                          <option value="" selected>— Seleziona —</option>
+                          <option value="FOR">FOR</option>
+                          <option value="DES">DES</option>
+                          <option value="COS">COS</option>
+                          <option value="INT">INT</option>
+                          <option value="SAG">SAG</option>
+                          <option value="CAR">CAR</option>
+                        </select>
+                      </td>
+                      <td>1d10</td>
+                    </tr>
+                    <tr><td>7</td><td>—</td><td>—</td></tr>
+                    <tr>
+                      <td>8</td>
+                      <td>
+                        <select class="select mythic-ability-pick" data-tier="8">
+                          <option value="" selected>— Seleziona —</option>
+                          <option value="FOR">FOR</option>
+                          <option value="DES">DES</option>
+                          <option value="COS">COS</option>
+                          <option value="INT">INT</option>
+                          <option value="SAG">SAG</option>
+                          <option value="CAR">CAR</option>
+                        </select>
+                      </td>
+                      <td>—</td>
+                    </tr>
+                    <tr><td>9</td><td>—</td><td>1d12</td></tr>
+                    <tr>
+                      <td>10</td>
+                      <td>
+                        <select class="select mythic-ability-pick" data-tier="10">
+                          <option value="" selected>— Seleziona —</option>
+                          <option value="FOR">FOR</option>
+                          <option value="DES">DES</option>
+                          <option value="COS">COS</option>
+                          <option value="INT">INT</option>
+                          <option value="SAG">SAG</option>
+                          <option value="CAR">CAR</option>
+                        </select>
+                      </td>
+                      <td>—</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
             <div class="field span-12"><label>Capacità Mitiche</label><textarea placeholder="Capacità base e di percorso..."></textarea></div>
             <div class="field span-12"><label>Oggetto Leggendario</label><textarea placeholder="Nome, oggetto base, capacità..."></textarea></div>
@@ -660,7 +803,11 @@
         </div>
         <div class="field span-4">
           <label>Taglia</label>
-          <input class="small" type="text" placeholder="M" />
+          <select class="select size-select-sync" id="size-select-compagno">
+            <option value="small">Piccola</option>
+            <option value="medium" selected>Media</option>
+            <option value="large">Grande</option>
+          </select>
         </div>
 
         <div class="field span-4">
@@ -692,24 +839,6 @@
     </div>
 
     <div class="card">
-      <h2>CA &amp; Attacchi</h2>
-      <div class="fields">
-        <div class="field span-4"><label>CA</label><input class="small" type="text" placeholder="10" /></div>
-        <div class="field span-4"><label>Contatto</label><input class="small" type="text" placeholder="10" /></div>
-        <div class="field span-4"><label>Impreparato</label><input class="small" type="text" placeholder="10" /></div>
-
-        <div class="field span-12">
-          <label>Attacchi</label>
-          <input type="text" placeholder="Es. morso +6 (1d6+4), artigli..." />
-        </div>
-        <div class="field span-12">
-          <label>Attacchi speciali / Capacità</label>
-          <input type="text" placeholder="Es. afferrare, trip, compagno..." />
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
       <h2>Caratteristiche &amp; TS</h2>
       <div class="fields">
         <div class="field span-4"><label>FOR</label><input class="small" type="number" step="1" placeholder="10" /></div>
@@ -723,6 +852,70 @@
         <div class="field span-4"><label>Tempra</label><input class="small" type="text" placeholder="+0" /></div>
         <div class="field span-4"><label>Riflessi</label><input class="small" type="text" placeholder="+0" /></div>
         <div class="field span-4"><label>Volontà</label><input class="small" type="text" placeholder="+0" /></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>CA &amp; Attacchi</h2>
+      <div class="fields">
+        <div class="field span-4"><label>CA</label><input class="small" type="text" placeholder="10" /></div>
+        <div class="field span-4"><label>Contatto</label><input class="small" type="text" placeholder="10" /></div>
+        <div class="field span-4"><label>Impreparato</label><input class="small" type="text" placeholder="10" /></div>
+      </div>
+
+      <div class="fields" style="margin-top:10px;">
+        <div class="field span-3"><label>BAB Compagno</label><input id="comp-atk-bab" class="small" type="number" step="1" value="0" /></div>
+        <div class="field span-3"><label>Mod FOR</label><input id="comp-atk-str-mod" class="small" type="number" step="1" value="0" /></div>
+        <div class="field span-3"><label>Mod DES</label><input id="comp-atk-dex-mod" class="small" type="number" step="1" value="0" /></div>
+        <div class="field span-3"><label>Varie (globale)</label><input id="comp-atk-misc" class="small" type="number" step="1" value="0" /></div>
+      </div>
+
+      <div class="actions" style="margin-top:8px;">
+        <button type="button" class="btn" id="add-comp-attack-row">Aggiungi attacco</button>
+        <button type="button" class="btn" id="remove-comp-attack-row">Rimuovi ultimo</button>
+      </div>
+
+      <div class="table-wrap" style="margin-top:10px;">
+        <table aria-label="Tabella Attacchi Compagno" id="comp-attacks-table" style="min-width:560px;">
+          <thead>
+            <tr>
+              <th style="width:14%;">Tipo</th>
+              <th style="width:28%;">Arma / Attacco</th>
+              <th style="width:14%;">Danni</th>
+              <th style="width:12%;">Varie</th>
+              <th style="width:12%;">Tot</th>
+              <th style="width:12%;">Critico</th>
+              <th style="width:8%;">Tiro</th>
+            </tr>
+          </thead>
+          <tbody id="comp-attacks-tbody">
+            <tr class="comp-attack-row">
+              <td>
+                <select class="select comp-atk-type">
+                  <option value="melee" selected>Mischia (FOR)</option>
+                  <option value="ranged">Distanza (DES)</option>
+                </select>
+              </td>
+              <td><input class="comp-atk-name" type="text" placeholder="Es. Morso" /></td>
+              <td><input class="comp-atk-dmg" type="text" placeholder="Es. 1d6+4" /></td>
+              <td><input class="small comp-atk-row-misc" type="number" step="1" value="0" /></td>
+              <td><input class="small comp-atk-total" type="text" value="+0" readonly /></td>
+              <td><input class="small comp-atk-crit" type="text" placeholder="20/x2" /></td>
+              <td style="text-align:center;"><button type="button" class="roll-btn comp-atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="fields" style="margin-top:10px;">
+        <div class="field span-12">
+          <label>Attacchi speciali / Capacità</label>
+          <input type="text" placeholder="Es. afferrare, trip, compagno..." />
+        </div>
+      </div>
+
+      <div class="hint" style="margin-top:10px;">
+        Tot = BAB + Mod(FOR/DES) + Taglia + Varie(globale) + Varie(riga).
       </div>
     </div>
 
@@ -763,3 +956,11 @@
   <script src="scheda_pathfinder.js"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
