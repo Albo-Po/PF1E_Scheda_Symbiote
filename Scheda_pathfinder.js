@@ -1524,9 +1524,84 @@ document.addEventListener("DOMContentLoaded", () => {
   if (resetBtn) {
     resetBtn.addEventListener("click", () => {
       const theme = localStorage.getItem(THEME_KEY);
-      localStorage.clear();
+
+      // 1) Rimuove stato salvato e contatori righe dinamiche.
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(SKILLS_EXTRA_KEY);
+      localStorage.removeItem(ATK_STORAGE_KEY);
+      localStorage.removeItem(COMP_ATK_STORAGE_KEY);
+      localStorage.removeItem(SPELLS_EXTRA_KEY);
       if (theme) localStorage.setItem(THEME_KEY, theme);
-      location.reload();
+
+      // 2) Svuota stato in memoria.
+      Object.keys(state).forEach((k) => delete state[k]);
+      saveState(state);
+
+      // 3) Ripristina default HTML su tutti i controlli.
+      $$(".page input, .page textarea, .page select").forEach((el) => {
+        if (el.type === "button" || el.type === "submit") return;
+        if (el.id === "theme-toggle") return;
+
+        if (el.tagName === "SELECT") {
+          const idx = Array.from(el.options).findIndex((o) => o.defaultSelected);
+          el.selectedIndex = idx >= 0 ? idx : 0;
+          return;
+        }
+
+        if (el.type === "checkbox" || el.type === "radio") {
+          el.checked = !!el.defaultChecked;
+          return;
+        }
+
+        el.value = el.defaultValue ?? "";
+      });
+
+      // 4) Forza i default richiesti della scheda.
+      const cdpLevelEl = document.getElementById("cdp-level");
+      if (cdpLevelEl) cdpLevelEl.value = "0";
+
+      const tierA = document.getElementById("mythic-tier-identita");
+      const tierB = document.getElementById("mythic-tier-mitico");
+      if (tierA) tierA.value = "0";
+      if (tierB) tierB.value = "0";
+
+      if (enableSpellsTab) enableSpellsTab.checked = false;
+      if (enableCompanionTab) enableCompanionTab.checked = false;
+      if (enableCdpSection) enableCdpSection.checked = false;
+
+      $$(".ability-score").forEach((el) => {
+        el.value = "10";
+        el.dataset.baseScore = "10";
+      });
+
+      // 5) Rimuove righe extra dinamiche e ricostruisce le sezioni.
+      setAtkExtraCount(0);
+      attacksTbody?.querySelectorAll(".attack-row-extra").forEach((r) => r.remove());
+
+      setCompAtkExtraCount(0);
+      compAttacksTbody?.querySelectorAll(".comp-attack-row-extra").forEach((r) => r.remove());
+
+      setExtraRowsCount(0);
+      rebuildExtraSkillRows();
+
+      for (let lvl = 0; lvl <= 9; lvl++) setSpellExtraCount(lvl, 0);
+      rebuildSpellRows();
+
+      // 6) Aggiorna visibilità tab/sezioni opzionali e ricalcola.
+      setAllSizeSelectors("medium");
+      forceMythicTierEquality();
+      updateMythicUI();
+      updateMythicAbilityPickAvailability();
+      updateMythicAbilityPickVisualState();
+      updateMythicTierRowHighlights();
+      applyMythicAbilityBonusToScores();
+      updateMythicSurgeUI();
+      updateOptionalTabsVisibility();
+      applyAutoClassSkills();
+      applySkillFilters();
+      updateSpellcastingClassFields();
+      recalcAllSpellSlots();
+      recalcDerived();
     });
   }
 
