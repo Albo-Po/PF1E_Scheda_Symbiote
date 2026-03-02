@@ -6,7 +6,7 @@
   <title>Scheda Personaggio — Pathfinder 1E</title>
 
   <!-- CSS esterno -->
-<link rel="stylesheet" href="https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder.css">
+<link rel="stylesheet" href="https://albo-po.github.io/PF1E_Scheda_Symbiote/scheda_pathfinder.css">
 
 
 
@@ -71,11 +71,11 @@
 
             <div class="field span-8">
               <label>Classe</label>
-              <input type="text" placeholder="Es. Guerriero 5 / Ladro 2" />
+              <input id="pc-class-free-text" type="text" placeholder="Es. Guerriero 5 / Ladro 2" />
             </div>
             <div class="field span-4">
               <label>Livello Totale</label>
-              <input class="small" type="number" min="1" step="1" placeholder="7" />
+              <input id="pc-level-total" class="small" type="number" min="1" step="1" placeholder="7" />
             </div>
 
 
@@ -1150,7 +1150,10 @@
   </main>
 
   <!-- JS esterno -->
-  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder.js" defer></script>
+  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_tables.js" defer></script>
+  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_spells.js" defer></script>
+  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_equipment.js" defer></script>
+  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/scheda_pathfinder.js" defer></script>
 </body>
 </html>
 

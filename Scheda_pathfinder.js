@@ -1603,6 +1603,31 @@ document.addEventListener("DOMContentLoaded", () => {
     return v ? [v] : [];
   }
 
+  function getBabApi() {
+    return window.PF1EData?.tables?.bab || null;
+  }
+
+  function applyAutoBabFromClass() {
+    const classes = getSelectedClasses();
+    if (!classes.length) return;
+
+    const levelEl = document.getElementById("pc-level-total");
+    const atkBabEl = document.getElementById("atk-bab");
+    if (!levelEl || !atkBabEl) return;
+
+    const level = num(levelEl.value);
+    if (level <= 0) return;
+
+    const cls = classes[0];
+    const babApi = getBabApi();
+    if (!babApi || typeof babApi.getByClass !== "function") return;
+
+    const autoBab = babApi.getByClass(level, cls);
+    atkBabEl.value = String(autoBab);
+    recalcAllAttacks();
+    recalcCmbCmd();
+  }
+
   function buildClassSkillSet(classes) {
     const set = new Set();
     classes.forEach((cls) => (CLASS_SKILLS[cls] || []).forEach((sk) => set.add(canonicalSkill(sk))));
@@ -1831,7 +1856,10 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("change", (e) => {
     const t = e.target;
     if (!t) return;
-    if (t.id === "pf-class-select") applyAutoClassSkills();
+    if (t.id === "pf-class-select") {
+      applyAutoClassSkills();
+      applyAutoBabFromClass();
+    }
     if (t.id === "spellcaster-class") {
       updateSpellcastingClassFields();
       recalcAllSpellSlots();
@@ -2168,6 +2196,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return row || null;
   }
 
+  const pcLevelEl = document.getElementById("pc-level-total");
+  if (pcLevelEl) {
+    pcLevelEl.addEventListener("input", applyAutoBabFromClass);
+    pcLevelEl.addEventListener("change", applyAutoBabFromClass);
+  }
+
   function targetHasAnyClass(target, classNames) {
     if (!target?.classList) return false;
     return classNames.some((className) => target.classList.contains(className));
@@ -2352,6 +2386,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Dopo restore: ricalcoli + auto-CS + filtri
   applyAutoClassSkills();
   applySkillFilters();
+  applyAutoBabFromClass();
   initCollapsibleCards();
   updateAllCompAbilityMods();
   rebuildSpellRows();
