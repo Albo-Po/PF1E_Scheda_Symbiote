@@ -101,28 +101,42 @@ document.addEventListener("DOMContentLoaded", () => {
     return mod === 0 ? "1d20" : `1d20${fmtSigned(mod)}`;
   }
 
+  function tryTaleSpireDiceRoll(formula, cleanLabel, mod) {
+    const diceApi = window?.TS?.dice;
+    if (!diceApi) return false;
+
+    const callSpecs = [
+      { method: "roll", mode: "roll" },
+      { method: "rollDice", mode: "roll" },
+      { method: "putDiceInTray", mode: "tray" },
+    ];
+
+    for (const spec of callSpecs) {
+      const fn = diceApi?.[spec.method];
+      if (typeof fn !== "function") continue;
+
+      try {
+        pendingTsRolls.push({ label: cleanLabel, mod });
+        fn.call(diceApi, formula);
+        const action = spec.mode === "roll" ? "tirato in TaleSpire" : "inviato nel tray TaleSpire";
+        toast(`${cleanLabel}: ${action} (${formula})`);
+        return true;
+      } catch (err) {
+        pendingTsRolls.pop();
+        console.error(`Errore con TS.dice.${spec.method}:`, err);
+      }
+    }
+
+    return false;
+  }
+
   function rollViaTaleSpire(total, label) {
     const cleanLabel = String(label || "Tiro").trim() || "Tiro";
     const mod = parseSignedInt(total);
     const formula = formatD20Formula(mod);
-
-    const canUseTs =
-      typeof window !== "undefined" &&
-      window.TS &&
-      window.TS.dice &&
-      typeof window.TS.dice.putDiceInTray === "function";
-
-    if (canUseTs) {
-      try {
-        pendingTsRolls.push({ label: cleanLabel, mod });
-        window.TS.dice.putDiceInTray(formula);
-        toast(`${cleanLabel}: inviato a TaleSpire (${formula})`);
-        return;
-      } catch (err) {
-        pendingTsRolls.pop();
-        console.error("Errore invio tiro a TaleSpire:", err);
-      }
-    }
+    const tsRollSent =
+      typeof window !== "undefined" && tryTaleSpireDiceRoll(formula, cleanLabel, mod);
+    if (tsRollSent) return;
 
     const roll = d20();
     const result = roll + mod;
