@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "name": "PF1E Character Sheet",
-  "entryPoint": "https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder.html"
+  "entryPoint": "https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder.html",
   "summary": "Scheda personaggio Pathfinder 1E con calcoli e roll d20",
   "version": "1",
   "api": {
@@ -17,7 +17,7 @@
       }
     },
     "interop": {
-      "id": "8d8a9e4c-0a64-4f31-ba96-5533cb881057"
+      "id": "4d2b3177-1767-4c79-ab99-eecefd2df231"
     }
   }
 }
