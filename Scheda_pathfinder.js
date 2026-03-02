@@ -101,19 +101,19 @@ document.addEventListener("DOMContentLoaded", () => {
     return mod === 0 ? "1d20" : `1d20${fmtSigned(mod)}`;
   }
 
-  function tryTaleSpireDiceRoll(formula, cleanLabel, mod) {
+  function tryTaleSpireDiceRoll(formula, cleanLabel, mod, trackResult = true) {
     const diceApi = window?.TS?.dice;
     if (!diceApi) return false;
 
     if (typeof diceApi.putDiceInTray === "function") {
       const legacyTrayRequest = [{ name: cleanLabel, roll: String(formula).toUpperCase() }];
       try {
-        pendingTsRolls.push({ label: cleanLabel, mod });
+        if (trackResult) pendingTsRolls.push({ label: cleanLabel, mod });
         diceApi.putDiceInTray(legacyTrayRequest);
         toast(`${cleanLabel}: inviato nel tray TaleSpire (${formula})`);
         return true;
       } catch (err) {
-        pendingTsRolls.pop();
+        if (trackResult) pendingTsRolls.pop();
         console.error("Errore con TS.dice.putDiceInTray (legacy):", err);
       }
     }
@@ -135,12 +135,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const descriptors = diceApi.makeRollDescriptors(formula);
         if (!Array.isArray(descriptors) || descriptors.length === 0) return false;
 
-        pendingTsRolls.push({ label: cleanLabel, mod });
+        if (trackResult) pendingTsRolls.push({ label: cleanLabel, mod });
         diceApi.putDiceInTray(descriptors, false);
         toast(`${cleanLabel}: inviato nel tray TaleSpire (${formula})`);
         return true;
       } catch (err) {
-        pendingTsRolls.pop();
+        if (trackResult) pendingTsRolls.pop();
         console.error("Errore con TS.dice.makeRollDescriptors/putDiceInTray:", err);
       }
     }
@@ -155,14 +155,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof fn !== "function") continue;
 
       try {
-        pendingTsRolls.push({ label: cleanLabel, mod });
+        if (trackResult) pendingTsRolls.push({ label: cleanLabel, mod });
         fn.call(diceApi, formula);
         const action =
           spec.mode === "roll" ? "tirato in TaleSpire" : "inviato nel tray TaleSpire";
         toast(`${cleanLabel}: ${action} (${formula})`);
         return true;
       } catch (err) {
-        pendingTsRolls.pop();
+        if (trackResult) pendingTsRolls.pop();
         console.error(`Errore con TS.dice.${spec.method}:`, err);
       }
     }
@@ -181,6 +181,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const roll = d20();
     const result = roll + mod;
     toast(`${cleanLabel}: d20(${roll}) + Tot(${mod >= 0 ? "+" : ""}${mod}) = ${result}`);
+  }
+
+  function rollFormulaViaTaleSpire(formula, label) {
+    const cleanLabel = String(label || "Danni").trim() || "Danni";
+    const cleanFormula = String(formula || "").trim();
+    if (!cleanFormula) return;
+
+    const tsRollSent =
+      typeof window !== "undefined" && tryTaleSpireDiceRoll(cleanFormula, cleanLabel, 0, false);
+    if (tsRollSent) return;
+
+    toast(`${cleanLabel}: formula ${cleanFormula}`);
   }
 
   window.handleRollResult = async (payload) => {
@@ -433,11 +445,16 @@ document.addEventListener("DOMContentLoaded", () => {
     return SIZE_MODIFIERS[getCurrentSizeKey()] || SIZE_MODIFIERS.medium;
   }
 
-  function getSizeAbilityModBonus(code) {
+  function getSizeAbilityScoreBonus(code) {
     const size = getCurrentSizeKey();
-    if (size === "large" && code === "FOR") return 2;
-    if (size === "small" && code === "DES") return 2;
+    // Bonus punteggio da taglia (coerente con i mod attuali: +4 score => +2 mod)
+    if (size === "large" && code === "FOR") return 4;
+    if (size === "small" && code === "DES") return 4;
     return 0;
+  }
+
+  function getSizeAbilityModBonus(code) {
+    return Math.trunc(getSizeAbilityScoreBonus(code) / 2);
   }
 
   function setAllSizeSelectors(sizeKey) {
@@ -453,8 +470,9 @@ document.addEventListener("DOMContentLoaded", () => {
   sizeSelectors.forEach((sel) => {
     if (!sel) return;
     const onSizeChange = () => {
+      syncAllAbilityBaseFromVisibleScores();
       setAllSizeSelectors(sel.value);
-      updateAllAbilityMods();
+      applyMythicAbilityBonusToScores();
       recalcDerived();
     };
     sel.addEventListener("input", onSizeChange);
@@ -475,16 +493,41 @@ document.addEventListener("DOMContentLoaded", () => {
     const scoreEl = $(".ability-score", statEl);
     const modEl = $(".ability-mod", statEl);
     if (!scoreEl || !modEl) return;
-    const code = String(statEl.dataset.ability || "");
-    const sizeBonus = getSizeAbilityModBonus(code);
-    modEl.value = String(pfModFromScore(scoreEl.value) + sizeBonus);
+    modEl.value = String(pfModFromScore(scoreEl.value));
   }
 
   function updateAllAbilityMods() {
     $$(".stat[data-ability]").forEach(updateAbilityBlock);
   }
 
+  function updateCompAbilityField(fieldEl) {
+    if (!fieldEl) return;
+    const scoreEl = $(".comp-ability-score", fieldEl);
+    const modEl = $(".comp-ability-mod", fieldEl);
+    if (!scoreEl || !modEl) return;
+    modEl.value = String(pfModFromScore(scoreEl.value));
+  }
+
+  function getCompAbilityModByCode(code) {
+    const field = $(`.comp-ability-field[data-ability="${code}"]`);
+    const modEl = field ? $(".comp-ability-mod", field) : null;
+    return modEl ? num(modEl.value) : 0;
+  }
+
+  function syncCompAttackModsFromAbilities() {
+    const strEl = document.getElementById("comp-atk-str-mod");
+    const dexEl = document.getElementById("comp-atk-dex-mod");
+    if (strEl) strEl.value = String(getCompAbilityModByCode("FOR"));
+    if (dexEl) dexEl.value = String(getCompAbilityModByCode("DES"));
+  }
+
+  function updateAllCompAbilityMods() {
+    $$(".comp-ability-field[data-ability]").forEach(updateCompAbilityField);
+    syncCompAttackModsFromAbilities();
+  }
+
   updateAllAbilityMods();
+  updateAllCompAbilityMods();
 
   function getMythicAbilityBonusFor(code) {
     const tierA = document.getElementById("mythic-tier-identita");
@@ -510,16 +553,17 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!scoreEl) return;
 
       const mythicBonus = getMythicAbilityBonusFor(code);
+      const sizeScoreBonus = getSizeAbilityScoreBonus(code);
       const min = num(scoreEl.min || 1);
       const max = num(scoreEl.max || 50);
 
       if (scoreEl.dataset.baseScore === undefined) {
         const currentVisible = num(scoreEl.value);
-        scoreEl.dataset.baseScore = String(currentVisible - mythicBonus);
+        scoreEl.dataset.baseScore = String(currentVisible - mythicBonus - sizeScoreBonus);
       }
 
       const base = num(scoreEl.dataset.baseScore);
-      const total = clamp(base + mythicBonus, min, max);
+      const total = clamp(base + mythicBonus + sizeScoreBonus, min, max);
       const nextValue = String(total);
 
       if (scoreEl.value !== nextValue) {
@@ -539,8 +583,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!scoreEl) return;
 
     const code = String(statEl.dataset.ability || "");
-    const bonus = getMythicAbilityBonusFor(code);
-    scoreEl.dataset.baseScore = String(num(scoreEl.value) - bonus);
+    const mythicBonus = getMythicAbilityBonusFor(code);
+    const sizeScoreBonus = getSizeAbilityScoreBonus(code);
+    scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus);
+  }
+
+  function syncAllAbilityBaseFromVisibleScores() {
+    $$(".stat[data-ability]").forEach((statEl) => {
+      const scoreEl = $(".ability-score", statEl);
+      if (!scoreEl) return;
+      const code = String(statEl.dataset.ability || "");
+      const mythicBonus = getMythicAbilityBonusFor(code);
+      const sizeScoreBonus = getSizeAbilityScoreBonus(code);
+      scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus);
+    });
   }
 
   document.addEventListener("input", (e) => {
@@ -560,6 +616,17 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (t.classList.contains("comp-ability-score")) {
+      if (isAbilitySyncing) return;
+      isAbilitySyncing = true;
+      const field = t.closest(".comp-ability-field");
+      updateCompAbilityField(field);
+      syncCompAttackModsFromAbilities();
+      isAbilitySyncing = false;
+      recalcAllCompAttacks();
+      return;
+    }
+
     // mod -> score
     if (t.classList.contains("ability-mod")) {
       if (isAbilitySyncing) return;
@@ -570,18 +637,36 @@ document.addEventListener("DOMContentLoaded", () => {
       if (scoreEl) {
         const code = String(stat?.dataset?.ability || "");
         const mythicBonus = getMythicAbilityBonusFor(code);
-        const sizeBonus = getSizeAbilityModBonus(code);
-        const desired = scoreFromPfMod(num(t.value) - sizeBonus);
+        const sizeScoreBonus = getSizeAbilityScoreBonus(code);
+        const desired = scoreFromPfMod(num(t.value));
         const min = num(scoreEl.min || 1);
         const max = num(scoreEl.max || 50);
         const total = clamp(desired, min, max);
-        scoreEl.dataset.baseScore = String(total - mythicBonus);
+        scoreEl.dataset.baseScore = String(total - mythicBonus - sizeScoreBonus);
         scoreEl.value = String(total);
         updateAbilityBlock(stat);
       }
 
       isAbilitySyncing = false;
       recalcDerived();
+      return;
+    }
+
+    if (t.classList.contains("comp-ability-mod")) {
+      if (isAbilitySyncing) return;
+      isAbilitySyncing = true;
+      const field = t.closest(".comp-ability-field");
+      const scoreEl = field ? $(".comp-ability-score", field) : null;
+      if (scoreEl) {
+        const desired = scoreFromPfMod(num(t.value));
+        const min = num(scoreEl.min || 1);
+        const max = num(scoreEl.max || 50);
+        scoreEl.value = String(clamp(desired, min, max));
+        updateCompAbilityField(field);
+      }
+      syncCompAttackModsFromAbilities();
+      isAbilitySyncing = false;
+      recalcAllCompAttacks();
       return;
     }
   });
@@ -948,12 +1033,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const addAtkBtn = document.getElementById("add-attack-row");
   const remAtkBtn = document.getElementById("remove-attack-row");
 
-  function getAtkGlobals() {
-    return {
-      bab: num(document.getElementById("atk-bab")?.value),
-      size: getCurrentSizeMods().acAtk,
-      misc: num(document.getElementById("atk-misc")?.value),
+  function buildAttackBaseVariables() {
+    const bab = num(document.getElementById("atk-bab")?.value);
+    const size = getCurrentSizeMods().acAtk;
+    const misc = num(document.getElementById("atk-misc")?.value);
+    const str = getAbilityModByCode("FOR");
+    const dex = getAbilityModByCode("DES");
+
+    const melee = {
+      bab,
+      ability: str,
+      size,
+      misc,
+      total: bab + str + size + misc,
     };
+
+    const ranged = {
+      bab,
+      ability: dex,
+      size,
+      misc,
+      total: bab + dex + size + misc,
+    };
+
+    return { bab, size, misc, str, dex, melee, ranged };
+  }
+
+  function syncAttackBaseTotals(attackVars = buildAttackBaseVariables()) {
+    const meleeOut = document.getElementById("atk-melee-total");
+    const rangedOut = document.getElementById("atk-ranged-total");
+    if (meleeOut) meleeOut.value = fmtSigned(attackVars.melee.total);
+    if (rangedOut) rangedOut.value = fmtSigned(attackVars.ranged.total);
   }
 
   function recalcCmbCmd() {
@@ -974,22 +1084,139 @@ document.addEventListener("DOMContentLoaded", () => {
     cmdEl.value = String(cmd);
   }
 
-  function recalcAttackRow(tr) {
+  function formatDamageFormula(diceCount, dieSize, dmgBonus) {
+    const count = Math.max(1, Math.trunc(num(diceCount)));
+    const die = Math.max(2, Math.trunc(num(dieSize)));
+    const bonus = Math.trunc(num(dmgBonus));
+    const base = `${count}d${die}`;
+    if (bonus === 0) return base;
+    return `${base}${bonus > 0 ? "+" : ""}${bonus}`;
+  }
+
+  function computePowerAttackStep(babValue) {
+    const bab = Math.max(0, Math.trunc(num(babValue)));
+    if (bab < 1) return 0;
+    return 1 + Math.floor((bab - 1) / 4);
+  }
+
+  function formatCritFormula(rangeStart, mult) {
+    const start = Math.max(2, Math.min(20, Math.trunc(num(rangeStart))));
+    const critRange = start === 20 ? "20" : `${start}-20`;
+    const critMult = Math.max(2, Math.min(4, Math.trunc(num(mult))));
+    return `${critRange}/x${critMult}`;
+  }
+
+  function getAttackDamageRow(hitRow) {
+    if (!hitRow) return null;
+    const next = hitRow.nextElementSibling;
+    return next?.classList?.contains("attack-row-dmg") ? next : null;
+  }
+
+  function syncAttackRowDerivedFields(tr) {
     if (!tr) return;
+    const dmgRow = getAttackDamageRow(tr);
+    if (!dmgRow) return { attackPenalty: 0 };
+    const diceCount = dmgRow.querySelector(".atk-dice-count")?.value;
+    const dieSize = dmgRow.querySelector(".atk-die")?.value;
+    const type = tr.querySelector(".atk-type")?.value || "melee";
+    const isMelee = type === "melee";
+    const meleeOnly = Array.from(dmgRow.querySelectorAll(".atk-melee-only"));
+    meleeOnly.forEach((el) => {
+      el.hidden = !isMelee;
+      el.setAttribute("aria-hidden", String(!isMelee));
+    });
+
+    const twoHandsEl = dmgRow.querySelector(".atk-twohands");
+    const powerAttackEl = dmgRow.querySelector(".atk-power-attack");
+    const furiousFocusEl = dmgRow.querySelector(".atk-furious-focus");
+
+    const twoHands = isMelee && !!twoHandsEl?.checked;
+    const powerAttack = isMelee && !!powerAttackEl?.checked;
+    const furiousFocus = isMelee && !!furiousFocusEl?.checked;
+
+    const strMod = getAbilityModByCode("FOR");
+    const strToDamage = isMelee ? (twoHands ? Math.trunc(strMod * 1.5) : strMod) : 0;
+    const bab = num(document.getElementById("atk-bab")?.value);
+    const paStep = computePowerAttackStep(bab);
+    const paDamage = powerAttack ? paStep * (twoHands ? 3 : 2) : 0;
+    const attackPenaltyRaw = powerAttack ? paStep : 0;
+    const attackPenalty = furiousFocus ? 0 : attackPenaltyRaw;
+
+    const dmgBonus = strToDamage + paDamage;
+    const critRange = dmgRow.querySelector(".atk-crit-range")?.value;
+    const critMult = dmgRow.querySelector(".atk-crit-mult")?.value;
+
+    const dmgFormula = formatDamageFormula(diceCount, dieSize, dmgBonus);
+    tr.dataset.dmgFormula = dmgFormula;
+
+    const dmgTotalOut = dmgRow.querySelector(".atk-dmg-total");
+    if (dmgTotalOut) dmgTotalOut.value = dmgFormula;
+
+    const critOut = dmgRow.querySelector(".atk-crit");
+    if (critOut) critOut.value = formatCritFormula(critRange, critMult);
+    return { attackPenalty };
+  }
+
+  function getCompAttackDamageRow(hitRow) {
+    if (!hitRow) return null;
+    const next = hitRow.nextElementSibling;
+    return next?.classList?.contains("comp-attack-row-dmg") ? next : null;
+  }
+
+  function syncCompAttackRowDerivedFields(tr) {
+    if (!tr) return;
+    const dmgRow = getCompAttackDamageRow(tr);
+    if (!dmgRow) return;
+    const diceCount = dmgRow.querySelector(".comp-atk-dice-count")?.value;
+    const dieSize = dmgRow.querySelector(".comp-atk-die")?.value;
+    const type = tr.querySelector(".comp-atk-type")?.value || "melee";
+    const strMod = num(document.getElementById("comp-atk-str-mod")?.value);
+    const dmgBonus = type === "melee" ? strMod : 0;
+    const critRange = dmgRow.querySelector(".comp-atk-crit-range")?.value;
+    const critMult = dmgRow.querySelector(".comp-atk-crit-mult")?.value;
+
+    const dmgFormula = formatDamageFormula(diceCount, dieSize, dmgBonus);
+    tr.dataset.dmgFormula = dmgFormula;
+
+    const dmgTotalOut = dmgRow.querySelector(".comp-atk-dmg-total");
+    if (dmgTotalOut) dmgTotalOut.value = dmgFormula;
+
+    const critOut = dmgRow.querySelector(".comp-atk-crit");
+    if (critOut) critOut.value = formatCritFormula(critRange, critMult);
+  }
+
+  function recalcAttackRow(tr, attackVars = buildAttackBaseVariables()) {
+    if (!tr) return;
+    const derived = syncAttackRowDerivedFields(tr);
     const type = tr.querySelector(".atk-type")?.value || "melee";
     const rowMisc = num(tr.querySelector(".atk-row-misc")?.value);
-
-    const { bab, size, misc } = getAtkGlobals();
-    const abil = type === "ranged" ? getAbilityModByCode("DES") : getAbilityModByCode("FOR");
-
-    const total = bab + abil + size + misc + rowMisc;
+    const base = type === "ranged" ? attackVars.ranged.total : attackVars.melee.total;
+    const total = base + rowMisc - num(derived?.attackPenalty);
     const out = tr.querySelector(".atk-total");
     if (out) out.value = fmtSigned(total);
   }
 
   function recalcAllAttacks() {
+    const attackVars = buildAttackBaseVariables();
+    syncAttackBaseTotals(attackVars);
     if (!attacksTbody) return;
-    attacksTbody.querySelectorAll(".attack-row").forEach(recalcAttackRow);
+    attacksTbody.querySelectorAll(".attack-row").forEach((row) => recalcAttackRow(row, attackVars));
+  }
+
+  function buildFullAttackBonuses(totalToHit, babValue) {
+    const total = Math.trunc(num(totalToHit));
+    const bab = Math.max(0, Math.trunc(num(babValue)));
+    const attacksCount = Math.max(1, Math.floor((Math.max(1, bab) - 1) / 5) + 1);
+    const bonuses = [];
+    for (let i = 0; i < attacksCount; i++) bonuses.push(total - 5 * i);
+    return bonuses;
+  }
+
+  function rollFullAttackSequence(totalToHit, babValue, label) {
+    const bonuses = buildFullAttackBonuses(totalToHit, babValue);
+    bonuses.forEach((bonus, idx) => {
+      rollViaTaleSpire(bonus, `${label} Full #${idx + 1}`);
+    });
   }
 
   function getAtkExtraCount() {
@@ -1000,33 +1227,98 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function makeAttackRow() {
-    const tr = document.createElement("tr");
-    tr.className = "attack-row attack-row-extra";
-    tr.innerHTML = `
+    const hitRow = document.createElement("tr");
+    hitRow.className = "attack-row attack-row-extra";
+    hitRow.innerHTML = `
       <td>
         <select class="select atk-type">
           <option value="melee" selected>Mischia (FOR)</option>
           <option value="ranged">Distanza (DES)</option>
         </select>
       </td>
-      <td><input class="atk-name" type="text" placeholder="Es. Arma/Attacco" /></td>
-      <td><input class="atk-dmg" type="text" placeholder="Es. 1d6+2" /></td>
+      <td><input class="atk-name" type="text" placeholder="Es. Arma" /></td>
       <td><input class="small atk-row-misc" type="number" step="1" value="0" /></td>
       <td><input class="small atk-total" type="text" value="+0" readonly /></td>
-      <td><input class="small atk-crit" type="text" placeholder="19-20/x2" /></td>
-      <td style="text-align:center;"><button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button></td>
     `;
-    return tr;
+
+    const dmgRow = document.createElement("tr");
+    dmgRow.className = "attack-row-dmg attack-row-dmg-extra";
+    dmgRow.innerHTML = `
+      <td colspan="4">
+        <div class="attack-dmg-line">
+          <div class="attack-main">
+            <div class="attack-groups">
+              <div class="attack-group">
+                <span class="attack-subtitle">Danni</span>
+                <div class="attack-dmg-inline">
+                  <div class="atk-dmg-builder">
+                    <input class="small atk-dice-count" type="number" min="1" step="1" value="1" title="Numero dadi" />
+                    <select class="select atk-die" title="Tipo dado">
+                      <option value="4">d4</option>
+                      <option value="6">d6</option>
+                      <option value="8" selected>d8</option>
+                      <option value="10">d10</option>
+                      <option value="12">d12</option>
+                    </select>
+                  </div>
+                  <input class="small atk-dmg-total" type="text" value="1d8+0" readonly title="Riepilogo danni calcolati" />
+                </div>
+              </div>
+              <div class="attack-group">
+                <span class="attack-subtitle">Critico</span>
+                <div class="atk-crit-builder">
+                  <select class="select atk-crit-range" title="Minaccia critico">
+                    <option value="20" selected>20</option>
+                    <option value="19">19-20</option>
+                    <option value="18">18-20</option>
+                    <option value="17">17-20</option>
+                  </select>
+                  <select class="select atk-crit-mult" title="Moltiplicatore critico">
+                    <option value="2" selected>x2</option>
+                    <option value="3">x3</option>
+                    <option value="4">x4</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="attack-flags">
+              <label class="attack-flag atk-melee-only">
+                <input class="atk-twohands" type="checkbox" />
+                2 mani
+              </label>
+              <label class="attack-flag atk-melee-only">
+                <input class="atk-power-attack" type="checkbox" />
+                Attacco Poderoso
+              </label>
+              <label class="attack-flag atk-melee-only">
+                <input class="atk-furious-focus" type="checkbox" />
+                Furia Focalizzata
+              </label>
+            </div>
+          </div>
+          <div class="attack-roll-line">
+            <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
+            <button type="button" class="roll-btn atk-full-roll-btn" title="Tira attacco completo">Full</button>
+            <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
+          </div>
+        </div>
+      </td>
+    `;
+
+    return { hitRow, dmgRow };
   }
 
   function rebuildAttackExtraRows() {
     if (!attacksTbody) return;
     const n = getAtkExtraCount();
     for (let i = 0; i < n; i++) {
-      const tr = makeAttackRow();
-      attacksTbody.appendChild(tr);
-      applySavedValues(tr);
-      wireAutosave(tr);
+      const { hitRow, dmgRow } = makeAttackRow();
+      attacksTbody.appendChild(hitRow);
+      attacksTbody.appendChild(dmgRow);
+      applySavedValues(hitRow);
+      applySavedValues(dmgRow);
+      wireAutosave(hitRow);
+      wireAutosave(dmgRow);
     }
     recalcAllAttacks();
   }
@@ -1035,12 +1327,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (addAtkBtn && attacksTbody) {
     addAtkBtn.addEventListener("click", () => {
-      const tr = makeAttackRow();
-      attacksTbody.appendChild(tr);
+      const { hitRow, dmgRow } = makeAttackRow();
+      attacksTbody.appendChild(hitRow);
+      attacksTbody.appendChild(dmgRow);
       setAtkExtraCount(getAtkExtraCount() + 1);
-      applySavedValues(tr);
-      wireAutosave(tr);
-      recalcAttackRow(tr);
+      applySavedValues(hitRow);
+      applySavedValues(dmgRow);
+      wireAutosave(hitRow);
+      wireAutosave(dmgRow);
+      recalcAttackRow(hitRow);
     });
   }
 
@@ -1048,10 +1343,15 @@ document.addEventListener("DOMContentLoaded", () => {
     remAtkBtn.addEventListener("click", () => {
       const extras = attacksTbody.querySelectorAll(".attack-row-extra");
       if (!extras.length) return;
-      const last = extras[extras.length - 1];
-      last.querySelectorAll("input, textarea, select").forEach((el) => delete state[keyFor(el)]);
+      const lastHit = extras[extras.length - 1];
+      const lastDmg = getAttackDamageRow(lastHit);
+      [lastHit, lastDmg].forEach((row) => {
+        if (!row) return;
+        row.querySelectorAll("input, textarea, select").forEach((el) => delete state[keyFor(el)]);
+      });
       saveState(state);
-      last.remove();
+      if (lastDmg) lastDmg.remove();
+      lastHit.remove();
       setAtkExtraCount(getAtkExtraCount() - 1);
       recalcAllAttacks();
     });
@@ -1076,6 +1376,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function recalcCompAttackRow(tr) {
     if (!tr) return;
+    syncCompAttackRowDerivedFields(tr);
     const type = tr.querySelector(".comp-atk-type")?.value || "melee";
     const rowMisc = num(tr.querySelector(".comp-atk-row-misc")?.value);
 
@@ -1100,33 +1401,83 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function makeCompAttackRow() {
-    const tr = document.createElement("tr");
-    tr.className = "comp-attack-row comp-attack-row-extra";
-    tr.innerHTML = `
+    const hitRow = document.createElement("tr");
+    hitRow.className = "comp-attack-row comp-attack-row-extra";
+    hitRow.innerHTML = `
       <td>
         <select class="select comp-atk-type">
           <option value="melee" selected>Mischia (FOR)</option>
           <option value="ranged">Distanza (DES)</option>
         </select>
       </td>
-      <td><input class="comp-atk-name" type="text" placeholder="Es. Attacco compagno" /></td>
-      <td><input class="comp-atk-dmg" type="text" placeholder="Es. 1d6+4" /></td>
+      <td><input class="comp-atk-name" type="text" placeholder="Es. Arma compagno" /></td>
       <td><input class="small comp-atk-row-misc" type="number" step="1" value="0" /></td>
       <td><input class="small comp-atk-total" type="text" value="+0" readonly /></td>
-      <td><input class="small comp-atk-crit" type="text" placeholder="20/x2" /></td>
-      <td style="text-align:center;"><button type="button" class="roll-btn comp-atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button></td>
     `;
-    return tr;
+
+    const dmgRow = document.createElement("tr");
+    dmgRow.className = "comp-attack-row-dmg comp-attack-row-dmg-extra";
+    dmgRow.innerHTML = `
+      <td colspan="4">
+        <div class="attack-dmg-line">
+          <div class="attack-main">
+            <div class="attack-groups">
+              <div class="attack-group">
+                <span class="attack-subtitle">Danni</span>
+                <div class="attack-dmg-inline">
+                  <div class="atk-dmg-builder">
+                    <input class="small comp-atk-dice-count" type="number" min="1" step="1" value="1" title="Numero dadi" />
+                    <select class="select comp-atk-die" title="Tipo dado">
+                      <option value="4">d4</option>
+                      <option value="6" selected>d6</option>
+                      <option value="8">d8</option>
+                      <option value="10">d10</option>
+                      <option value="12">d12</option>
+                    </select>
+                  </div>
+                  <input class="small atk-dmg-total comp-atk-dmg-total" type="text" value="1d6+0" readonly title="Riepilogo danni calcolati" />
+                </div>
+              </div>
+              <div class="attack-group">
+                <span class="attack-subtitle">Critico</span>
+                <div class="atk-crit-builder">
+                  <select class="select comp-atk-crit-range" title="Minaccia critico">
+                    <option value="20" selected>20</option>
+                    <option value="19">19-20</option>
+                    <option value="18">18-20</option>
+                    <option value="17">17-20</option>
+                  </select>
+                  <select class="select comp-atk-crit-mult" title="Moltiplicatore critico">
+                    <option value="2" selected>x2</option>
+                    <option value="3">x3</option>
+                    <option value="4">x4</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="attack-roll-line">
+            <button type="button" class="roll-btn comp-atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
+            <button type="button" class="roll-btn comp-atk-full-roll-btn" title="Tira attacco completo">Full</button>
+            <button type="button" class="roll-btn comp-atk-dmg-roll-btn" title="Tira danni">Danni</button>
+          </div>
+        </div>
+      </td>
+    `;
+    return { hitRow, dmgRow };
   }
 
   function rebuildCompAttackExtraRows() {
     if (!compAttacksTbody) return;
     const n = getCompAtkExtraCount();
     for (let i = 0; i < n; i++) {
-      const tr = makeCompAttackRow();
-      compAttacksTbody.appendChild(tr);
-      applySavedValues(tr);
-      wireAutosave(tr);
+      const { hitRow, dmgRow } = makeCompAttackRow();
+      compAttacksTbody.appendChild(hitRow);
+      compAttacksTbody.appendChild(dmgRow);
+      applySavedValues(hitRow);
+      applySavedValues(dmgRow);
+      wireAutosave(hitRow);
+      wireAutosave(dmgRow);
     }
     recalcAllCompAttacks();
   }
@@ -1135,12 +1486,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (addCompAtkBtn && compAttacksTbody) {
     addCompAtkBtn.addEventListener("click", () => {
-      const tr = makeCompAttackRow();
-      compAttacksTbody.appendChild(tr);
+      const { hitRow, dmgRow } = makeCompAttackRow();
+      compAttacksTbody.appendChild(hitRow);
+      compAttacksTbody.appendChild(dmgRow);
       setCompAtkExtraCount(getCompAtkExtraCount() + 1);
-      applySavedValues(tr);
-      wireAutosave(tr);
-      recalcCompAttackRow(tr);
+      applySavedValues(hitRow);
+      applySavedValues(dmgRow);
+      wireAutosave(hitRow);
+      wireAutosave(dmgRow);
+      recalcCompAttackRow(hitRow);
     });
   }
 
@@ -1148,10 +1502,15 @@ document.addEventListener("DOMContentLoaded", () => {
     remCompAtkBtn.addEventListener("click", () => {
       const extras = compAttacksTbody.querySelectorAll(".comp-attack-row-extra");
       if (!extras.length) return;
-      const last = extras[extras.length - 1];
-      last.querySelectorAll("input, textarea, select").forEach((el) => delete state[keyFor(el)]);
+      const lastHit = extras[extras.length - 1];
+      const lastDmg = getCompAttackDamageRow(lastHit);
+      [lastHit, lastDmg].forEach((row) => {
+        if (!row) return;
+        row.querySelectorAll("input, textarea, select").forEach((el) => delete state[keyFor(el)]);
+      });
       saveState(state);
-      last.remove();
+      if (lastDmg) lastDmg.remove();
+      lastHit.remove();
       setCompAtkExtraCount(getCompAtkExtraCount() - 1);
       recalcAllCompAttacks();
     });
@@ -1348,17 +1707,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const tr = document.createElement("tr");
     tr.className = isExtra ? "skill-row skill-row-extra" : "skill-row";
     tr.innerHTML = `
-      <td style="text-align:center;"><input class="skill-cs" type="checkbox" /></td>
+      <td class="td-center"><input class="skill-cs" type="checkbox" /></td>
       <td><input class="skill-name" type="text" value="${name}" placeholder="${placeholder}" /></td>
       <td>
         <input class="small skill-abil-fixed" type="text" value="${ability}" readonly />
         <input class="skill-abil" type="hidden" value="${ability}" />
       </td>
-      <td style="text-align:center;"><input class="skill-acp" type="checkbox" ${acp ? "checked" : ""} /></td>
+      <td class="td-center"><input class="skill-acp" type="checkbox" ${acp ? "checked" : ""} /></td>
       <td><input class="small skill-ranks" type="number" step="1" min="0" value="0" /></td>
       <td><input class="small skill-misc" type="number" step="1" value="0" /></td>
       <td><input class="small skill-total" type="text" value="+0" readonly /></td>
-      <td style="text-align:center;"><button type="button" class="roll-btn" title="Tira 1d20 + Tot">Tiro</button></td>
+      <td class="td-center"><button type="button" class="roll-btn" title="Tira 1d20 + Tot">Tiro</button></td>
     `;
     return tr;
   }
@@ -1487,6 +1846,48 @@ document.addEventListener("DOMContentLoaded", () => {
     el.addEventListener("change", applySkillFilters);
   });
 
+  function getLinkedHitRowFromButton(btnEl, hitRowClass, dmgRowClass) {
+    if (!btnEl) return null;
+    let tr = btnEl.closest(`tr.${hitRowClass}`);
+    if (tr) return tr;
+    const dmgRow = btnEl.closest(`tr.${dmgRowClass}`);
+    tr = dmgRow?.previousElementSibling?.classList?.contains(hitRowClass)
+      ? dmgRow.previousElementSibling
+      : null;
+    return tr || null;
+  }
+
+  function handleToHitRoll(btnEl, cfg) {
+    const tr = getLinkedHitRowFromButton(btnEl, cfg.hitRowClass, cfg.dmgRowClass);
+    if (!tr) return false;
+    cfg.recalcRow(tr);
+    const tot = parseSignedInt(tr.querySelector(cfg.totalSelector)?.value);
+    const name = tr.querySelector(cfg.nameSelector)?.value?.trim() || cfg.fallbackLabel;
+    rollViaTaleSpire(tot, name);
+    return true;
+  }
+
+  function handleFullAttackRoll(btnEl, cfg) {
+    const tr = getLinkedHitRowFromButton(btnEl, cfg.hitRowClass, cfg.dmgRowClass);
+    if (!tr) return false;
+    cfg.recalcRow(tr);
+    const tot = parseSignedInt(tr.querySelector(cfg.totalSelector)?.value);
+    const bab = num(document.getElementById(cfg.babId)?.value);
+    const name = tr.querySelector(cfg.nameSelector)?.value?.trim() || cfg.fallbackLabel;
+    rollFullAttackSequence(tot, bab, name);
+    return true;
+  }
+
+  function handleDamageRoll(btnEl, cfg) {
+    const tr = getLinkedHitRowFromButton(btnEl, cfg.hitRowClass, cfg.dmgRowClass);
+    if (!tr) return false;
+    cfg.recalcRow(tr);
+    const formula = tr.dataset.dmgFormula || cfg.fallbackFormula || "1d6";
+    const name = tr.querySelector(cfg.nameSelector)?.value?.trim() || cfg.fallbackLabel;
+    rollFormulaViaTaleSpire(formula, `${name} - Danni`);
+    return true;
+  }
+
   // roll skill (delegation)
   document.addEventListener("click", (e) => {
     const addSpellBtn = e.target.closest?.("[id^='add-spell-']");
@@ -1527,27 +1928,121 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const atkBtn = e.target.closest?.(".atk-roll-btn");
-    if (atkBtn) {
-      const tr = atkBtn.closest("tr.attack-row");
-      if (!tr) return;
+    const initBtn = e.target.closest?.(".init-roll-btn");
+    if (initBtn) {
+      recalcInitiative();
+      const tot = parseSignedInt(document.getElementById("init-total")?.value);
+      rollViaTaleSpire(tot, "Iniziativa");
+      return;
+    }
 
-      recalcAttackRow(tr);
-      const tot = parseSignedInt(tr.querySelector(".atk-total")?.value);
-      const name = tr.querySelector(".atk-name")?.value?.trim() || "Attacco";
-      rollViaTaleSpire(tot, name);
+    const cmbBtn = e.target.closest?.(".cmb-roll-btn");
+    if (cmbBtn) {
+      recalcCmbCmd();
+      const tot = parseSignedInt(document.getElementById("cmb")?.value);
+      rollViaTaleSpire(tot, "BMC");
+      return;
+    }
+
+    const saveBtn = e.target.closest?.(".save-roll-btn");
+    if (saveBtn) {
+      const targetId = String(saveBtn.dataset.target || "").trim();
+      const label = String(saveBtn.dataset.label || "Tiro Salvezza").trim() || "Tiro Salvezza";
+      const inputEl = targetId ? document.getElementById(targetId) : null;
+      const tot = parseSignedInt(inputEl?.value);
+      rollViaTaleSpire(tot, label);
+      return;
+    }
+
+    const atkBtn = e.target.closest?.(".atk-roll-btn");
+    if (
+      atkBtn &&
+      handleToHitRoll(atkBtn, {
+        hitRowClass: "attack-row",
+        dmgRowClass: "attack-row-dmg",
+        recalcRow: recalcAttackRow,
+        totalSelector: ".atk-total",
+        nameSelector: ".atk-name",
+        fallbackLabel: "Attacco",
+      })
+    ) {
+      return;
+    }
+
+    const atkFullBtn = e.target.closest?.(".atk-full-roll-btn");
+    if (
+      atkFullBtn &&
+      handleFullAttackRoll(atkFullBtn, {
+        hitRowClass: "attack-row",
+        dmgRowClass: "attack-row-dmg",
+        recalcRow: recalcAttackRow,
+        totalSelector: ".atk-total",
+        nameSelector: ".atk-name",
+        babId: "atk-bab",
+        fallbackLabel: "Attacco",
+      })
+    ) {
+      return;
+    }
+
+    const atkDmgBtn = e.target.closest?.(".atk-dmg-roll-btn");
+    if (
+      atkDmgBtn &&
+      handleDamageRoll(atkDmgBtn, {
+        hitRowClass: "attack-row",
+        dmgRowClass: "attack-row-dmg",
+        recalcRow: recalcAttackRow,
+        nameSelector: ".atk-name",
+        fallbackLabel: "Danni attacco",
+        fallbackFormula: "1d6",
+      })
+    ) {
       return;
     }
 
     const compAtkBtn = e.target.closest?.(".comp-atk-roll-btn");
-    if (compAtkBtn) {
-      const tr = compAtkBtn.closest("tr.comp-attack-row");
-      if (!tr) return;
+    if (
+      compAtkBtn &&
+      handleToHitRoll(compAtkBtn, {
+        hitRowClass: "comp-attack-row",
+        dmgRowClass: "comp-attack-row-dmg",
+        recalcRow: recalcCompAttackRow,
+        totalSelector: ".comp-atk-total",
+        nameSelector: ".comp-atk-name",
+        fallbackLabel: "Attacco compagno",
+      })
+    ) {
+      return;
+    }
 
-      recalcCompAttackRow(tr);
-      const tot = parseSignedInt(tr.querySelector(".comp-atk-total")?.value);
-      const name = tr.querySelector(".comp-atk-name")?.value?.trim() || "Attacco compagno";
-      rollViaTaleSpire(tot, name);
+    const compAtkFullBtn = e.target.closest?.(".comp-atk-full-roll-btn");
+    if (
+      compAtkFullBtn &&
+      handleFullAttackRoll(compAtkFullBtn, {
+        hitRowClass: "comp-attack-row",
+        dmgRowClass: "comp-attack-row-dmg",
+        recalcRow: recalcCompAttackRow,
+        totalSelector: ".comp-atk-total",
+        nameSelector: ".comp-atk-name",
+        babId: "comp-atk-bab",
+        fallbackLabel: "Attacco compagno",
+      })
+    ) {
+      return;
+    }
+
+    const compAtkDmgBtn = e.target.closest?.(".comp-atk-dmg-roll-btn");
+    if (
+      compAtkDmgBtn &&
+      handleDamageRoll(compAtkDmgBtn, {
+        hitRowClass: "comp-attack-row",
+        dmgRowClass: "comp-attack-row-dmg",
+        recalcRow: recalcCompAttackRow,
+        nameSelector: ".comp-atk-name",
+        fallbackLabel: "Danni attacco compagno",
+        fallbackFormula: "1d6",
+      })
+    ) {
       return;
     }
 
@@ -1587,6 +2082,33 @@ document.addEventListener("DOMContentLoaded", () => {
     // incantesimi (caratteristica chiave + mod)
     updateSpellcastingClassFields();
     recalcAllSpellSlots();
+  }
+
+  function initCollapsibleCards() {
+    $$(".page .card").forEach((card) => {
+      if (card.classList.contains("card-collapsible")) return;
+      const head = card.querySelector(":scope > h2");
+      if (!head) return;
+
+      card.classList.add("card-collapsible");
+      head.classList.add("card-collapse-head");
+      head.setAttribute("role", "button");
+      head.setAttribute("tabindex", "0");
+      head.setAttribute("aria-expanded", "true");
+
+      const toggle = () => {
+        const collapsed = card.classList.toggle("is-collapsed");
+        head.setAttribute("aria-expanded", String(!collapsed));
+      };
+
+      head.addEventListener("click", () => toggle());
+      head.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggle();
+        }
+      });
+    });
   }
 
   // listeners combat
@@ -1635,20 +2157,54 @@ document.addEventListener("DOMContentLoaded", () => {
     el.addEventListener("change", recalcAllCompAttacks);
   });
 
+  function resolveLinkedRowFromEventTarget(target, hitRowClass, dmgRowClass) {
+    if (!target?.closest) return null;
+    let row = target.closest(`.${hitRowClass}`);
+    if (row) return row;
+    const dmgRow = target.closest(`.${dmgRowClass}`);
+    row = dmgRow?.previousElementSibling?.classList?.contains(hitRowClass)
+      ? dmgRow.previousElementSibling
+      : null;
+    return row || null;
+  }
+
+  function targetHasAnyClass(target, classNames) {
+    if (!target?.classList) return false;
+    return classNames.some((className) => target.classList.contains(className));
+  }
+
   document.addEventListener("input", (e) => {
-    const row = e.target?.closest?.(".attack-row");
+    const row = resolveLinkedRowFromEventTarget(e.target, "attack-row", "attack-row-dmg");
     if (!row) return;
-    if (e.target.classList.contains("atk-row-misc") || e.target.classList.contains("atk-type")) {
+    if (
+      targetHasAnyClass(e.target, [
+        "atk-row-misc",
+        "atk-type",
+        "atk-dice-count",
+        "atk-die",
+        "atk-crit-range",
+        "atk-crit-mult",
+        "atk-twohands",
+        "atk-power-attack",
+        "atk-furious-focus",
+      ])
+    ) {
       recalcAttackRow(row);
     }
   });
 
   document.addEventListener("input", (e) => {
-    const row = e.target?.closest?.(".comp-attack-row");
+    const row = resolveLinkedRowFromEventTarget(e.target, "comp-attack-row", "comp-attack-row-dmg");
     if (!row) return;
     if (
-      e.target.classList.contains("comp-atk-row-misc") ||
-      e.target.classList.contains("comp-atk-type")
+      targetHasAnyClass(e.target, [
+        "comp-atk-row-misc",
+        "comp-atk-type",
+        "comp-atk-dice-count",
+        "comp-atk-die",
+        "comp-atk-crit-range",
+        "comp-atk-crit-mult",
+      ])
     ) {
       recalcCompAttackRow(row);
     }
@@ -1667,15 +2223,36 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.addEventListener("change", (e) => {
-    const row = e.target?.closest?.(".attack-row");
+    const row = resolveLinkedRowFromEventTarget(e.target, "attack-row", "attack-row-dmg");
     if (!row) return;
-    if (e.target.classList.contains("atk-type")) recalcAttackRow(row);
+    if (
+      targetHasAnyClass(e.target, [
+        "atk-type",
+        "atk-die",
+        "atk-crit-range",
+        "atk-crit-mult",
+        "atk-twohands",
+        "atk-power-attack",
+        "atk-furious-focus",
+      ])
+    ) {
+      recalcAttackRow(row);
+    }
   });
 
   document.addEventListener("change", (e) => {
-    const row = e.target?.closest?.(".comp-attack-row");
+    const row = resolveLinkedRowFromEventTarget(e.target, "comp-attack-row", "comp-attack-row-dmg");
     if (!row) return;
-    if (e.target.classList.contains("comp-atk-type")) recalcCompAttackRow(row);
+    if (
+      targetHasAnyClass(e.target, [
+        "comp-atk-type",
+        "comp-atk-die",
+        "comp-atk-crit-range",
+        "comp-atk-crit-mult",
+      ])
+    ) {
+      recalcCompAttackRow(row);
+    }
   });
 
   /* =========================
@@ -1738,9 +2315,11 @@ document.addEventListener("DOMContentLoaded", () => {
       // 5) Rimuove righe extra dinamiche e ricostruisce le sezioni.
       setAtkExtraCount(0);
       attacksTbody?.querySelectorAll(".attack-row-extra").forEach((r) => r.remove());
+      attacksTbody?.querySelectorAll(".attack-row-dmg-extra").forEach((r) => r.remove());
 
       setCompAtkExtraCount(0);
       compAttacksTbody?.querySelectorAll(".comp-attack-row-extra").forEach((r) => r.remove());
+      compAttacksTbody?.querySelectorAll(".comp-attack-row-dmg-extra").forEach((r) => r.remove());
 
       setExtraRowsCount(0);
       rebuildExtraSkillRows();
@@ -1763,6 +2342,7 @@ document.addEventListener("DOMContentLoaded", () => {
       updateSpellcastingClassFields();
       recalcAllSpellSlots();
       recalcDerived();
+      updateAllCompAbilityMods();
     });
   }
 
@@ -1772,6 +2352,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Dopo restore: ricalcoli + auto-CS + filtri
   applyAutoClassSkills();
   applySkillFilters();
+  initCollapsibleCards();
+  updateAllCompAbilityMods();
   rebuildSpellRows();
   recalcAllSpellSlots();
   updateSpellcastingClassFields();

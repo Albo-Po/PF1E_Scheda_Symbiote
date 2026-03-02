@@ -242,11 +242,19 @@
         <div class="field span-4"><label>Velocità</label><input id="speed" class="small" type="text" placeholder="9 m" /></div>
       </div>
 
-      <div class="fields" style="margin-bottom:12px;">
-        <div class="field span-12"><label>RD / RI</label><input id="dr-sr" class="small" type="text" placeholder="—" /></div>
+      <div class="combat-quick-row">
+        <div class="combat-dr-wrap">
+          <label>RD / RI</label>
+          <input id="dr-sr" class="small" type="text" placeholder="—" />
+        </div>
+        <div class="actions" style="margin-top:0; margin-bottom:0;">
+          <button type="button" class="btn init-roll-btn" title="Tira 1d20 + Iniziativa">Tira Iniziativa</button>
+          <button type="button" class="btn cmb-roll-btn" title="Tira 1d20 + BMC">Tira BMC</button>
+        </div>
       </div>
+    </div>
 
-      <div class="stack">
+      <div class="stack combat-subcards">
 
         <!-- CA (già calcolata automaticamente) -->
         <div class="card" style="padding:10px;">
@@ -324,7 +332,7 @@
         </div>
 
         <div class="card" style="padding:10px;">
-  <h2 style="margin-bottom:8px;">Attacchi (calcolati)</h2>
+  <h2 style="margin-bottom:8px;">Attacchi</h2>
 
   <!-- Modificatori globali per attacco -->
   <div class="fields" style="margin-bottom:10px;">
@@ -346,6 +354,17 @@
     </div>
   </div>
 
+  <div class="fields" style="margin-bottom:10px;">
+    <div class="field span-6">
+      <label>Totale Mischia (base)</label>
+      <input id="atk-melee-total" class="small" type="text" value="+0" readonly />
+    </div>
+    <div class="field span-6">
+      <label>Totale Distanza (base)</label>
+      <input id="atk-ranged-total" class="small" type="text" value="+0" readonly />
+    </div>
+  </div>
+
   <div class="actions" style="margin-top:0;">
     <button type="button" class="btn" id="add-attack-row">Aggiungi attacco</button>
     <button type="button" class="btn" id="remove-attack-row">Rimuovi ultimo</button>
@@ -355,13 +374,10 @@
     <table aria-label="Tabella Attacchi" id="attacks-table" style="min-width:560px;">
       <thead>
         <tr>
-          <th style="width:14%;">Tipo</th>
-          <th style="width:28%;">Arma / Attacco</th>
-          <th style="width:14%;">Danni</th>
-          <th style="width:12%;">Varie</th>
-          <th style="width:12%;">Tot</th>
-          <th style="width:12%;">Critico</th>
-          <th style="width:8%;">Tiro</th>
+          <th style="width:18%;">Tipo</th>
+          <th style="width:46%;">Arma</th>
+          <th style="width:18%;">Varie</th>
+          <th style="width:18%;">Tot</th>
         </tr>
       </thead>
       <tbody id="attacks-tbody">
@@ -373,11 +389,69 @@
             </select>
           </td>
           <td><input class="atk-name" type="text" placeholder="Es. Spada lunga" /></td>
-          <td><input class="atk-dmg" type="text" placeholder="Es. 1d8+3" /></td>
           <td><input class="small atk-row-misc" type="number" step="1" value="0" /></td>
           <td><input class="small atk-total" type="text" value="+0" readonly /></td>
-          <td><input class="small atk-crit" type="text" placeholder="19-20/x2" /></td>
-          <td style="text-align:center;"><button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button></td>
+        </tr>
+        <tr class="attack-row-dmg">
+          <td colspan="4">
+            <div class="attack-dmg-line">
+              <div class="attack-main">
+                <div class="attack-groups">
+                  <div class="attack-group">
+                    <span class="attack-subtitle">Danni</span>
+                    <div class="attack-dmg-inline">
+                      <div class="atk-dmg-builder">
+                        <input class="small atk-dice-count" type="number" min="1" step="1" value="1" title="Numero dadi" />
+                        <select class="select atk-die" title="Tipo dado">
+                          <option value="4">d4</option>
+                          <option value="6">d6</option>
+                          <option value="8" selected>d8</option>
+                          <option value="10">d10</option>
+                          <option value="12">d12</option>
+                        </select>
+                      </div>
+                      <input class="small atk-dmg-total" type="text" value="1d8+0" readonly title="Riepilogo danni calcolati" />
+                    </div>
+                  </div>
+                  <div class="attack-group">
+                    <span class="attack-subtitle">Critico</span>
+                    <div class="atk-crit-builder">
+                      <select class="select atk-crit-range" title="Minaccia critico">
+                        <option value="20" selected>20</option>
+                        <option value="19">19-20</option>
+                        <option value="18">18-20</option>
+                        <option value="17">17-20</option>
+                      </select>
+                      <select class="select atk-crit-mult" title="Moltiplicatore critico">
+                        <option value="2" selected>x2</option>
+                        <option value="3">x3</option>
+                        <option value="4">x4</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="attack-flags">
+                  <label class="attack-flag atk-melee-only">
+                    <input class="atk-twohands" type="checkbox" />
+                    2 mani
+                  </label>
+                  <label class="attack-flag atk-melee-only">
+                    <input class="atk-power-attack" type="checkbox" />
+                    Attacco Poderoso
+                  </label>
+                  <label class="attack-flag atk-melee-only">
+                    <input class="atk-furious-focus" type="checkbox" />
+                    Furia Focalizzata
+                  </label>
+                </div>
+              </div>
+              <div class="attack-roll-line">
+                <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
+                <button type="button" class="roll-btn atk-full-roll-btn" title="Tira attacco completo">Full</button>
+                <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
+              </div>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -388,18 +462,17 @@
   </div>
 </div>
 
-        <!-- CMB / DMC (in fondo) -->
+        <!-- BMC / DMC (in fondo) -->
         <div class="card" style="padding:10px;">
-          <h2 style="margin-bottom:8px;">Manovre (CMB / DMC)</h2>
+          <h2 style="margin-bottom:8px;">Manovre (BMC / DMC)</h2>
           <div class="fields">
-            <div class="field span-4"><label>CMB</label><input id="cmb" class="small" type="text" value="+0" readonly /></div>
+            <div class="field span-4"><label>BMC</label><input id="cmb" class="small" type="text" value="+0" readonly /></div>
             <div class="field span-4"><label>DMC</label><input id="cmd" class="small" type="text" value="10" readonly /></div>
             <div class="field span-4"><label>Note</label><input id="cmb-cmd-notes" class="small" type="text" placeholder="bonus situazionali..." /></div>
           </div>
         </div>
 
       </div>
-    </div>
   </div>
 </section>
     <!-- PAGE: ABILITÀ (NUOVA, con CS/ACP/Car e pronta per autocalcolo+auto-CS) -->
@@ -796,7 +869,7 @@
       <div class="fields">
         <div class="field span-12">
           <label>Nome Compagno</label>
-          <input type="text" placeholder="Es. Zanna" />
+          <input type="text" placeholder="Es. Tyr" />
         </div>
 
         <div class="field span-8">
@@ -827,7 +900,10 @@
 
         <div class="field span-4">
           <label>Iniziativa</label>
-          <input class="small" type="text" placeholder="+0" />
+          <div class="save-roll-inline">
+            <input id="comp-init" class="small save-roll-value" type="text" value="+0" />
+            <button type="button" class="roll-btn save-roll-btn" data-target="comp-init" data-label="Iniziativa Compagno" title="Tira 1d20 + Iniziativa">Tiro</button>
+          </div>
         </div>
         <div class="field span-4">
           <label>Velocità</label>
@@ -843,17 +919,95 @@
     <div class="card">
       <h2>Caratteristiche &amp; TS</h2>
       <div class="fields">
-        <div class="field span-4"><label>FOR</label><input class="small" type="number" step="1" placeholder="10" /></div>
-        <div class="field span-4"><label>DES</label><input class="small" type="number" step="1" placeholder="10" /></div>
-        <div class="field span-4"><label>COS</label><input class="small" type="number" step="1" placeholder="10" /></div>
+        <div class="field span-4 comp-ability-field" data-ability="FOR">
+          <label>FOR</label>
+          <div class="comp-ability-pair">
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-score" type="number" min="1" max="50" step="1" value="10" title="Valore FOR" />
+            </div>
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-mod" type="number" step="1" value="0" title="Mod FOR" />
+            </div>
+          </div>
+        </div>
+        <div class="field span-4 comp-ability-field" data-ability="DES">
+          <label>DES</label>
+          <div class="comp-ability-pair">
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-score" type="number" min="1" max="50" step="1" value="10" title="Valore DES" />
+            </div>
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-mod" type="number" step="1" value="0" title="Mod DES" />
+            </div>
+          </div>
+        </div>
+        <div class="field span-4 comp-ability-field" data-ability="COS">
+          <label>COS</label>
+          <div class="comp-ability-pair">
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-score" type="number" min="1" max="50" step="1" value="10" title="Valore COS" />
+            </div>
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-mod" type="number" step="1" value="0" title="Mod COS" />
+            </div>
+          </div>
+        </div>
 
-        <div class="field span-4"><label>INT</label><input class="small" type="number" step="1" placeholder="2" /></div>
-        <div class="field span-4"><label>SAG</label><input class="small" type="number" step="1" placeholder="12" /></div>
-        <div class="field span-4"><label>CAR</label><input class="small" type="number" step="1" placeholder="6" /></div>
+        <div class="field span-4 comp-ability-field" data-ability="INT">
+          <label>INT</label>
+          <div class="comp-ability-pair">
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-score" type="number" min="1" max="50" step="1" value="10" title="Valore INT" />
+            </div>
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-mod" type="number" step="1" value="0" title="Mod INT" />
+            </div>
+          </div>
+        </div>
+        <div class="field span-4 comp-ability-field" data-ability="SAG">
+          <label>SAG</label>
+          <div class="comp-ability-pair">
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-score" type="number" min="1" max="50" step="1" value="10" title="Valore SAG" />
+            </div>
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-mod" type="number" step="1" value="0" title="Mod SAG" />
+            </div>
+          </div>
+        </div>
+        <div class="field span-4 comp-ability-field" data-ability="CAR">
+          <label>CAR</label>
+          <div class="comp-ability-pair">
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-score" type="number" min="1" max="50" step="1" value="10" title="Valore CAR" />
+            </div>
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-mod" type="number" step="1" value="0" title="Mod CAR" />
+            </div>
+          </div>
+        </div>
 
-        <div class="field span-4"><label>Tempra</label><input class="small" type="text" placeholder="+0" /></div>
-        <div class="field span-4"><label>Riflessi</label><input class="small" type="text" placeholder="+0" /></div>
-        <div class="field span-4"><label>Volontà</label><input class="small" type="text" placeholder="+0" /></div>
+        <div class="field span-4">
+          <label>Tempra</label>
+          <div class="save-roll-inline">
+            <input id="comp-save-fort" class="small save-roll-value" type="text" value="+0" />
+            <button type="button" class="roll-btn save-roll-btn" data-target="comp-save-fort" data-label="Tempra Compagno" title="Tira 1d20 + Tempra">Tiro</button>
+          </div>
+        </div>
+        <div class="field span-4">
+          <label>Riflessi</label>
+          <div class="save-roll-inline">
+            <input id="comp-save-ref" class="small save-roll-value" type="text" value="+0" />
+            <button type="button" class="roll-btn save-roll-btn" data-target="comp-save-ref" data-label="Riflessi Compagno" title="Tira 1d20 + Riflessi">Tiro</button>
+          </div>
+        </div>
+        <div class="field span-4">
+          <label>Volontà</label>
+          <div class="save-roll-inline">
+            <input id="comp-save-will" class="small save-roll-value" type="text" value="+0" />
+            <button type="button" class="roll-btn save-roll-btn" data-target="comp-save-will" data-label="Volontà Compagno" title="Tira 1d20 + Volontà">Tiro</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -881,13 +1035,10 @@
         <table aria-label="Tabella Attacchi Compagno" id="comp-attacks-table" style="min-width:560px;">
           <thead>
             <tr>
-              <th style="width:14%;">Tipo</th>
-              <th style="width:28%;">Arma / Attacco</th>
-              <th style="width:14%;">Danni</th>
-              <th style="width:12%;">Varie</th>
-              <th style="width:12%;">Tot</th>
-              <th style="width:12%;">Critico</th>
-              <th style="width:8%;">Tiro</th>
+              <th style="width:18%;">Tipo</th>
+              <th style="width:46%;">Arma</th>
+              <th style="width:18%;">Varie</th>
+              <th style="width:18%;">Tot</th>
             </tr>
           </thead>
           <tbody id="comp-attacks-tbody">
@@ -899,11 +1050,55 @@
                 </select>
               </td>
               <td><input class="comp-atk-name" type="text" placeholder="Es. Morso" /></td>
-              <td><input class="comp-atk-dmg" type="text" placeholder="Es. 1d6+4" /></td>
               <td><input class="small comp-atk-row-misc" type="number" step="1" value="0" /></td>
               <td><input class="small comp-atk-total" type="text" value="+0" readonly /></td>
-              <td><input class="small comp-atk-crit" type="text" placeholder="20/x2" /></td>
-              <td style="text-align:center;"><button type="button" class="roll-btn comp-atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button></td>
+            </tr>
+            <tr class="comp-attack-row-dmg">
+              <td colspan="4">
+                <div class="attack-dmg-line">
+                  <div class="attack-main">
+                    <div class="attack-groups">
+                      <div class="attack-group">
+                        <span class="attack-subtitle">Danni</span>
+                        <div class="attack-dmg-inline">
+                          <div class="atk-dmg-builder">
+                            <input class="small comp-atk-dice-count" type="number" min="1" step="1" value="1" title="Numero dadi" />
+                            <select class="select comp-atk-die" title="Tipo dado">
+                              <option value="4">d4</option>
+                              <option value="6" selected>d6</option>
+                              <option value="8">d8</option>
+                              <option value="10">d10</option>
+                              <option value="12">d12</option>
+                            </select>
+                          </div>
+                          <input class="small atk-dmg-total comp-atk-dmg-total" type="text" value="1d6+0" readonly title="Riepilogo danni calcolati" />
+                        </div>
+                      </div>
+                      <div class="attack-group">
+                        <span class="attack-subtitle">Critico</span>
+                        <div class="atk-crit-builder">
+                          <select class="select comp-atk-crit-range" title="Minaccia critico">
+                            <option value="20" selected>20</option>
+                            <option value="19">19-20</option>
+                            <option value="18">18-20</option>
+                            <option value="17">17-20</option>
+                          </select>
+                          <select class="select comp-atk-crit-mult" title="Moltiplicatore critico">
+                            <option value="2" selected>x2</option>
+                            <option value="3">x3</option>
+                            <option value="4">x4</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="attack-roll-line">
+                    <button type="button" class="roll-btn comp-atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
+                    <button type="button" class="roll-btn comp-atk-full-roll-btn" title="Tira attacco completo">Full</button>
+                    <button type="button" class="roll-btn comp-atk-dmg-roll-btn" title="Tira danni">Danni</button>
+                  </div>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -959,8 +1154,7 @@
 </body>
 </html>
 
-<!-- Francesco Culo è stato qui -->
-
+<!-- Francesco Culo è stato qui ma ci ha aiutati a risolvere dei problemi -->
 
 
 
