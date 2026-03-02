@@ -105,6 +105,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const diceApi = window?.TS?.dice;
     if (!diceApi) return false;
 
+    if (typeof diceApi.putDiceInTray === "function") {
+      const legacyTrayRequest = [{ name: cleanLabel, roll: String(formula).toUpperCase() }];
+      try {
+        pendingTsRolls.push({ label: cleanLabel, mod });
+        diceApi.putDiceInTray(legacyTrayRequest);
+        toast(`${cleanLabel}: inviato nel tray TaleSpire (${formula})`);
+        return true;
+      } catch (err) {
+        pendingTsRolls.pop();
+        console.error("Errore con TS.dice.putDiceInTray (legacy):", err);
+      }
+    }
+
     const hasDescriptorsApi =
       typeof diceApi.makeRollDescriptors === "function" &&
       typeof diceApi.putDiceInTray === "function";
@@ -151,19 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (err) {
         pendingTsRolls.pop();
         console.error(`Errore con TS.dice.${spec.method}:`, err);
-      }
-    }
-
-    if (typeof diceApi.putDiceInTray === "function") {
-      const legacyTrayRequest = [{ name: cleanLabel, roll: String(formula).toUpperCase() }];
-      try {
-        pendingTsRolls.push({ label: cleanLabel, mod });
-        diceApi.putDiceInTray(legacyTrayRequest);
-        toast(`${cleanLabel}: inviato nel tray TaleSpire (${formula})`);
-        return true;
-      } catch (err) {
-        pendingTsRolls.pop();
-        console.error("Errore con TS.dice.putDiceInTray (legacy):", err);
       }
     }
 
