@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const d20 = () => Math.floor(Math.random() * 20) + 1;
+  const pendingTsRolls = [];
 
   function toast(msg) {
     let el = document.getElementById("toast");
@@ -67,6 +68,91 @@ document.addEventListener("DOMContentLoaded", () => {
       el.style.transform = "translateX(-50%) translateY(6px)";
     }, 2200);
   }
+
+  function extractRollTotal(payload) {
+    if (payload == null) return null;
+    if (typeof payload === "number" && Number.isFinite(payload)) return payload;
+
+    if (Array.isArray(payload)) {
+      for (const item of payload) {
+        const value = extractRollTotal(item);
+        if (value != null) return value;
+      }
+      return null;
+    }
+
+    if (typeof payload === "object") {
+      const keys = ["total", "result", "value", "sum", "grandTotal"];
+      for (const key of keys) {
+        const value = payload[key];
+        if (typeof value === "number" && Number.isFinite(value)) return value;
+      }
+      for (const value of Object.values(payload)) {
+        const nested = extractRollTotal(value);
+        if (nested != null) return nested;
+      }
+    }
+
+    return null;
+  }
+
+  function formatD20Formula(total) {
+    const mod = parseSignedInt(total);
+    return mod === 0 ? "1d20" : `1d20${fmtSigned(mod)}`;
+  }
+
+  function rollViaTaleSpire(total, label) {
+    const cleanLabel = String(label || "Tiro").trim() || "Tiro";
+    const mod = parseSignedInt(total);
+    const formula = formatD20Formula(mod);
+
+    const canUseTs =
+      typeof window !== "undefined" &&
+      window.TS &&
+      window.TS.dice &&
+      typeof window.TS.dice.putDiceInTray === "function";
+
+    if (canUseTs) {
+      try {
+        pendingTsRolls.push({ label: cleanLabel, mod });
+        window.TS.dice.putDiceInTray(formula);
+        toast(`${cleanLabel}: inviato a TaleSpire (${formula})`);
+        return;
+      } catch (err) {
+        pendingTsRolls.pop();
+        console.error("Errore invio tiro a TaleSpire:", err);
+      }
+    }
+
+    const roll = d20();
+    const result = roll + mod;
+    toast(`${cleanLabel}: d20(${roll}) + Tot(${mod >= 0 ? "+" : ""}${mod}) = ${result}`);
+  }
+
+  window.handleRollResult = (payload) => {
+    const ctx = pendingTsRolls.shift();
+    const label = ctx?.label || "Tiro";
+    const mod = ctx?.mod ?? 0;
+    const total = extractRollTotal(payload);
+
+    if (total == null) {
+      toast(`${label}: risultato TaleSpire ricevuto`);
+      return;
+    }
+
+    const baseRoll = total - mod;
+    toast(
+      `${label}: d20(${baseRoll}) + Tot(${mod >= 0 ? "+" : ""}${mod}) = ${total}`
+    );
+  };
+
+  window.logSymbioteEvent = (event) => {
+    console.debug("[PF1E Symbiote] Visibility event:", event);
+  };
+
+  window.onStateChangeEvent = (event) => {
+    console.debug("[PF1E Symbiote] State change event:", event);
+  };
 
   /* =========================
      Tabs
@@ -1373,10 +1459,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       recalcAttackRow(tr);
       const tot = parseSignedInt(tr.querySelector(".atk-total")?.value);
-      const roll = d20();
-      const result = roll + tot;
       const name = tr.querySelector(".atk-name")?.value?.trim() || "Attacco";
-      toast(`${name}: d20(${roll}) + Tot(${tot >= 0 ? "+" : ""}${tot}) = ${result}`);
+      rollViaTaleSpire(tot, name);
       return;
     }
 
@@ -1387,10 +1471,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       recalcCompAttackRow(tr);
       const tot = parseSignedInt(tr.querySelector(".comp-atk-total")?.value);
-      const roll = d20();
-      const result = roll + tot;
       const name = tr.querySelector(".comp-atk-name")?.value?.trim() || "Attacco compagno";
-      toast(`${name}: d20(${roll}) + Tot(${tot >= 0 ? "+" : ""}${tot}) = ${result}`);
+      rollViaTaleSpire(tot, name);
       return;
     }
 
@@ -1402,11 +1484,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     recalcSkillRow(tr);
     const tot = parseSignedInt(tr.querySelector(".skill-total")?.value);
-    const roll = d20();
-    const result = roll + tot;
-
     const name = tr.querySelector(".skill-name")?.value?.trim() || "Abilità";
-    toast(`${name}: d20(${roll}) + Tot(${tot >= 0 ? "+" : ""}${tot}) = ${result}`);
+    rollViaTaleSpire(tot, name);
   });
 
   /* =========================
