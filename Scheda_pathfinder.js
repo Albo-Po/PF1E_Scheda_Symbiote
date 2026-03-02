@@ -135,7 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const callSpecs = [
       { method: "roll", mode: "roll" },
       { method: "rollDice", mode: "roll" },
-      { method: "putDiceInTray", mode: "tray-legacy" },
     ];
 
     for (const spec of callSpecs) {
@@ -155,6 +154,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    if (typeof diceApi.putDiceInTray === "function") {
+      const legacyTrayRequest = [{ name: cleanLabel, roll: String(formula).toUpperCase() }];
+      try {
+        pendingTsRolls.push({ label: cleanLabel, mod });
+        diceApi.putDiceInTray(legacyTrayRequest);
+        toast(`${cleanLabel}: inviato nel tray TaleSpire (${formula})`);
+        return true;
+      } catch (err) {
+        pendingTsRolls.pop();
+        console.error("Errore con TS.dice.putDiceInTray (legacy):", err);
+      }
+    }
+
     return false;
   }
 
@@ -171,11 +183,32 @@ document.addEventListener("DOMContentLoaded", () => {
     toast(`${cleanLabel}: d20(${roll}) + Tot(${mod >= 0 ? "+" : ""}${mod}) = ${result}`);
   }
 
-  window.handleRollResult = (payload) => {
+  window.handleRollResult = async (payload) => {
+    if (payload?.kind === "rollRemoved") {
+      toast("Un tiro è stato rimosso dal tray");
+      return;
+    }
+
     const ctx = pendingTsRolls.shift();
     const label = ctx?.label || "Tiro";
     const mod = ctx?.mod ?? 0;
-    const total = extractRollTotal(payload);
+    let total = extractRollTotal(payload);
+
+    if (
+      total == null &&
+      payload?.kind === "rollResults" &&
+      typeof window?.TS?.dice?.evaluateDiceResultsGroup === "function"
+    ) {
+      const group = payload?.payload?.resultsGroups?.[0] ?? payload?.resultsGroups?.[0];
+      if (group != null) {
+        try {
+          const evaluated = await window.TS.dice.evaluateDiceResultsGroup(group);
+          total = extractRollTotal(evaluated);
+        } catch (err) {
+          console.error("Errore TS.dice.evaluateDiceResultsGroup:", err);
+        }
+      }
+    }
 
     if (total == null) {
       toast(`${label}: risultato TaleSpire ricevuto`);
