@@ -137,6 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ========================= */
   const themeToggle = document.getElementById("theme-toggle");
   const themeState = document.getElementById("theme-state");
+  const refreshPageBtn = document.getElementById("refresh-page");
 
   function applyTheme(mode) {
     const isDark = mode === "dark";
@@ -163,6 +164,12 @@ document.addEventListener("DOMContentLoaded", () => {
   if (themeToggle) {
     themeToggle.addEventListener("change", () => {
       applyTheme(themeToggle.checked ? "dark" : "light");
+    });
+  }
+
+  if (refreshPageBtn) {
+    refreshPageBtn.addEventListener("click", () => {
+      location.reload();
     });
   }
 
