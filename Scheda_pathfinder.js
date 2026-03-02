@@ -105,10 +105,37 @@ document.addEventListener("DOMContentLoaded", () => {
     const diceApi = window?.TS?.dice;
     if (!diceApi) return false;
 
+    const hasDescriptorsApi =
+      typeof diceApi.makeRollDescriptors === "function" &&
+      typeof diceApi.putDiceInTray === "function";
+
+    if (hasDescriptorsApi) {
+      try {
+        if (
+          typeof diceApi.isValidRollString === "function" &&
+          !diceApi.isValidRollString(formula)
+        ) {
+          console.warn("Formula TS non valida:", formula);
+          return false;
+        }
+
+        const descriptors = diceApi.makeRollDescriptors(formula);
+        if (!Array.isArray(descriptors) || descriptors.length === 0) return false;
+
+        pendingTsRolls.push({ label: cleanLabel, mod });
+        diceApi.putDiceInTray(descriptors, false);
+        toast(`${cleanLabel}: inviato nel tray TaleSpire (${formula})`);
+        return true;
+      } catch (err) {
+        pendingTsRolls.pop();
+        console.error("Errore con TS.dice.makeRollDescriptors/putDiceInTray:", err);
+      }
+    }
+
     const callSpecs = [
       { method: "roll", mode: "roll" },
       { method: "rollDice", mode: "roll" },
-      { method: "putDiceInTray", mode: "tray" },
+      { method: "putDiceInTray", mode: "tray-legacy" },
     ];
 
     for (const spec of callSpecs) {
@@ -118,7 +145,8 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         pendingTsRolls.push({ label: cleanLabel, mod });
         fn.call(diceApi, formula);
-        const action = spec.mode === "roll" ? "tirato in TaleSpire" : "inviato nel tray TaleSpire";
+        const action =
+          spec.mode === "roll" ? "tirato in TaleSpire" : "inviato nel tray TaleSpire";
         toast(`${cleanLabel}: ${action} (${formula})`);
         return true;
       } catch (err) {
