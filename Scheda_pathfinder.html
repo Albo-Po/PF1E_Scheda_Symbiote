@@ -5,9 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Scheda Personaggio — Pathfinder 1E</title>
 
-  <!-- CSS esterno -->
-<link rel="stylesheet" href="https://albo-po.github.io/PF1E_Scheda_Symbiote/scheda_pathfinder.css">
+<!-- CSS delvelopment -->
+<link rel="stylesheet" href="scheda_pathfinder.css">
 
+
+ <!-- CSS esterno -->
+<!-- <link rel="stylesheet" href="https://albo-po.github.io/PF1E_Scheda_Symbiote/scheda_pathfinder.css" -->
+ 
 
 
 </head>
@@ -374,10 +378,11 @@
     <table aria-label="Tabella Attacchi" id="attacks-table" style="min-width:560px;">
       <thead>
         <tr>
-          <th style="width:18%;">Tipo</th>
-          <th style="width:46%;">Arma</th>
-          <th style="width:18%;">Varie</th>
-          <th style="width:18%;">Tot</th>
+          <th style="width:16%;">Tipo</th>
+          <th style="width:38%;">Arma</th>
+          <th style="width:14%;">Bonus Mag.</th>
+          <th style="width:16%;">Varie</th>
+          <th style="width:16%;">Tot</th>
         </tr>
       </thead>
       <tbody id="attacks-tbody">
@@ -389,11 +394,21 @@
             </select>
           </td>
           <td><input class="atk-name" type="text" placeholder="Es. Spada lunga" /></td>
+          <td>
+            <select class="select atk-magic-bonus">
+              <option value="0" selected>+0</option>
+              <option value="1">+1</option>
+              <option value="2">+2</option>
+              <option value="3">+3</option>
+              <option value="4">+4</option>
+              <option value="5">+5</option>
+            </select>
+          </td>
           <td><input class="small atk-row-misc" type="number" step="1" value="0" /></td>
           <td><input class="small atk-total" type="text" value="+0" readonly /></td>
         </tr>
         <tr class="attack-row-dmg">
-          <td colspan="4">
+          <td colspan="5">
             <div class="attack-dmg-line">
               <div class="attack-main">
                 <div class="attack-groups">
@@ -458,7 +473,7 @@
   </div>
 
   <div class="hint" style="margin-top:10px;">
-    Tot = BAB + Mod(FOR/DES) + Taglia + Varie(globale) + Varie(riga).
+    Tot = BAB + Mod(FOR/DES) + Taglia + Bonus Magico + Varie(globale) + Varie(riga).
   </div>
 </div>
 
@@ -691,6 +706,68 @@
           </div>
         </div>
 
+        <div class="card equip-weapon-card">
+          <h2>Arma</h2>
+          <div class="equip-weapon-inline">
+            <div class="field">
+              <label>Nome Arma</label>
+              <input id="equip-weapon-name" type="text" placeholder="Es. Spada lunga +1" />
+            </div>
+            <div class="field">
+              <label>Bonus Magico</label>
+              <input id="equip-weapon-magic-bonus" class="small" type="number" min="0" max="5" step="1" value="0" />
+            </div>
+            <div class="field">
+              <label>Bonus Capacita</label>
+              <input id="equip-weapon-ability-bonus" class="small" type="number" min="0" max="5" step="1" value="0" />
+            </div>
+          </div>
+          <div class="fields">
+            <div class="field span-12">
+              <label class="legendary-enable-toggle"><input id="equip-weapon-legendary" type="checkbox" />Oggetto leggendario</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card equip-core-card">
+          <h2>Armatura • Scudo</h2>
+          <div class="table-wrap" style="overflow-x:auto;">
+            <table class="equip-core-table" aria-label="Valori equipaggiamento principale">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Nome Oggetto</th>
+                  <th>CA</th>
+                  <th>Fall. Arcano %</th>
+                  <th>Pen. Abilita</th>
+                  <th>Legg.</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Armatura</td>
+                  <td><input id="equip-armor-name" type="text" placeholder="Es. Corazza di mithral" /></td>
+                  <td><input id="equip-armor-ac" class="small" type="number" step="1" value="0" /></td>
+                  <td><input id="equip-armor-asf" class="small" type="number" min="0" max="100" step="1" value="0" /></td>
+                  <td><input id="equip-armor-acp" class="small" type="number" min="0" step="1" value="0" /></td>
+                  <td class="td-center"><input id="equip-armor-legendary" type="checkbox" /></td>
+                </tr>
+                <tr>
+                  <td>Scudo</td>
+                  <td><input id="equip-shield-name" type="text" placeholder="Es. Scudo pesante +2" /></td>
+                  <td><input id="equip-shield-ac" class="small" type="number" step="1" value="0" /></td>
+                  <td><input id="equip-shield-asf" class="small" type="number" min="0" max="100" step="1" value="0" /></td>
+                  <td><input id="equip-shield-acp" class="small" type="number" min="0" step="1" value="0" /></td>
+                  <td class="td-center"><input id="equip-shield-legendary" type="checkbox" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="hint" style="margin-top:10px;">
+            Le penalita abilita vengono sommate automaticamente e inviate al campo ACP globale delle abilita.
+          </div>
+        </div>
+
         <div class="card">
           <h2>Inventario</h2>
           <div class="fields">
@@ -852,8 +929,123 @@
             </div>
 
             <div class="field span-12"><label>Capacità Mitiche</label><textarea placeholder="Capacità base e di percorso..."></textarea></div>
-            <div class="field span-12"><label>Oggetto Leggendario</label><textarea placeholder="Nome, oggetto base, capacità..."></textarea></div>
             <div class="field span-12"><label>Cimenti</label><textarea placeholder="Cimenti completati..."></textarea></div>
+          </div>
+        </div>
+
+        <div class="card sword-graphic-card">
+          <h2>Oggetto Leggendario</h2>
+          <div class="legendary-toggle-row">
+            <label class="legendary-enable-toggle">
+              <input id="legendary-enabled" type="checkbox" />
+              Attiva Oggetto Leggendario
+            </label>
+          </div>
+
+          <div id="legendary-content" hidden>
+          <div class="fields">
+            <div class="field span-8">
+              <label>Nome Oggetto</label>
+              <input id="legendary-name" type="text" placeholder="Es. Lama della Stella" />
+            </div>
+            <div class="field span-4">
+              <label>Tipo Oggetto</label>
+              <select id="legendary-item-type" class="select">
+                <option value="weapon" selected>Arma</option>
+                <option value="armor">Armatura</option>
+                <option value="shield">Scudo</option>
+                <option value="wondrous">Altro Oggetto</option>
+              </select>
+            </div>
+
+            <div class="field span-4"><label>Tier Mitico (auto)</label><input id="legendary-tier" class="small" type="text" value="0" readonly /></div>
+            <div class="field span-4"><label>Punti Potere Totali</label><input id="legendary-power-total" class="small" type="text" value="3" readonly /></div>
+            <div class="field span-4"><label>Punti Spesi</label><input id="legendary-power-spent" class="small" type="number" min="0" step="1" value="0" /></div>
+            <div class="field span-4"><label>Punti Rimanenti</label><input id="legendary-power-remaining" class="small" type="text" value="3" readonly /></div>
+            <div class="field span-4"><label>Legendary Surge</label><input id="legendary-surge-die" class="small" type="text" value="—" readonly /></div>
+            <div class="field span-4"><label>Ego</label><input id="legendary-ego" class="small" type="number" min="0" step="1" value="0" /></div>
+            <div class="field span-4"><label>Bonus Magico</label><input id="legendary-magic-bonus" class="small" type="number" min="0" max="5" step="1" value="0" /></div>
+            <div class="field span-4"><label>Bonus Capacità</label><input id="legendary-ability-bonus" class="small" type="number" min="0" max="5" step="1" value="0" /></div>
+            <div class="field span-4"><label>Totale Bonus</label><input id="legendary-total-bonus" class="small" type="text" value="+0 / +10" readonly /></div>
+
+            <div class="field span-6">
+              <label>Materiale</label>
+              <select id="legendary-material" class="select">
+                <option value="steel" selected>Acciaio</option>
+                <option value="cold_iron">Ferro Freddo</option>
+                <option value="silver">Argento Alchemico</option>
+                <option value="adamantine">Adamantio</option>
+                <option value="mithral">Mithral</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="hint sword-mod-summary" id="legendary-mod-summary">Tier 0 • Punti Potere 3/3</div>
+
+          <details class="legendary-section" open>
+            <summary>Poteri dell'Oggetto</summary>
+            <div class="fields" style="margin-top:12px;">
+              <div class="field span-12">
+                <label>Poteri Minori</label>
+                <textarea id="legendary-powers-minor" placeholder="Elenco poteri minori..."></textarea>
+              </div>
+              <div class="field span-12">
+                <label>Poteri Maggiori (Tier 6)</label>
+                <textarea id="legendary-powers-major" placeholder="Elenco poteri maggiori..."></textarea>
+              </div>
+              <div class="field span-12">
+                <label>Poteri Supremi (Tier 9)</label>
+                <textarea id="legendary-powers-supreme" placeholder="Elenco poteri supremi..."></textarea>
+              </div>
+            </div>
+          </details>
+
+          <details class="legendary-section" open>
+            <summary>Riepilogo Meccanico</summary>
+            <div class="table-wrap legendary-summary-wrap" style="margin-top:10px;">
+              <table aria-label="Riepilogo meccanico oggetto leggendario">
+                <thead>
+                  <tr>
+                    <th>Tier</th>
+                    <th>PP Totali</th>
+                    <th>PP Spesi</th>
+                    <th>PP Rimanenti</th>
+                    <th>Surge</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><input id="legendary-tier-out" class="small" type="text" value="0" readonly /></td>
+                    <td><input id="legendary-power-total-out" class="small" type="text" value="3" readonly /></td>
+                    <td><input id="legendary-power-spent-out" class="small" type="text" value="0" readonly /></td>
+                    <td><input id="legendary-power-remaining-out" class="small" type="text" value="3" readonly /></td>
+                    <td><input id="legendary-surge-out" class="small" type="text" value="—" readonly /></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+          <div class="hint" id="legendary-enhancement-warning" style="margin-top:8px; display:none;">
+            Cap applicato: massimo +5 bonus magico, +5 capacità, totale combinato +10.
+          </div>
+
+          <details class="legendary-section" open>
+            <summary>Tavola Effetti Arma</summary>
+            <div class="table-wrap" style="margin-top:12px;">
+              <table aria-label="Tavola poteri leggendari">
+                <thead>
+                  <tr>
+                    <th>Potere</th>
+                    <th>Categoria</th>
+                    <th>Costo PP</th>
+                    <th>Meccanica</th>
+                    <th>Vincoli</th>
+                  </tr>
+                </thead>
+                <tbody id="legendary-power-catalog-body"></tbody>
+              </table>
+            </div>
+          </details>
           </div>
         </div>
       </div>
@@ -1149,11 +1341,17 @@
 
   </main>
 
+  <!-- JS locale (sviluppo): decommenta queste righe e commenta quelle esterne sopra -->
+   <script src="js/pf1e_tables.js" defer></script>
+   <script src="js/pf1e_spells.js" defer></script>
+   <script src="js/pf1e_equipment.js" defer></script>
+   <script src="scheda_pathfinder.js" defer></script>
+
   <!-- JS esterno -->
-  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_tables.js" defer></script>
+ <!-- <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_tables.js" defer></script>
   <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_spells.js" defer></script>
   <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_equipment.js" defer></script>
-  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/scheda_pathfinder.js" defer></script>
+  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/scheda_pathfinder.js" defer></script> -->
 </body>
 </html>
 

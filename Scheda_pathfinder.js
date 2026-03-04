@@ -707,6 +707,40 @@ document.addEventListener("DOMContentLoaded", () => {
     modEl.value = abilityCode ? fmtSigned(getAbilityModByCode(abilityCode)) : "+0";
   }
 
+  function getSpellApi() {
+    return window.PF1EData?.tables?.spells || null;
+  }
+
+  function getMaxCastableSpellLevel() {
+    const className = String(document.getElementById("spellcaster-class")?.value || "").trim();
+    if (!className) return 9;
+    const li = num(document.getElementById("spellcaster-level")?.value);
+    const spellApi = getSpellApi();
+    if (!spellApi || typeof spellApi.getMaxLevelByClass !== "function") return 9;
+    return spellApi.getMaxLevelByClass(li, className);
+  }
+
+  function updateSpellLevelsVisibility() {
+    const className = String(document.getElementById("spellcaster-class")?.value || "").trim();
+    const hasClass = className.length > 0;
+    const maxLevel = getMaxCastableSpellLevel();
+
+    $$(".spell-level-block").forEach((block, idx) => {
+      const lvl = idx;
+      block.dataset.level = String(lvl);
+      const visible = !hasClass || lvl <= maxLevel;
+      block.hidden = !visible;
+      block.setAttribute("aria-hidden", String(!visible));
+    });
+
+    $$("#spell-slots-body .spell-slot-row").forEach((row) => {
+      const lvl = num(row.dataset.level);
+      const visible = !hasClass || lvl <= maxLevel;
+      row.hidden = !visible;
+      row.setAttribute("aria-hidden", String(!visible));
+    });
+  }
+
   function loadSpellExtraMap() {
     try {
       const parsed = JSON.parse(localStorage.getItem(SPELLS_EXTRA_KEY) || "{}");
@@ -731,25 +765,162 @@ document.addEventListener("DOMContentLoaded", () => {
     saveSpellExtraMap(map);
   }
 
-  function makeSpellRow(level) {
-    const input = document.createElement("input");
-    input.type = "text";
-    input.className = "spell-name spell-name-extra";
-    input.placeholder = `Incantesimo livello ${level}`;
-    return input;
+  function getSpellRangeFeet(rangeType, casterLevel) {
+    const li = Math.max(0, Math.trunc(num(casterLevel)));
+    if (rangeType === "medium") return 100 + 10 * li;
+    if (rangeType === "long") return 400 + 40 * li;
+    return 25 + 5 * Math.floor(li / 2);
+  }
+
+  function formatFeetToMeters(feet) {
+    const meters = Math.round(num(feet) * 0.3048);
+    return `${meters} m`;
+  }
+
+  function makeSpellRow(level, index, isExtra = false) {
+    const row = document.createElement("div");
+    row.className = `spell-entry${isExtra ? " spell-entry-extra" : ""}`;
+    row.dataset.level = String(level);
+    row.dataset.index = String(index);
+    row.innerHTML = `
+      <div class="spell-entry-head">
+        <div class="spell-entry-title">
+          <input
+            class="spell-name${isExtra ? " spell-name-extra" : ""}"
+            data-key="spell:${level}:${index}:name"
+            type="text"
+            placeholder="Incantesimo livello ${level}"
+          />
+        </div>
+        <div class="spell-entry-controls">
+          <button type="button" class="spell-entry-toggle" aria-expanded="true" title="Mostra/nascondi dettagli incantesimo">
+            Dettagli
+          </button>
+          <label class="spell-offensive-toggle">
+            <input class="spell-offensive" data-key="spell:${level}:${index}:offensive" type="checkbox" />
+            Offensivo
+          </label>
+        </div>
+      </div>
+
+      <div class="spell-entry-body">
+        <div class="spell-offensive-panel" hidden>
+          <div class="spell-offensive-row">
+            <div class="spell-offensive-group">
+              <span class="attack-subtitle">TpC Incantesimo</span>
+              <div class="spell-offensive-inline spell-atk-line">
+                <select class="select spell-atk-type" data-key="spell:${level}:${index}:atk_type" title="Tipo attacco">
+                  <option value="ranged" selected>Distanza (DES)</option>
+                  <option value="melee">Mischia (FOR)</option>
+                </select>
+                <input class="small spell-atk-misc" data-key="spell:${level}:${index}:atk_misc" type="number" step="1" value="0" title="Varie TpC" />
+                <input class="small spell-atk-total" type="text" value="+0" readonly title="Totale TpC" />
+              </div>
+            </div>
+            <div class="spell-offensive-group">
+              <span class="attack-subtitle">Danni</span>
+              <div class="spell-offensive-inline spell-dmg-line">
+                <div class="atk-dmg-builder">
+                  <input class="small spell-dice-count" data-key="spell:${level}:${index}:dice_count" type="number" min="1" step="1" value="1" title="Numero dadi" />
+                  <select class="select spell-die" data-key="spell:${level}:${index}:die_size" title="Tipo dado">
+                    <option value="4">d4</option>
+                    <option value="6" selected>d6</option>
+                    <option value="8">d8</option>
+                    <option value="10">d10</option>
+                    <option value="12">d12</option>
+                  </select>
+                </div>
+                <button type="button" class="roll-btn spell-roll-btn spell-atk-roll-btn" title="Tira 1d20 + TpC">Tiro</button>
+                <button type="button" class="roll-btn spell-roll-btn spell-dmg-roll-btn" title="Tira danni">Danni</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="spell-range-row">
+          <label>Raggio</label>
+          <div class="spell-range-inline">
+            <select class="select spell-range-type" data-key="spell:${level}:${index}:range_type" title="Raggio">
+              <option value="close" selected>Vicino</option>
+              <option value="medium">Medio</option>
+              <option value="long">Lontano</option>
+            </select>
+            <input class="small spell-range-summary" type="text" value="8 m" readonly title="Raggio calcolato da LI" />
+          </div>
+        </div>
+      </div>
+    `;
+    return row;
+  }
+
+  function setSpellEntryCollapsed(row, collapsed) {
+    if (!row) return;
+    row.classList.toggle("is-collapsed", !!collapsed);
+    const toggleBtn = row.querySelector(".spell-entry-toggle");
+    if (toggleBtn) toggleBtn.setAttribute("aria-expanded", String(!collapsed));
+  }
+
+  function moveSpellLevelActionsInline() {
+    $$(".spell-level-block").forEach((block) => {
+      const head = block.querySelector(".spell-level-head");
+      const actions = block.querySelector(".spell-level-actions");
+      if (!head || !actions || head.contains(actions)) return;
+      head.appendChild(actions);
+    });
+  }
+
+  function recalcSpellRow(row, attackVars = buildAttackBaseVariables()) {
+    if (!row) return;
+    const offensiveEl = row.querySelector(".spell-offensive");
+    const offensivePanel = row.querySelector(".spell-offensive-panel");
+    const offensive = !!offensiveEl?.checked;
+    if (offensivePanel) {
+      offensivePanel.hidden = !offensive;
+      offensivePanel.setAttribute("aria-hidden", String(!offensive));
+    }
+
+    if (offensive) {
+      const atkType = row.querySelector(".spell-atk-type")?.value || "ranged";
+      const rowMisc = num(row.querySelector(".spell-atk-misc")?.value);
+      const base = atkType === "melee" ? attackVars.melee.total : attackVars.ranged.total;
+      const total = base + rowMisc;
+      const atkOut = row.querySelector(".spell-atk-total");
+      if (atkOut) atkOut.value = fmtSigned(total);
+
+      const diceCount = row.querySelector(".spell-dice-count")?.value;
+      const dieSize = row.querySelector(".spell-die")?.value;
+      const dmgFormula = formatDamageFormula(diceCount, dieSize, 0);
+      row.dataset.dmgFormula = dmgFormula;
+    }
+
+    const rangeType = row.querySelector(".spell-range-type")?.value || "close";
+    const li = num(document.getElementById("spellcaster-level")?.value);
+    const feet = getSpellRangeFeet(rangeType, li);
+    const meters = formatFeetToMeters(feet);
+    const summary = `${meters}`;
+    const rangeOut = row.querySelector(".spell-range-summary");
+    if (rangeOut) rangeOut.value = summary;
+  }
+
+  function recalcAllSpellRows() {
+    const attackVars = buildAttackBaseVariables();
+    $$(".spell-entry").forEach((row) => recalcSpellRow(row, attackVars));
   }
 
   function rebuildSpellRows() {
     for (let lvl = 0; lvl <= 9; lvl++) {
       const container = document.getElementById(`spell-list-level-${lvl}`);
       if (!container) continue;
-      container.querySelectorAll(".spell-name-extra").forEach((el) => el.remove());
+      container.innerHTML = "";
       const extra = getSpellExtraCount(lvl);
-      for (let i = 0; i < extra; i++) {
-        const row = makeSpellRow(lvl);
+      const rows = 1 + extra;
+      for (let idx = 0; idx < rows; idx++) {
+        const row = makeSpellRow(lvl, idx, idx > 0);
         container.appendChild(row);
         applySavedValues(row);
         wireAutosave(row);
+        setSpellEntryCollapsed(row, false);
+        recalcSpellRow(row);
       }
     }
   }
@@ -1133,6 +1304,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const twoHands = isMelee && !!twoHandsEl?.checked;
     const powerAttack = isMelee && !!powerAttackEl?.checked;
     const furiousFocus = isMelee && !!furiousFocusEl?.checked;
+    const magicBonus = clamp(Math.trunc(num(tr.querySelector(".atk-magic-bonus")?.value)), 0, 5);
 
     const strMod = getAbilityModByCode("FOR");
     const strToDamage = isMelee ? (twoHands ? Math.trunc(strMod * 1.5) : strMod) : 0;
@@ -1142,7 +1314,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const attackPenaltyRaw = powerAttack ? paStep : 0;
     const attackPenalty = furiousFocus ? 0 : attackPenaltyRaw;
 
-    const dmgBonus = strToDamage + paDamage;
+    const dmgBonus = strToDamage + paDamage + magicBonus;
     const critRange = dmgRow.querySelector(".atk-crit-range")?.value;
     const critMult = dmgRow.querySelector(".atk-crit-mult")?.value;
 
@@ -1189,9 +1361,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!tr) return;
     const derived = syncAttackRowDerivedFields(tr);
     const type = tr.querySelector(".atk-type")?.value || "melee";
+    const magicBonus = clamp(Math.trunc(num(tr.querySelector(".atk-magic-bonus")?.value)), 0, 5);
     const rowMisc = num(tr.querySelector(".atk-row-misc")?.value);
     const base = type === "ranged" ? attackVars.ranged.total : attackVars.melee.total;
-    const total = base + rowMisc - num(derived?.attackPenalty);
+    const total = base + magicBonus + rowMisc - num(derived?.attackPenalty);
     const out = tr.querySelector(".atk-total");
     if (out) out.value = fmtSigned(total);
   }
@@ -1237,6 +1410,16 @@ document.addEventListener("DOMContentLoaded", () => {
         </select>
       </td>
       <td><input class="atk-name" type="text" placeholder="Es. Arma" /></td>
+      <td>
+        <select class="select atk-magic-bonus">
+          <option value="0" selected>+0</option>
+          <option value="1">+1</option>
+          <option value="2">+2</option>
+          <option value="3">+3</option>
+          <option value="4">+4</option>
+          <option value="5">+5</option>
+        </select>
+      </td>
       <td><input class="small atk-row-misc" type="number" step="1" value="0" /></td>
       <td><input class="small atk-total" type="text" value="+0" readonly /></td>
     `;
@@ -1244,7 +1427,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const dmgRow = document.createElement("tr");
     dmgRow.className = "attack-row-dmg attack-row-dmg-extra";
     dmgRow.innerHTML = `
-      <td colspan="4">
+      <td colspan="5">
         <div class="attack-dmg-line">
           <div class="attack-main">
             <div class="attack-groups">
@@ -1862,6 +2045,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (t.id === "spellcaster-class") {
       updateSpellcastingClassFields();
+      updateSpellLevelsVisibility();
       recalcAllSpellSlots();
     }
     if (t.id === "filter-class" || t.id === "filter-trained") applySkillFilters();
@@ -1918,6 +2102,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // roll skill (delegation)
   document.addEventListener("click", (e) => {
+    const spellToggleBtn = e.target.closest?.(".spell-entry-toggle");
+    if (spellToggleBtn) {
+      const row = spellToggleBtn.closest(".spell-entry");
+      if (!row) return;
+      const collapsed = row.classList.contains("is-collapsed");
+      setSpellEntryCollapsed(row, !collapsed);
+      return;
+    }
+
     const addSpellBtn = e.target.closest?.("[id^='add-spell-']");
     if (addSpellBtn) {
       e.preventDefault();
@@ -1926,12 +2119,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (level < 0 || level > 9) return;
       const container = document.getElementById(`spell-list-level-${level}`);
       if (!container) return;
-      const row = makeSpellRow(level);
+      const index = container.querySelectorAll(".spell-entry").length;
+      const row = makeSpellRow(level, index, true);
       container.appendChild(row);
       setSpellExtraCount(level, getSpellExtraCount(level) + 1);
       applySavedValues(row);
       wireAutosave(row);
-      row.focus();
+      setSpellEntryCollapsed(row, false);
+      recalcSpellRow(row);
+      const focusEl = row.querySelector(".spell-name");
+      if (focusEl) focusEl.focus();
       row.scrollIntoView({ block: "nearest", behavior: "smooth" });
       return;
     }
@@ -1945,14 +2142,36 @@ document.addEventListener("DOMContentLoaded", () => {
       const container = document.getElementById(`spell-list-level-${level}`);
       if (!container) return;
 
-      const extras = container.querySelectorAll(".spell-name-extra");
+      const extras = container.querySelectorAll(".spell-entry-extra");
       if (!extras.length) return;
 
       const last = extras[extras.length - 1];
-      delete state[keyFor(last)];
+      last.querySelectorAll("input, textarea, select").forEach((el) => delete state[keyFor(el)]);
       saveState(state);
       last.remove();
       setSpellExtraCount(level, getSpellExtraCount(level) - 1);
+      return;
+    }
+
+    const spellAtkBtn = e.target.closest?.(".spell-atk-roll-btn");
+    if (spellAtkBtn) {
+      const row = spellAtkBtn.closest(".spell-entry");
+      if (!row) return;
+      recalcSpellRow(row);
+      const total = parseSignedInt(row.querySelector(".spell-atk-total")?.value);
+      const name = row.querySelector(".spell-name")?.value?.trim() || "Incantesimo";
+      rollViaTaleSpire(total, `${name} - TpC`);
+      return;
+    }
+
+    const spellDmgBtn = e.target.closest?.(".spell-dmg-roll-btn");
+    if (spellDmgBtn) {
+      const row = spellDmgBtn.closest(".spell-entry");
+      if (!row) return;
+      recalcSpellRow(row);
+      const formula = row.dataset.dmgFormula || "1d6";
+      const name = row.querySelector(".spell-name")?.value?.trim() || "Incantesimo";
+      rollFormulaViaTaleSpire(formula, `${name} - Danni`);
       return;
     }
 
@@ -2109,7 +2328,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // incantesimi (caratteristica chiave + mod)
     updateSpellcastingClassFields();
+    updateSpellLevelsVisibility();
     recalcAllSpellSlots();
+    recalcAllSpellRows();
   }
 
   function initCollapsibleCards() {
@@ -2139,6 +2360,282 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  let refreshLegendaryWeaponUI = () => {};
+  let refreshEquipLegendaryBridgeUI = () => {};
+
+  function initLegendaryWeaponCard() {
+    const card = document.querySelector(".sword-graphic-card");
+    if (!card) return;
+    const enabledEl = document.getElementById("legendary-enabled");
+    const contentEl = document.getElementById("legendary-content");
+    const itemTypeEl = document.getElementById("legendary-item-type");
+    const materialEl = document.getElementById("legendary-material");
+    const figureNodes = Array.from(card.querySelectorAll(".legendary-figure"));
+    const tierEl = document.getElementById("legendary-tier");
+    const powerTotalEl = document.getElementById("legendary-power-total");
+    const powerSpentEl = document.getElementById("legendary-power-spent");
+    const powerRemainingEl = document.getElementById("legendary-power-remaining");
+    const surgeDieEl = document.getElementById("legendary-surge-die");
+    const magicBonusEl = document.getElementById("legendary-magic-bonus");
+    const abilityBonusEl = document.getElementById("legendary-ability-bonus");
+    const totalBonusEl = document.getElementById("legendary-total-bonus");
+    const summaryEl = document.getElementById("legendary-mod-summary");
+    const catalogBody = document.getElementById("legendary-power-catalog-body");
+    const tierOut = document.getElementById("legendary-tier-out");
+    const powerTotalOut = document.getElementById("legendary-power-total-out");
+    const powerSpentOut = document.getElementById("legendary-power-spent-out");
+    const powerRemainingOut = document.getElementById("legendary-power-remaining-out");
+    const surgeOut = document.getElementById("legendary-surge-out");
+    const enhancementWarning = document.getElementById("legendary-enhancement-warning");
+    if (
+      !enabledEl ||
+      !contentEl ||
+      !itemTypeEl ||
+      !materialEl ||
+      !tierEl ||
+      !powerTotalEl ||
+      !powerSpentEl ||
+      !powerRemainingEl ||
+      !surgeDieEl ||
+      !magicBonusEl ||
+      !abilityBonusEl ||
+      !totalBonusEl ||
+      !summaryEl ||
+      !catalogBody ||
+      !tierOut ||
+      !powerTotalOut ||
+      !powerSpentOut ||
+      !powerRemainingOut ||
+      !surgeOut ||
+      !enhancementWarning
+    ) {
+      return;
+    }
+
+    const powerCatalog = window.PF1EData?.tables?.legendaryItems?.powerCatalog || [];
+    if (!Array.isArray(powerCatalog) || !powerCatalog.length) return;
+
+    const MATERIAL_LABELS = {
+      steel: "Acciaio",
+      cold_iron: "Ferro Freddo",
+      silver: "Argento Alchemico",
+      adamantine: "Adamantio",
+      mithral: "Mithral",
+    };
+
+    catalogBody.innerHTML = "";
+
+    powerCatalog.forEach((power) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${power.name}</td>
+        <td>${power.category}</td>
+        <td>${power.powerCost}</td>
+        <td>${power.mechanics || "—"}</td>
+        <td>${power.restrictions || "—"}</td>
+      `;
+      catalogBody.appendChild(tr);
+    });
+
+    const update = (bonusSourceEl = null) => {
+      const material = String(materialEl.value || "steel");
+      const itemType = String(itemTypeEl.value || "weapon");
+      const enabled = !!enabledEl.checked;
+      const tier = Math.max(0, Math.trunc(getMythicTier()));
+      const powerTotal = 3 + tier;
+      const powerSpent = clamp(num(powerSpentEl.value), 0, powerTotal);
+      const powerRemaining = powerTotal - powerSpent;
+      const surge = getSurgeDieByTier(tier);
+      let magicBonus = clamp(Math.trunc(num(magicBonusEl.value)), 0, 5);
+      let abilityBonus = clamp(Math.trunc(num(abilityBonusEl.value)), 0, 5);
+      const rawTotal = magicBonus + abilityBonus;
+      if (rawTotal > 10) {
+        if (bonusSourceEl === magicBonusEl) {
+          magicBonus = 10 - abilityBonus;
+        } else {
+          abilityBonus = 10 - magicBonus;
+        }
+      }
+      const totalBonus = magicBonus + abilityBonus;
+      const wasClamped =
+        rawTotal > 10 ||
+        Math.trunc(num(magicBonusEl.value)) !== magicBonus ||
+        Math.trunc(num(abilityBonusEl.value)) !== abilityBonus;
+
+      card.dataset.enhancement = String(clamp(Math.ceil(tier / 2), 0, 5));
+      card.dataset.material = material;
+      card.dataset.itemType = itemType;
+      card.dataset.legendaryEnabled = enabled ? "1" : "0";
+      contentEl.hidden = !enabled;
+      contentEl.setAttribute("aria-hidden", String(!enabled));
+      if (figureNodes.length) {
+        figureNodes.forEach((node) => {
+          node.style.display = node.dataset.legendaryFigure === itemType ? "" : "none";
+        });
+      }
+
+      const matLabel = MATERIAL_LABELS[material] || "Acciaio";
+      summaryEl.textContent = `Tier ${tier} • Punti Potere ${powerRemaining}/${powerTotal} • ${matLabel} • Bonus +${totalBonus}/+10`;
+
+      tierEl.value = String(tier);
+      powerTotalEl.value = String(powerTotal);
+      powerSpentEl.value = String(powerSpent);
+      powerRemainingEl.value = String(powerRemaining);
+      surgeDieEl.value = surge;
+      magicBonusEl.value = String(magicBonus);
+      abilityBonusEl.value = String(abilityBonus);
+      totalBonusEl.value = `+${totalBonus} / +10`;
+
+      tierOut.value = String(tier);
+      powerTotalOut.value = String(powerTotal);
+      powerSpentOut.value = String(powerSpent);
+      powerRemainingOut.value = String(powerRemaining);
+      surgeOut.value = surge;
+
+      enhancementWarning.style.display = wasClamped ? "block" : "none";
+    };
+
+    [enabledEl, itemTypeEl, materialEl, powerSpentEl].forEach((el) => {
+      el.addEventListener("input", update);
+      el.addEventListener("change", update);
+    });
+    [magicBonusEl, abilityBonusEl].forEach((el) => {
+      el.addEventListener("input", () => update(el));
+      el.addEventListener("change", () => update(el));
+    });
+
+    refreshLegendaryWeaponUI = update;
+    update();
+  }
+
+  function initEquipLegendaryBridge() {
+    const legendaryCardEl = document.querySelector(".sword-graphic-card");
+    const armorAcEl = document.getElementById("equip-armor-ac");
+    const shieldAcEl = document.getElementById("equip-shield-ac");
+    const armorAcpEl = document.getElementById("equip-armor-acp");
+    const shieldAcpEl = document.getElementById("equip-shield-acp");
+    const weaponMagicBonusEl = document.getElementById("equip-weapon-magic-bonus");
+    const weaponAbilityBonusEl = document.getElementById("equip-weapon-ability-bonus");
+    const acArmorEl = document.getElementById("ac-armor");
+    const acShieldEl = document.getElementById("ac-shield");
+    const skillsAcpEl = document.getElementById("skills-acp");
+    const legendaryEnabledEl = document.getElementById("legendary-enabled");
+    const legendaryTypeEl = document.getElementById("legendary-item-type");
+    const legendaryMagicBonusEl = document.getElementById("legendary-magic-bonus");
+    const legendaryAbilityBonusEl = document.getElementById("legendary-ability-bonus");
+    const weaponLegendaryEl = document.getElementById("equip-weapon-legendary");
+    const armorLegendaryEl = document.getElementById("equip-armor-legendary");
+    const shieldLegendaryEl = document.getElementById("equip-shield-legendary");
+
+    if (
+      !armorAcEl ||
+      !shieldAcEl ||
+      !armorAcpEl ||
+      !shieldAcpEl ||
+      !weaponMagicBonusEl ||
+      !weaponAbilityBonusEl ||
+      !acArmorEl ||
+      !acShieldEl ||
+      !skillsAcpEl ||
+      !legendaryCardEl ||
+      !legendaryEnabledEl ||
+      !legendaryTypeEl ||
+      !legendaryMagicBonusEl ||
+      !legendaryAbilityBonusEl ||
+      !weaponLegendaryEl ||
+      !armorLegendaryEl ||
+      !shieldLegendaryEl
+    ) {
+      return;
+    }
+
+    const legendaryLinks = [
+      { type: "weapon", el: weaponLegendaryEl },
+      { type: "armor", el: armorLegendaryEl },
+      { type: "shield", el: shieldLegendaryEl },
+    ];
+
+    const syncEquipDefenseToCore = () => {
+      const armorAc = Math.max(0, Math.trunc(num(armorAcEl.value)));
+      const shieldAc = Math.max(0, Math.trunc(num(shieldAcEl.value)));
+      const armorAcp = Math.max(0, Math.trunc(num(armorAcpEl.value)));
+      const shieldAcp = Math.max(0, Math.trunc(num(shieldAcpEl.value)));
+
+      armorAcEl.value = String(armorAc);
+      shieldAcEl.value = String(shieldAc);
+      armorAcpEl.value = String(armorAcp);
+      shieldAcpEl.value = String(shieldAcp);
+
+      acArmorEl.value = String(armorAc);
+      acShieldEl.value = String(shieldAc);
+      skillsAcpEl.value = String(armorAcp + shieldAcp);
+
+      recalcAC();
+      recalcAllSkills();
+    };
+
+    const syncWeaponLegendaryStats = () => {
+      const weaponMagic = clamp(Math.trunc(num(weaponMagicBonusEl.value)), 0, 5);
+      const weaponAbility = clamp(Math.trunc(num(weaponAbilityBonusEl.value)), 0, 5);
+      weaponMagicBonusEl.value = String(weaponMagic);
+      weaponAbilityBonusEl.value = String(weaponAbility);
+
+      if (!weaponLegendaryEl.checked) return;
+      legendaryMagicBonusEl.value = String(weaponMagic);
+      legendaryAbilityBonusEl.value = String(weaponAbility);
+      refreshLegendaryWeaponUI();
+    };
+
+    const syncLegendaryToggle = (sourceEl = null) => {
+      if (sourceEl?.checked) {
+        legendaryLinks.forEach(({ el }) => {
+          if (el !== sourceEl) el.checked = false;
+        });
+      }
+
+      const selected = legendaryLinks.find(({ el }) => el.checked) || null;
+      legendaryEnabledEl.checked = !!selected;
+      legendaryCardEl.hidden = !selected;
+      if (selected) legendaryTypeEl.value = selected.type;
+      if (selected?.type === "weapon") syncWeaponLegendaryStats();
+      refreshLegendaryWeaponUI();
+    };
+
+    [armorAcEl, shieldAcEl, armorAcpEl, shieldAcpEl].forEach((el) => {
+      el.addEventListener("input", syncEquipDefenseToCore);
+      el.addEventListener("change", syncEquipDefenseToCore);
+    });
+    [weaponMagicBonusEl, weaponAbilityBonusEl].forEach((el) => {
+      el.addEventListener("input", syncWeaponLegendaryStats);
+      el.addEventListener("change", syncWeaponLegendaryStats);
+    });
+
+    legendaryLinks.forEach(({ el }) => {
+      el.addEventListener("input", () => syncLegendaryToggle(el));
+      el.addEventListener("change", () => syncLegendaryToggle(el));
+    });
+
+    legendaryEnabledEl.addEventListener("change", () => {
+      if (legendaryEnabledEl.checked) return;
+      legendaryLinks.forEach(({ el }) => {
+        el.checked = false;
+      });
+      syncLegendaryToggle();
+    });
+    [legendaryMagicBonusEl, legendaryAbilityBonusEl].forEach((el) => {
+      el.addEventListener("input", syncWeaponLegendaryStats);
+      el.addEventListener("change", syncWeaponLegendaryStats);
+    });
+
+    refreshEquipLegendaryBridgeUI = () => {
+      syncEquipDefenseToCore();
+      syncWeaponLegendaryStats();
+      syncLegendaryToggle();
+    };
+
+    refreshEquipLegendaryBridgeUI();
+  }
+
   // listeners combat
   ["init-misc"].forEach((id) => {
     const el = document.getElementById(id);
@@ -2159,23 +2656,39 @@ document.addEventListener("DOMContentLoaded", () => {
     atkBabEl.addEventListener("input", () => {
       recalcAllAttacks();
       recalcCmbCmd();
+      recalcAllSpellRows();
     });
     atkBabEl.addEventListener("change", () => {
       recalcAllAttacks();
       recalcCmbCmd();
+      recalcAllSpellRows();
     });
   }
 
   const atkMiscEl = document.getElementById("atk-misc");
   if (atkMiscEl) {
-    atkMiscEl.addEventListener("input", recalcAllAttacks);
-    atkMiscEl.addEventListener("change", recalcAllAttacks);
+    atkMiscEl.addEventListener("input", () => {
+      recalcAllAttacks();
+      recalcAllSpellRows();
+    });
+    atkMiscEl.addEventListener("change", () => {
+      recalcAllAttacks();
+      recalcAllSpellRows();
+    });
   }
 
   const spellcasterLevelEl = document.getElementById("spellcaster-level");
   if (spellcasterLevelEl) {
-    spellcasterLevelEl.addEventListener("input", recalcAllSpellSlots);
-    spellcasterLevelEl.addEventListener("change", recalcAllSpellSlots);
+    spellcasterLevelEl.addEventListener("input", () => {
+      updateSpellLevelsVisibility();
+      recalcAllSpellSlots();
+      recalcAllSpellRows();
+    });
+    spellcasterLevelEl.addEventListener("change", () => {
+      updateSpellLevelsVisibility();
+      recalcAllSpellSlots();
+      recalcAllSpellRows();
+    });
   }
 
   ["comp-atk-bab", "comp-atk-str-mod", "comp-atk-dex-mod", "comp-atk-misc"].forEach((id) => {
@@ -2213,6 +2726,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (
       targetHasAnyClass(e.target, [
         "atk-row-misc",
+        "atk-magic-bonus",
         "atk-type",
         "atk-dice-count",
         "atk-die",
@@ -2256,12 +2770,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  document.addEventListener("input", (e) => {
+    const row = e.target?.closest?.(".spell-entry");
+    if (!row) return;
+    if (
+      targetHasAnyClass(e.target, [
+        "spell-offensive",
+        "spell-atk-type",
+        "spell-atk-misc",
+        "spell-dice-count",
+        "spell-die",
+        "spell-range-type",
+      ])
+    ) {
+      recalcSpellRow(row);
+    }
+  });
+
   document.addEventListener("change", (e) => {
     const row = resolveLinkedRowFromEventTarget(e.target, "attack-row", "attack-row-dmg");
     if (!row) return;
     if (
       targetHasAnyClass(e.target, [
         "atk-type",
+        "atk-magic-bonus",
         "atk-die",
         "atk-crit-range",
         "atk-crit-mult",
@@ -2286,6 +2818,21 @@ document.addEventListener("DOMContentLoaded", () => {
       ])
     ) {
       recalcCompAttackRow(row);
+    }
+  });
+
+  document.addEventListener("change", (e) => {
+    const row = e.target?.closest?.(".spell-entry");
+    if (!row) return;
+    if (
+      targetHasAnyClass(e.target, [
+        "spell-offensive",
+        "spell-atk-type",
+        "spell-die",
+        "spell-range-type",
+      ])
+    ) {
+      recalcSpellRow(row);
     }
   });
 
@@ -2374,8 +2921,12 @@ document.addEventListener("DOMContentLoaded", () => {
       applyAutoClassSkills();
       applySkillFilters();
       updateSpellcastingClassFields();
+      updateSpellLevelsVisibility();
       recalcAllSpellSlots();
+      recalcAllSpellRows();
       recalcDerived();
+      refreshEquipLegendaryBridgeUI();
+      refreshLegendaryWeaponUI();
       updateAllCompAbilityMods();
     });
   }
@@ -2387,10 +2938,15 @@ document.addEventListener("DOMContentLoaded", () => {
   applyAutoClassSkills();
   applySkillFilters();
   applyAutoBabFromClass();
+  moveSpellLevelActionsInline();
   initCollapsibleCards();
+  initLegendaryWeaponCard();
+  initEquipLegendaryBridge();
   updateAllCompAbilityMods();
   rebuildSpellRows();
+  updateSpellLevelsVisibility();
   recalcAllSpellSlots();
+  recalcAllSpellRows();
   updateSpellcastingClassFields();
   recalcDerived();
 });

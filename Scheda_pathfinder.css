@@ -391,6 +391,182 @@ body{
   gap:6px;
 }
 
+.spell-entry{
+  border:1px solid color-mix(in srgb, var(--line) 70%, var(--c-incantesimi) 30%);
+  border-radius:10px;
+  padding:8px;
+  background: color-mix(in srgb, var(--surface) 96%, var(--c-incantesimi) 4%);
+  display:grid;
+  gap:8px;
+}
+
+.spell-entry-head{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+  justify-content:flex-start;
+  flex-wrap:wrap;
+}
+
+.spell-entry-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  flex:1 1 100%;
+}
+
+.spell-entry .spell-name{
+  flex:1 1 auto;
+  min-width:0;
+}
+
+.spell-entry-controls{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  flex:0 1 auto;
+  justify-content:flex-start;
+  flex-wrap:nowrap;
+  max-width:100%;
+}
+
+.spell-offensive-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  text-transform:none;
+  letter-spacing:0;
+  margin:0;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+
+.spell-offensive-toggle input{
+  width:18px;
+  height:18px;
+  accent-color: var(--c-incantesimi);
+}
+
+.spell-entry-toggle{
+  appearance:none;
+  border:0;
+  background: var(--c-incantesimi);
+  color:#fff;
+  border-radius:999px;
+  padding:7px 12px;
+  font-size:11px;
+  letter-spacing:.35px;
+  text-transform:uppercase;
+  cursor:pointer;
+  font-weight:700;
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+
+.spell-entry-toggle::before{
+  content:"▾ ";
+  font-weight:900;
+}
+
+.spell-entry.is-collapsed .spell-entry-toggle::before{
+  content:"▸ ";
+}
+
+.spell-entry.is-collapsed .spell-entry-body{
+  display:none;
+}
+
+.spell-entry-body{
+  display:grid;
+  gap:8px;
+}
+
+.spell-offensive-panel{
+  border:1px dashed color-mix(in srgb, var(--line) 65%, var(--c-incantesimi) 35%);
+  border-radius:8px;
+  padding:8px;
+  background: color-mix(in srgb, var(--surface) 93%, var(--c-incantesimi) 7%);
+}
+
+.spell-offensive-row{
+  display:grid;
+  gap:8px;
+}
+
+.spell-offensive-group{
+  display:grid;
+  gap:6px;
+}
+
+.spell-offensive-inline{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  align-items:center;
+  min-width:0;
+}
+
+.spell-offensive-inline > *{
+  min-width:0;
+}
+
+.spell-atk-line .select,
+.spell-atk-line input.small,
+.spell-dmg-line .select,
+.spell-dmg-line input.small{
+  width:auto;
+}
+
+.spell-atk-line{
+  display:grid;
+  grid-template-columns:minmax(128px, 1fr) 72px 72px;
+  gap:6px;
+  align-items:center;
+}
+
+.spell-dmg-line{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px;
+}
+
+.spell-dmg-line .atk-dmg-builder{
+  flex:0 0 auto;
+}
+
+.spell-dmg-line .spell-roll-btn{
+  flex:0 0 auto;
+}
+
+.spell-roll-btn{
+  background: var(--c-incantesimi) !important;
+}
+
+.spell-range-row{
+  display:grid;
+  gap:6px;
+}
+
+.spell-range-inline{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:nowrap;
+}
+
+.spell-range-type{
+  width:92px;
+  min-width:92px;
+}
+
+.spell-range-summary{
+  width:88px;
+  min-width:88px;
+  text-align:center;
+}
+
 .spell-levels{
   display:grid;
   gap:10px;
@@ -428,6 +604,7 @@ body{
 .spell-level-actions{
   margin:0;
   gap:6px;
+  margin-left:auto;
 }
 
 .spell-level-content{
@@ -440,6 +617,107 @@ body{
 
 .spell-level-block:not([open]) .spell-list-level{
   display:none;
+}
+
+@media (max-width: 640px){
+  .spell-entry-head{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .spell-entry-title{
+    width:100%;
+  }
+
+  .spell-entry .spell-name{
+    width:100%;
+  }
+
+  .spell-entry-controls{
+    width:100%;
+    justify-content:flex-start;
+    gap:10px;
+  }
+
+  .spell-level-head{
+    flex-wrap:wrap;
+    align-items:flex-start;
+  }
+
+  .spell-level-actions{
+    margin-left:0;
+    width:100%;
+  }
+
+  .spell-offensive-inline{
+    flex-wrap:wrap;
+  }
+
+  .spell-atk-line{
+    grid-template-columns:1fr 72px 72px;
+  }
+
+  .spell-range-inline{
+    flex-wrap:wrap;
+  }
+
+  .spell-range-type{
+    width:auto;
+    min-width:0;
+    flex:1 1 120px;
+  }
+
+  .spell-range-summary{
+    width:auto;
+    min-width:76px;
+    flex:0 0 auto;
+  }
+}
+
+@media (max-width: 520px){
+  .spell-entry-controls{
+    gap:8px;
+  }
+
+  .spell-entry-toggle{
+    padding:6px 10px;
+    font-size:10px;
+  }
+
+  .spell-offensive-toggle{
+    font-size:11px;
+  }
+
+  .spell-offensive-toggle input{
+    width:16px;
+    height:16px;
+  }
+
+  .spell-atk-line{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .spell-atk-line .spell-atk-type{
+    grid-column:1 / -1;
+  }
+
+  .spell-atk-line .spell-atk-misc,
+  .spell-atk-line .spell-atk-total{
+    width:100%;
+    min-width:0;
+  }
+
+  .spell-offensive-group:last-child .spell-offensive-inline{
+    flex-wrap:wrap;
+  }
+
+  .spell-offensive-group:last-child .atk-dmg-builder{
+    flex:1 1 138px;
+  }
+
+  .spell-offensive-group:last-child .spell-roll-btn{
+    flex:1 1 78px;
+  }
 }
 
 .spell-level-label::before{
@@ -749,6 +1027,53 @@ td input{
 .equip-slots th:nth-child(1){ width: 34%; }
 .equip-slots th:nth-child(2){ width: 66%; }
 
+.equip-core-table{
+  width:100%;
+  min-width:0;
+  table-layout:fixed;
+}
+
+.equip-core-table th:nth-child(1){ width: 12%; }
+.equip-core-table th:nth-child(2){ width: 26%; }
+.equip-core-table th:nth-child(3),
+.equip-core-table th:nth-child(4),
+.equip-core-table th:nth-child(5){ width: 16%; }
+.equip-core-table th:nth-child(6){ width: 12%; }
+
+.equip-core-table th{
+  white-space:normal;
+  line-height:1.2;
+  font-size:10px;
+  letter-spacing:.4px;
+  text-align:center;
+}
+
+.equip-core-table th,
+.equip-core-table td{
+  padding:5px;
+}
+
+.equip-core-table td input{
+  width:100%;
+}
+
+.equip-core-table td.td-center input[type="checkbox"]{
+  width:16px;
+}
+
+.equip-core-table input[type="checkbox"]{
+  width:16px;
+  height:16px;
+  accent-color: var(--c-equip);
+}
+
+.equip-weapon-inline{
+  display:grid;
+  grid-template-columns: minmax(220px, 1fr) 120px 140px;
+  gap:10px;
+  align-items:end;
+}
+
 .ring-pair{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -758,6 +1083,117 @@ td input{
 
 .slot-notes textarea{
   min-height: 90px;
+}
+
+.sword-graphic-card{
+  background: transparent;
+  --sword-line:#3f454d;
+}
+
+.sword-graphic-wrap{
+  margin-top:12px;
+  border:2px dashed color-mix(in srgb, var(--line) 62%, var(--c-mitico) 38%);
+  border-radius:14px;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: color-mix(in srgb, var(--surface) 88%, var(--c-mitico) 12%);
+}
+
+.sword-mod-summary{
+  margin-top:10px;
+  padding:6px 10px;
+  border:1px solid color-mix(in srgb, var(--line) 62%, var(--c-mitico) 38%);
+  border-radius:999px;
+  display:inline-block;
+  background: color-mix(in srgb, var(--surface) 92%, var(--c-mitico) 8%);
+}
+
+.legendary-toggle-row{
+  margin-top:8px;
+}
+
+.legendary-enable-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-weight:700;
+}
+
+.legendary-enable-toggle input[type="checkbox"]{
+  width:16px;
+  height:16px;
+  accent-color:var(--c-mitico);
+}
+
+.legendary-section{
+  margin-top:12px;
+  border:1px solid color-mix(in srgb, var(--line) 68%, var(--c-mitico) 32%);
+  border-radius:12px;
+  background: color-mix(in srgb, var(--surface) 94%, var(--c-mitico) 6%);
+  padding:8px 10px;
+}
+
+.legendary-section > summary{
+  cursor:pointer;
+  font-weight:700;
+  color: color-mix(in srgb, var(--text) 82%, var(--c-mitico) 18%);
+  user-select:none;
+}
+
+.legendary-section > summary::marker{
+  color: var(--c-mitico);
+}
+
+.legendary-summary-wrap input.small{
+  text-align:center;
+}
+
+.sword-graphic{
+  width:min(560px, 100%);
+  height:auto;
+  display:block;
+  overflow:visible;
+}
+
+.sword-outline{
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.legendary-figure{
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.sword-part{
+  stroke:var(--sword-line);
+  stroke-width:6.5;
+}
+
+.sword-graphic-card[data-enhancement="1"] .sword-part{ stroke-width:7.25; }
+.sword-graphic-card[data-enhancement="2"] .sword-part{ stroke-width:7.5; }
+.sword-graphic-card[data-enhancement="3"] .sword-part{ stroke-width:7.75; }
+.sword-graphic-card[data-enhancement="4"] .sword-part{ stroke-width:8; }
+.sword-graphic-card[data-enhancement="5"] .sword-part{ stroke-width:8.25; }
+
+.sword-graphic-card[data-material="steel"]{
+  --sword-line:#4b5563;
+}
+.sword-graphic-card[data-material="cold_iron"]{
+  --sword-line:#334155;
+}
+.sword-graphic-card[data-material="silver"]{
+  --sword-line:#94a3b8;
+}
+.sword-graphic-card[data-material="adamantine"]{
+  --sword-line:#0f766e;
+}
+.sword-graphic-card[data-material="mithral"]{
+  --sword-line:#0ea5e9;
 }
 
 
@@ -800,6 +1236,10 @@ td input{
   #attacks-table,
   #comp-attacks-table{
     min-width:520px !important;
+  }
+
+  .equip-weapon-inline{
+    grid-template-columns: 1fr 110px 130px;
   }
 }
 
@@ -1028,27 +1468,64 @@ td input{
 
 .roll-btn{
   appearance:none;
-  border:2px solid transparent;
+  border:0;
   background: var(--c-abilita);
   color: #fff;
-  border-radius:8px;
-  padding:6px 10px;
+  border-radius:999px;
+  padding:8px 14px;
   font-size:12px;
-  font-weight:700;
-  letter-spacing:.3px;
+  font-weight:600;
+  letter-spacing:.4px;
   text-transform:uppercase;
   cursor:pointer;
   line-height:1.1;
   min-width:52px;
-  box-shadow: 0 2px 0 rgba(0,0,0,.18);
+  box-shadow: 0 4px 10px rgba(0,0,0,.1);
+  transition: all .2s ease;
 }
 .roll-btn:hover{
-  filter: brightness(1.06);
-  transform: translateY(-1px);
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,.15);
 }
 
 td .roll-btn + .roll-btn{
-  margin-left:4px;
+  margin-left:0px;
+}
+
+#page-identita .btn,
+#page-identita .roll-btn{
+  background: var(--c-identita);
+}
+
+#page-abilita .btn,
+#page-abilita .roll-btn{
+  background: var(--c-abilita);
+}
+
+#page-incantesimi .btn,
+#page-incantesimi .roll-btn{
+  background: var(--c-incantesimi);
+}
+
+#page-talenti .btn,
+#page-talenti .roll-btn{
+  background: var(--c-talenti);
+}
+
+#page-equip .btn,
+#page-equip .roll-btn{
+  background: var(--c-equip);
+}
+
+#page-mitico .btn,
+#page-mitico .roll-btn{
+  background: var(--c-mitico);
+}
+
+#page-note .btn,
+#page-note .roll-btn{
+  background: var(--c-note);
 }
 
 #page-combattimento .btn,
@@ -1140,7 +1617,3 @@ td .roll-btn + .roll-btn{
   #ac-components .ac-row.row-2{ grid-template-columns: 1fr 1fr; }
   #ac-components .field.wide{ grid-column: span 2 !important; }
 }
-
-
-
-
