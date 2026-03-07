@@ -243,11 +243,11 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   window.logSymbioteEvent = (event) => {
-    console.debug("[PF1E Symbiote] Visibility event:", event);
+    void event;
   };
 
   window.onStateChangeEvent = (event) => {
-    console.debug("[PF1E Symbiote] State change event:", event);
+    void event;
   };
 
   /* =========================
@@ -370,7 +370,9 @@ document.addEventListener("DOMContentLoaded", () => {
           : "";
     const enabled = !!variant;
     if (enabled) {
-      previousThemeBeforeVariant = themeToggle?.checked ? "dark" : "light";
+      if (!document.documentElement.hasAttribute("data-theme-variant")) {
+        previousThemeBeforeVariant = themeToggle?.checked ? "dark" : "light";
+      }
       document.documentElement.setAttribute("data-theme-variant", variant);
       applyTheme(variant === "classic" ? "light" : "dark");
     } else {
@@ -2848,17 +2850,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const tot = parseSignedInt(tr.querySelector(cfg.totalSelector)?.value);
     const name = getAttackRollLabel(tr, cfg);
     rollViaTaleSpire(tot, name);
-    return true;
-  }
-
-  function handleFullAttackRoll(btnEl, cfg) {
-    const tr = getLinkedHitRowFromButton(btnEl, cfg.hitRowClass, cfg.dmgRowClass);
-    if (!tr) return false;
-    cfg.recalcRow(tr);
-    const tot = parseSignedInt(tr.querySelector(cfg.totalSelector)?.value);
-    const bab = num(document.getElementById(cfg.babId)?.value);
-    const name = getAttackRollLabel(tr, cfg);
-    rollFullAttackSequence(tot, bab, name);
     return true;
   }
 
