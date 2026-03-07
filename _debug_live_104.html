@@ -1,4 +1,4 @@
-﻿<!doctype html>
+﻿﻿<!doctype html>
 <html lang="it">
 <head>
   <meta charset="utf-8" />
@@ -4310,15 +4310,15 @@ document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      Tabs
   ========================= */
-  const tabs = $$(".tab");
-  const pages = $$(".page");
+  const tabs = $(".tab");
+  const pages = $(".page");
   const tabIncantesimi = document.getElementById("tab-incantesimi");
   const tabCompagno = document.getElementById("tab-compagno");
   const tabCdp = document.getElementById("tab-cdp");
   const enableCdpSection = document.getElementById("enable-cdp-section");
   const enableSpellsTab = document.getElementById("enable-spells-tab");
   const enableCompanionTab = document.getElementById("enable-companion-tab");
-  const cdpFields = $$(".cdp-field");
+  const cdpFields = $(".cdp-field");
 
   function activate(targetId, pushHash = true) {
     pages.forEach((p) => p.classList.toggle("active", p.id === targetId));
@@ -4575,7 +4575,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   updateOptionalTabsVisibility();
 
-  const sizeSelectors = $$(".size-select-sync");
+  const sizeSelectors = $(".size-select-sync");
   const SIZE_MODIFIERS = {
     small: { acAtk: 1, stealth: 4, cmbCmd: -1 },
     medium: { acAtk: 0, stealth: 0, cmbCmd: 0 },
@@ -5134,7 +5134,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const tierI = document.getElementById("mythic-tier-identita");
   const pathM = document.getElementById("mythic-path-mitico");
   const tierM = document.getElementById("mythic-tier-mitico");
-  const mythicAbilityPicks = $$(".mythic-ability-pick");
+  const mythicAbilityPicks = $(".mythic-ability-pick");
   const mythicTierTableBody = document.getElementById("mythic-tier-table-body");
   const mythicSurgeDie = document.getElementById("mythic-surge-die");
   const mythicSurgeReminder = document.getElementById("mythic-surge-reminder");
@@ -6296,7 +6296,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function refreshClassRowVisibility() {
-    const rows = $$('.class-entry-row[data-class-slot="1"], .class-entry-row[data-class-slot="2"], .class-entry-row[data-class-slot="3"]');
+    const rows = $('.class-entry-row[data-class-slot="1"], .class-entry-row[data-class-slot="2"], .class-entry-row[data-class-slot="3"]');
     const addBtn = document.getElementById("add-class-row");
     const removeBtn = document.getElementById("remove-class-row");
     const hiddenRows = rows.filter((row) => row.hidden);
@@ -6306,7 +6306,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function initClassCard() {
-    const rows = $$('.class-entry-row[data-class-slot="1"], .class-entry-row[data-class-slot="2"], .class-entry-row[data-class-slot="3"]');
+    const rows = $('.class-entry-row[data-class-slot="1"], .class-entry-row[data-class-slot="2"], .class-entry-row[data-class-slot="3"]');
     const addBtn = document.getElementById("add-class-row");
     const removeBtn = document.getElementById("remove-class-row");
     if (!rows.length) return;
@@ -6386,7 +6386,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateTalentLevelMarkers(summaryEntries = null) {
-    const rows = $$("#talents-table tbody tr");
+    const rows = $("#talents-table tbody tr");
     if (!rows.length) return;
 
     const entries = Array.isArray(summaryEntries)
@@ -6686,7 +6686,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateSkillRanksSpent() {
     const outEl = document.getElementById("skills-ranks-spent");
     if (!outEl) return;
-    const spentRanks = $$("#skills-tbody tr.skill-row .skill-ranks").reduce(
+    const spentRanks = $("#skills-tbody tr.skill-row .skill-ranks").reduce(
       (sum, el) => sum + Math.max(0, Math.trunc(num(el.value))),
       0
     );
@@ -7876,6 +7876,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </html>
 
 <!-- Francesco Culo è stato qui ma ci ha aiutati a risolvere dei problemi -->
+
 
 
 
