@@ -1,0 +1,3747 @@
+﻿<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scheda Personaggio — Pathfinder 1E</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Cormorant+Garamond:wght@400;600;700&family=Crimson+Text:wght@400;600;700&family=IM+Fell+English+SC&family=Space+Grotesk:wght@400;500;700&family=Uncial+Antiqua&display=swap" rel="stylesheet">
+
+  <style>
+/* =========================================================
+   Pathfinder 1E Sheet — stile.css (COMPLETO)
+   ========================================================= */
+
+/* ===== Base variables ===== */
+:root{
+  --ink:#2a2115;
+  --muted:#5f5140;
+  --line:#4a3a27;
+
+  /* palette sezioni (LIGHT) */
+  --c-identita:#1f4fa8;      /* blu */
+  --c-combattimento:#b3261e; /* rosso */
+  --c-abilita:#2f7d32;       /* verde */
+  --c-incantesimi:#0f6b63;   /* smeraldo */
+  --c-talenti:#6f3aa8;       /* viola */
+  --c-equip:#9a5a12;         /* arancione */
+  --c-mitico:#8f2f9e;        /* magenta */
+  --c-cdp:#7a2336;           /* bordeaux */
+  --c-compagno:#1a6f84;      /* azzurro/teal */
+  --c-note:#2f665f;          /* teal */
+
+  /* theme tokens */
+  --page-bg: linear-gradient(135deg, #e8e0cf, #f4eddc);
+  --surface: #f7f1e4;
+  --surface-2: #efe6d3;
+  --text: var(--ink);
+  --text-muted: var(--muted);
+  --shadow: 0 10px 30px rgba(58,40,18,.12);
+
+  --radius:12px;
+  --font: "Lora", Georgia, "Times New Roman", serif;
+  --font-display: "Cinzel", Georgia, serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --gap:12px;
+}
+/* ===== Dark mode overrides ===== */
+:root[data-theme="dark"]{
+  --page-bg: radial-gradient(circle at 20% 10%, #0b1220, #05070b 55%, #02030a);
+  --surface: #0b1220;
+  --surface-2: #0f172a;
+  --text: #e5e7eb;
+  --text-muted: #a1a1aa;
+  --line: #334155;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+
+  /* palette tab più “neon/pastello” in dark */
+  --c-identita:#60a5fa;
+  --c-combattimento:#ef4444;
+  --c-abilita:#4ade80;
+  --c-incantesimi:#2dd4bf;
+  --c-talenti:#c084fc;
+  --c-equip:#fbbf24;
+  --c-mitico:#730fed;
+  --c-cdp:#fb7185;
+  --c-compagno:#22d3ee;
+  --c-note:#2dd4bf;
+}
+
+/* ===== Variant: Ira dei Giusti ===== */
+:root[data-theme-variant="wrath"]{
+  --ink:#261616;
+  --muted:#6c5148;
+  --line:#5f2f2b;
+  --font:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-display:"Uncial Antiqua", Georgia, serif;
+  --page-bg:
+    radial-gradient(circle at top, rgba(178,70,47,.18), transparent 32%),
+    linear-gradient(145deg, #efe0cc 0%, #d6b49a 46%, #4a2527 100%);
+  --surface:#f4e4d3;
+  --surface-2:#e3c4af;
+  --text:var(--ink);
+  --text-muted:var(--muted);
+  --shadow:0 12px 34px rgba(56,22,18,.22);
+
+  --c-identita:#8a2f2c;
+  --c-combattimento:#b44027;
+  --c-abilita:#7d5f2e;
+  --c-incantesimi:#5f4b63;
+  --c-talenti:#6a2c43;
+  --c-equip:#9a4f24;
+  --c-mitico:#8b1e30;
+  --c-cdp:#5b1f2e;
+  --c-compagno:#6c3d2d;
+  --c-note:#7a2336;
+}
+
+:root[data-theme="dark"][data-theme-variant="wrath"]{
+  --page-bg:
+    radial-gradient(circle at top, rgba(220,94,68,.18), transparent 30%),
+    linear-gradient(155deg, #170d0d 0%, #251212 48%, #090506 100%);
+  --surface:#211313;
+  --surface-2:#2b1818;
+  --text:#f2e7da;
+  --text-muted:#c0a79b;
+  --line:#7c3b35;
+  --shadow:0 12px 34px rgba(0,0,0,.42);
+
+  --c-identita:#d36a57;
+  --c-combattimento:#ef7b45;
+  --c-abilita:#b69a53;
+  --c-incantesimi:#a88db2;
+  --c-talenti:#c96b83;
+  --c-equip:#d78f4a;
+  --c-mitico:#d9485a;
+  --c-cdp:#bc5a72;
+  --c-compagno:#b57457;
+  --c-note:#d1634f;
+}
+
+/* ===== Variant: Caos Cromatico ===== */
+:root[data-theme-variant="vivid"]{
+  --ink:#220a38;
+  --muted:#4f3569;
+  --line:#a3186f;
+  --font:"Space Grotesk", "Trebuchet MS", Arial, sans-serif;
+  --font-display:"Bungee", Impact, fantasy;
+  --page-bg:
+    radial-gradient(circle at 18% 18%, rgba(255,255,0,.3), transparent 18%),
+    radial-gradient(circle at 82% 20%, rgba(0,255,255,.26), transparent 22%),
+    radial-gradient(circle at 50% 78%, rgba(255,0,140,.28), transparent 24%),
+    linear-gradient(145deg, #ff6a00 0%, #ff00a8 32%, #6100ff 68%, #00d1ff 100%);
+  --surface:#fff4b8;
+  --surface-2:#ffd4f1;
+  --text:var(--ink);
+  --text-muted:var(--muted);
+  --shadow:0 14px 36px rgba(100,0,80,.26);
+
+  --c-identita:#ff006e;
+  --c-combattimento:#ff5400;
+  --c-abilita:#06d6a0;
+  --c-incantesimi:#118ab2;
+  --c-talenti:#8338ec;
+  --c-equip:#ffbe0b;
+  --c-mitico:#ff006e;
+  --c-cdp:#3a86ff;
+  --c-compagno:#00b4d8;
+  --c-note:#fb5607;
+}
+
+:root[data-theme="dark"][data-theme-variant="vivid"]{
+  --page-bg:
+    radial-gradient(circle at 14% 14%, rgba(255,214,10,.22), transparent 18%),
+    radial-gradient(circle at 84% 18%, rgba(0,229,255,.22), transparent 22%),
+    radial-gradient(circle at 55% 82%, rgba(255,0,140,.2), transparent 24%),
+    linear-gradient(150deg, #10031a 0%, #1d0430 30%, #120a3d 62%, #032034 100%);
+  --surface:#1f1031;
+  --surface-2:#2d1540;
+  --text:#fff2fb;
+  --text-muted:#e5bde0;
+  --line:#ff4db8;
+  --shadow:0 14px 36px rgba(0,0,0,.42);
+
+  --c-identita:#ff5ea8;
+  --c-combattimento:#ff7a18;
+  --c-abilita:#37f3c1;
+  --c-incantesimi:#4fd8ff;
+  --c-talenti:#bd7bff;
+  --c-equip:#ffd84d;
+  --c-mitico:#ff4db8;
+  --c-cdp:#67a7ff;
+  --c-compagno:#3ce6ff;
+  --c-note:#ff8a3d;
+}
+
+/* ===== Variant: Classico ===== */
+:root[data-theme-variant="classic"]{
+  --ink:#2b1f13;
+  --muted:#6b5a46;
+  --line:#6f4a2a;
+  --font:"Crimson Text", Georgia, "Times New Roman", serif;
+  --font-display:"IM Fell English SC", Georgia, serif;
+  --page-bg:
+    radial-gradient(circle at top, rgba(128,75,28,.12), transparent 30%),
+    linear-gradient(145deg, #efe2c6 0%, #e1cfaa 52%, #c5ab78 100%);
+  --surface:#f6ead1;
+  --surface-2:#ead8b4;
+  --text:var(--ink);
+  --text-muted:var(--muted);
+  --shadow:0 12px 32px rgba(78,50,21,.18);
+
+  --c-identita:#7b2f24;
+  --c-combattimento:#9f3c2f;
+  --c-abilita:#6b5a2d;
+  --c-incantesimi:#375772;
+  --c-talenti:#5f3d75;
+  --c-equip:#8a5a1f;
+  --c-mitico:#7a2f52;
+  --c-cdp:#6a2831;
+  --c-compagno:#556b5d;
+  --c-note:#725a34;
+}
+
+:root[data-theme="dark"][data-theme-variant="classic"]{
+  --page-bg:
+    radial-gradient(circle at top, rgba(194,147,88,.12), transparent 28%),
+    linear-gradient(150deg, #17110c 0%, #221913 46%, #120d09 100%);
+  --surface:#241b14;
+  --surface-2:#30231b;
+  --text:#f0e3cf;
+  --text-muted:#c8b596;
+  --line:#9b7a55;
+  --shadow:0 12px 32px rgba(0,0,0,.4);
+
+  --c-identita:#c66d52;
+  --c-combattimento:#d27c5f;
+  --c-abilita:#bca168;
+  --c-incantesimi:#7fb0d1;
+  --c-talenti:#ba98d8;
+  --c-equip:#d4a15f;
+  --c-mitico:#c27b9f;
+  --c-cdp:#d38793;
+  --c-compagno:#9eb39a;
+  --c-note:#d0b07d;
+}
+
+*{ box-sizing:border-box; }
+
+[hidden]{
+  display:none !important;
+}
+
+body{
+  margin:0;
+  background: var(--page-bg);
+  color: var(--text);
+  font-family:var(--font);
+}
+
+/* ===== Layout sheet ===== */
+.sheet{
+  width: 620px; /* leggermente più stretta */
+  max-width: calc(100vw - 24px);
+  margin: 24px auto;
+  background: var(--surface);
+  border:2px solid var(--line);
+  border-radius:16px;
+  padding:18px;
+  box-shadow: var(--shadow);
+  position:relative;
+}
+
+.sheet,
+.grid,
+.card,
+.fields,
+.table-wrap{
+  min-width:0;
+}
+
+.topbar{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.title{
+  font-family:var(--font-display);
+  font-weight:900;
+  letter-spacing:.5px;
+  font-size:16px;
+  text-transform:uppercase;
+}
+
+.hint{
+  color: var(--text-muted);
+  font-size:12px;
+  line-height:1.2;
+}
+
+/* ===== Top actions (Dark mode toggle) ===== */
+.top-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.wrath-theme-label{
+  color:var(--text);
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.top-refresh-btn{
+  appearance:none;
+  border:2px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family:var(--font-display);
+  border-radius:999px;
+  padding:5px 10px;
+  font-size:11px;
+  letter-spacing:.35px;
+  text-transform:uppercase;
+  cursor:pointer;
+  font-weight:700;
+  transition: all .2s ease;
+  position:absolute;
+  top:12px;
+  right:12px;
+  z-index:2;
+}
+
+.top-refresh-btn:hover{
+  transform: translateY(-1px);
+}
+
+/* Switch (slider) */
+.switch{
+  position:relative;
+  width:58px;
+  height:28px;
+  display:inline-block;
+}
+
+/* IMPORTANT: override input global styles for checkbox */
+.switch input{
+  position:absolute;
+  inset:0;
+  margin:0;
+  padding:0;
+  border:0;
+  opacity:0;
+  cursor:pointer;
+}
+
+.slider{
+  position:absolute;
+  cursor:pointer;
+  inset:0;
+  background: rgba(0,0,0,.08);
+  border:2px solid var(--line);
+  border-radius:999px;
+  transition: .2s ease;
+}
+
+.slider::before{
+  content:"";
+  position:absolute;
+  width:20px;
+  height:20px;
+  left:3px;
+  top:50%;
+  transform:translateY(-50%);
+  background: var(--surface);
+  border:2px solid var(--line);
+  border-radius:999px;
+  transition: .2s ease;
+}
+
+.switch input:checked + .slider{
+  background: rgba(255,255,255,.08);
+}
+
+.switch input:checked + .slider::before{
+  transform: translate(30px, -50%);
+}
+
+.switch input:focus + .slider{
+  box-shadow:0 0 0 3px rgba(0,0,0,.12);
+}
+
+/* ===== Tabs ===== */
+.tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin: 10px 0 12px 0;
+  padding:8px;
+  border:2px solid var(--line);
+  border-radius:14px;
+  background: var(--surface-2);
+}
+
+.tab{
+  appearance:none;
+  border:2px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font-family:var(--font-display);
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:12px;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition: all .2s ease;
+  font-weight:600;
+  white-space:normal;
+  line-height:1.1;
+}
+
+.tab:hover{
+  transform: translateY(-2px);
+}
+
+.tab-reset-alert{
+  appearance:none;
+  border:2px solid transparent;
+  background:#b91c1c;
+  color:#fff;
+  font-family:var(--font-display);
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:11px;
+  letter-spacing:.45px;
+  text-transform:uppercase;
+  cursor:pointer;
+  font-weight:700;
+  transition: all .2s ease;
+  margin-left:auto;
+}
+
+.tab-reset-alert:hover{
+  background:#991b1b;
+  transform: translateY(-2px);
+}
+
+/* Tab attiva */
+.tab[aria-selected="true"]{
+  color:#fff;
+  border-color:transparent;
+}
+
+/* Colori per sezione (tab attiva) */
+#tab-identita[aria-selected="true"]{ background:var(--c-identita); }
+#tab-combattimento[aria-selected="true"]{ background:var(--c-combattimento); }
+#tab-abilita[aria-selected="true"]{ background:var(--c-abilita); }
+#tab-incantesimi[aria-selected="true"]{ background:var(--c-incantesimi); }
+#tab-talenti[aria-selected="true"]{ background:var(--c-talenti); }
+#tab-equip[aria-selected="true"]{ background:var(--c-equip); }
+#tab-mitico[aria-selected="true"]{ background:var(--c-mitico); }
+#tab-cdp[aria-selected="true"]{ background:var(--c-cdp); }
+#tab-note[aria-selected="true"]{ background:var(--c-note); }
+#tab-compagno[aria-selected="true"]{ background:var(--c-compagno); }
+
+/* Mitico disabilitata */
+.tab.is-disabled{
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ===== Pages ===== */
+.page{ display:none; }
+.page.active{ display:block; }
+
+/* ===== Action buttons (Add row, Reset, ecc.) ===== */
+.actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin: 8px 0 10px 0;
+}
+
+.btn{
+  appearance:none;
+  border:0;
+  background: var(--c-identita);
+  color:#fff;
+  font-family:var(--font-display);
+  border-radius:999px;
+  padding:8px 14px;
+  font-size:12px;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  cursor:pointer;
+  font-weight:600;
+  transition: all .2s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,.1);
+}
+
+.btn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,.15);
+}
+
+.btn-green{
+  background: var(--c-abilita);
+}
+
+.btn-incantesimi{
+  background: var(--c-incantesimi);
+}
+
+.btn-reset-skill{
+  margin-left:auto;
+}
+
+#filter-class,
+#filter-trained{
+  width:18px;
+  height:18px;
+  accent-color: var(--c-abilita);
+}
+
+.skills-filters-col{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:10px;
+}
+
+.skills-filter-label{
+  margin:0;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  text-transform:none;
+  letter-spacing:0;
+  white-space:nowrap;
+}
+
+.skills-trained-filter-col{
+  padding-left:50px;
+}
+
+.skills-reset-wrap{
+  justify-content:flex-end;
+  margin-top:10px;
+}
+
+.field.identita-toggles{
+  display:flex;
+  flex-direction:row;
+  align-items:flex-start;
+  gap:18px;
+  flex-wrap:wrap;
+  justify-content:flex-start;
+  width:100%;
+}
+
+.identita-toggle-label{
+  margin:0;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:flex-start;
+  text-transform:none;
+  letter-spacing:0;
+  min-width:0;
+  flex:1 1 180px;
+}
+
+.identita-toggle-label strong{
+  font-size:14px;
+  text-align:left;
+  line-height:1.2;
+}
+
+#enable-spells-tab,
+#enable-companion-tab,
+#enable-cdp-section{
+  width:18px;
+  height:18px;
+  accent-color: var(--c-identita);
+}
+
+.spell-list-level{
+  display:grid;
+  gap:6px;
+}
+
+.spell-entry{
+  border:1px solid color-mix(in srgb, var(--line) 70%, var(--c-incantesimi) 30%);
+  border-radius:10px;
+  padding:8px;
+  background: color-mix(in srgb, var(--surface) 96%, var(--c-incantesimi) 4%);
+  display:grid;
+  gap:8px;
+}
+
+.spell-entry-head{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+  justify-content:flex-start;
+  flex-wrap:wrap;
+}
+
+.spell-entry-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  flex:1 1 100%;
+}
+
+.spell-entry .spell-name{
+  flex:1 1 auto;
+  min-width:0;
+}
+
+.spell-entry-controls{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  flex:0 1 auto;
+  justify-content:flex-start;
+  flex-wrap:nowrap;
+  max-width:100%;
+}
+
+.spell-offensive-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  text-transform:none;
+  letter-spacing:0;
+  margin:0;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+
+.spell-offensive-toggle input{
+  width:18px;
+  height:18px;
+  accent-color: var(--c-incantesimi);
+}
+
+.spell-entry-toggle{
+  appearance:none;
+  border:0;
+  background: var(--c-incantesimi);
+  color:#fff;
+  border-radius:999px;
+  padding:7px 12px;
+  font-size:11px;
+  letter-spacing:.35px;
+  text-transform:uppercase;
+  cursor:pointer;
+  font-weight:700;
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+
+.spell-entry-toggle::before{
+  content:"▾ ";
+  font-weight:900;
+}
+
+.spell-entry.is-collapsed .spell-entry-toggle::before{
+  content:"▸ ";
+}
+
+.spell-entry.is-collapsed .spell-entry-body{
+  display:none;
+}
+
+.spell-entry-body{
+  display:grid;
+  gap:8px;
+}
+
+.spell-offensive-panel{
+  border:1px dashed color-mix(in srgb, var(--line) 65%, var(--c-incantesimi) 35%);
+  border-radius:8px;
+  padding:8px;
+  background: color-mix(in srgb, var(--surface) 93%, var(--c-incantesimi) 7%);
+}
+
+.spell-offensive-row{
+  display:grid;
+  gap:8px;
+}
+
+.spell-offensive-group{
+  display:grid;
+  gap:6px;
+}
+
+.spell-offensive-inline{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  align-items:center;
+  min-width:0;
+}
+
+.spell-offensive-inline > *{
+  min-width:0;
+}
+
+.spell-atk-line .select,
+.spell-atk-line input.small,
+.spell-dmg-line .select,
+.spell-dmg-line input.small{
+  width:auto;
+}
+
+.spell-atk-line{
+  display:grid;
+  grid-template-columns:minmax(128px, 1fr) 72px 72px;
+  gap:6px;
+  align-items:center;
+}
+
+.spell-dmg-line{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px;
+}
+
+.spell-dmg-line .atk-dmg-builder{
+  flex:0 0 auto;
+}
+
+.spell-dmg-line .spell-roll-btn{
+  flex:0 0 auto;
+}
+
+.spell-roll-btn{
+  background: var(--c-incantesimi) !important;
+}
+
+.spell-range-row{
+  display:grid;
+  gap:6px;
+}
+
+.spell-range-inline{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:nowrap;
+}
+
+.spell-range-type{
+  width:92px;
+  min-width:92px;
+}
+
+.spell-range-summary{
+  width:88px;
+  min-width:88px;
+  text-align:center;
+}
+
+.spell-levels{
+  display:grid;
+  gap:10px;
+}
+
+.spell-level-block{
+  border:2px solid var(--line);
+  border-radius:10px;
+  padding:8px 10px;
+  background: color-mix(in srgb, var(--surface) 94%, var(--c-incantesimi) 6%);
+}
+
+.spell-level-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:0;
+  cursor:pointer;
+  list-style:none;
+}
+
+.spell-level-head::-webkit-details-marker{
+  display:none;
+}
+
+.spell-level-label{
+  font-size:14px;
+  font-weight:800;
+  text-transform:none;
+  letter-spacing:.2px;
+  color:var(--text);
+}
+
+.spell-level-actions{
+  margin:0;
+  gap:6px;
+  margin-left:auto;
+}
+
+.spell-level-content{
+  margin-top:8px;
+}
+
+.spell-level-block .spell-list-level{
+  margin-top:8px;
+}
+
+.spell-level-block:not([open]) .spell-list-level{
+  display:none;
+}
+
+@media (max-width: 640px){
+  .spell-entry-head{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .spell-entry-title{
+    width:100%;
+  }
+
+  .spell-entry .spell-name{
+    width:100%;
+  }
+
+  .spell-entry-controls{
+    width:100%;
+    justify-content:flex-start;
+    gap:10px;
+  }
+
+  .spell-level-head{
+    flex-wrap:wrap;
+    align-items:flex-start;
+  }
+
+  .spell-level-actions{
+    margin-left:0;
+    width:100%;
+  }
+
+  .spell-offensive-inline{
+    flex-wrap:wrap;
+  }
+
+  .spell-atk-line{
+    grid-template-columns:1fr 72px 72px;
+  }
+
+  .spell-range-inline{
+    flex-wrap:wrap;
+  }
+
+  .spell-range-type{
+    width:auto;
+    min-width:0;
+    flex:1 1 120px;
+  }
+
+  .spell-range-summary{
+    width:auto;
+    min-width:76px;
+    flex:0 0 auto;
+  }
+}
+
+@media (max-width: 520px){
+  .spell-entry-controls{
+    gap:8px;
+  }
+
+  .spell-entry-toggle{
+    padding:6px 10px;
+    font-size:10px;
+  }
+
+  .spell-offensive-toggle{
+    font-size:11px;
+  }
+
+  .spell-offensive-toggle input{
+    width:16px;
+    height:16px;
+  }
+
+  .spell-atk-line{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .spell-atk-line .spell-atk-type{
+    grid-column:1 / -1;
+  }
+
+  .spell-atk-line .spell-atk-misc,
+  .spell-atk-line .spell-atk-total{
+    width:100%;
+    min-width:0;
+  }
+
+  .spell-offensive-group:last-child .spell-offensive-inline{
+    flex-wrap:wrap;
+  }
+
+  .spell-offensive-group:last-child .atk-dmg-builder{
+    flex:1 1 138px;
+  }
+
+  .spell-offensive-group:last-child .spell-roll-btn{
+    flex:1 1 78px;
+  }
+}
+
+.spell-level-label::before{
+  content:"▾ ";
+  font-weight:900;
+}
+
+.spell-level-block:not([open]) .spell-level-label::before{
+  content:"▸ ";
+}
+
+#mythic-tier-table-body tr{
+  transition: background-color .18s ease, box-shadow .18s ease;
+}
+
+#mythic-tier-table-body tr.mythic-tier-active td{
+  background: color-mix(in srgb, var(--c-mitico) 14%, transparent);
+}
+
+#mythic-tier-table-body tr.mythic-tier-pick-active td{
+  background: color-mix(in srgb, var(--c-mitico) 22%, transparent);
+}
+
+#mythic-tier-table-body tr.mythic-tier-current td{
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c-mitico) 72%, #fff 28%);
+}
+
+.mythic-ability-pick{
+  transition: background-color .18s ease, color .18s ease, border-color .18s ease, opacity .18s ease;
+}
+
+.mythic-ability-pick.mythic-pick-selected{
+  background: var(--c-mitico);
+  border-color: color-mix(in srgb, var(--c-mitico) 70%, #000 30%);
+  color: #fff;
+}
+
+.mythic-ability-pick.mythic-pick-locked{
+  opacity: .78;
+}
+
+/* ===== Cards + Fields ===== */
+.grid{ display:grid; gap:var(--gap); }
+
+.card{
+  border:2px solid var(--line);
+  border-radius: var(--radius);
+  padding:12px;
+  background: transparent;
+}
+
+:root[data-theme="dark"] .card{
+  box-shadow: 0 8px 18px rgba(0,0,0,.25);
+}
+
+.card h2{
+  font-family:var(--font-display);
+  margin:0 0 10px 0;
+  font-size:12px;
+  line-height:1.2;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  padding-bottom:6px;
+  border-bottom:3px solid var(--c-identita);
+  color: var(--text);
+}
+
+.combat-hp-calc > summary,
+.legendary-section > summary{
+  font-size:12px;
+  line-height:1.2;
+  font-weight:700;
+  letter-spacing:.6px;
+}
+
+.card.card-collapsible .card-collapse-head{
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  user-select:none;
+}
+
+.card.card-collapsible .card-collapse-head::after{
+  content:"▾";
+  font-size:12px;
+  line-height:1;
+  color: var(--text-muted);
+  transition: transform .16s ease;
+}
+
+.card.card-collapsible.is-collapsed .card-collapse-head{
+  margin-bottom:0;
+}
+
+.card.card-collapsible.is-collapsed .card-collapse-head::after{
+  transform: rotate(-90deg);
+}
+
+.card.card-collapsible.is-collapsed > :not(.card-collapse-head){
+  display:none !important;
+}
+
+#page-identita .card h2{ border-bottom-color: var(--c-identita); }
+#page-mitico .card{ background: var(--surface); }
+#page-mitico .card h2{ border-bottom-color: var(--c-mitico); }
+#page-abilita .card h2{ border-bottom-color: var(--c-abilita); }
+#page-incantesimi .card h2{ border-bottom-color: var(--c-incantesimi); }
+#page-talenti .card h2{ border-bottom-color: var(--c-talenti); }
+#page-cdp .card h2{ border-bottom-color: var(--c-cdp); }
+#page-combattimento .card h2{ border-bottom-color: var(--c-combattimento); }
+#page-equip .card h2{ border-bottom-color: var(--c-equip); }
+#page-compagno .card h2{ border-bottom-color: var(--c-compagno); }
+#page-note .card h2{ border-bottom-color: var(--c-note); }
+
+.fields{
+  display:grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap:10px;
+}
+
+.field{
+  grid-column: span 3;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:0;
+}
+
+.field.span-4{ grid-column: span 4; }
+.field.span-6{ grid-column: span 6; }
+.field.span-8{ grid-column: span 8; }
+.field.span-12{ grid-column: span 12; }
+
+label{
+  font-size:11px;
+  color: var(--text-muted);
+  text-transform:uppercase;
+  letter-spacing:.55px;
+  line-height:1.1;
+}
+
+/* Inputs */
+input, textarea, .select{
+  width:100%;
+  border:2px solid var(--line);
+  border-radius:10px;
+  padding:8px 10px;
+  font-size:14px;
+  outline:none;
+  background: var(--surface);
+  color: var(--text);
+  min-width:0;
+}
+
+textarea{
+  min-height:120px;
+  resize:vertical;
+}
+
+input.small{
+  text-align:center;
+  font-family:var(--mono);
+  padding:7px 8px;
+}
+
+input:focus, textarea:focus, .select:focus{
+  box-shadow:0 0 0 3px rgba(0,0,0,.08);
+}
+
+/* ===== Stats ===== */
+.stats{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:10px;
+}
+
+.stat{
+  border:2px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+  text-align:center;
+}
+
+.stat .name{
+  font-size:14px;
+  font-weight:800;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+  color: var(--text-muted);
+  margin-bottom:8px;
+}
+
+.stat .row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  align-items:center;
+}
+
+.stat .row > div{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.stat .row span{
+  font-size:10px;
+  color: var(--text-muted);
+  text-transform:uppercase;
+  letter-spacing:.55px;
+}
+
+.stat .row .ability-score,
+.stat .row .ability-mod{
+  text-align:center;
+}
+
+/* ===== Combat helpers ===== */
+.triple{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+}
+
+.pill{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:10px;
+}
+
+.stack{ display:grid; gap:12px; }
+
+.save-roll-inline{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.save-roll-inline .save-roll-value{
+  flex:1 1 auto;
+  min-width:0;
+}
+
+.save-roll-inline .save-roll-btn{
+  flex:0 0 auto;
+  min-width:58px;
+}
+
+.companion-toggle{
+  margin-top:8px;
+  font-size:13px;
+  font-weight:600;
+  gap:10px;
+}
+
+.companion-toggle input[type="checkbox"]{
+  accent-color: var(--c-compagno);
+  width:18px;
+  height:18px;
+}
+
+.combat-quick-row{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.combat-dr-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:150px;
+  max-width:230px;
+  flex:0 1 220px;
+}
+
+.combat-dr-wrap #dr-sr{
+  max-width:230px;
+}
+
+.combat-hp-calc{
+  border:2px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+  background: var(--surface);
+}
+
+.combat-hp-calc > summary{
+  cursor:pointer;
+  font-family:var(--font-display);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  color: var(--text);
+  list-style:none;
+  user-select:none;
+  margin:0 0 10px 0;
+  padding-bottom:6px;
+  border-bottom:3px solid var(--c-combattimento);
+}
+
+.combat-hp-calc > summary::-webkit-details-marker{
+  display:none;
+}
+
+.combat-hp-calc > summary::before{
+  content:none;
+}
+
+.combat-hp-calc > summary::after{
+  content:"▾";
+  font-size:12px;
+  line-height:1;
+  color: var(--text-muted);
+}
+
+.combat-hp-calc:not([open]) > summary{
+  margin-bottom:0;
+}
+
+.combat-hp-calc:not([open]) > summary::after{
+  content:"▸";
+}
+
+.combat-hp-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-weight:700;
+  text-transform:none;
+  letter-spacing:0;
+  color: var(--text);
+}
+
+.combat-hp-toggle-inline{
+  width:auto;
+  min-height:auto;
+  padding:0;
+  justify-content:flex-start;
+  align-self:flex-start;
+  margin-left:0;
+  font-size:12px;
+}
+
+.combat-hp-talent-field{
+  justify-content:flex-start;
+}
+
+.combat-hp-talent-field .combat-hp-toggle-inline{
+  max-width:none;
+}
+
+.combat-hp-calc .fields .field span-3,
+.combat-hp-calc .field.span-3{
+  min-width:0;
+}
+
+.combat-hp-calc .field.span-3 label{
+  font-size:10px;
+  letter-spacing:.35px;
+}
+
+.combat-hp-calc .field.span-3 input,
+.combat-hp-calc .field.span-3 .select{
+  padding:7px 8px;
+  font-size:13px;
+}
+
+.combat-hp-calc .hint{
+  margin-top:10px;
+  line-height:1.35;
+}
+
+.theme-variant-toggle{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:700;
+  text-transform:none;
+  letter-spacing:0;
+  color:var(--text);
+  justify-content:flex-start;
+  font-size:13px;
+  line-height:1.3;
+  width:max-content;
+  align-self:flex-start;
+  white-space:nowrap;
+}
+
+.theme-variant-toggle input[type="checkbox"]{
+  accent-color:var(--c-note);
+}
+
+.class-card-rows{
+  display:grid;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.class-entry-row{
+  display:block;
+}
+
+.class-entry-row .field{
+  min-width:0;
+}
+
+.class-entry-inline-row{
+  display:grid;
+  grid-template-columns: minmax(0, 1fr) 86px;
+  gap:10px;
+  align-items:end;
+}
+
+.class-card-actions{
+  display:flex;
+  justify-content:flex-start;
+  gap:8px;
+  align-items:end;
+  margin:8px 0 0 0;
+  flex-wrap:wrap;
+}
+
+.class-summary-row{
+  display:grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  gap:10px;
+  align-items:end;
+}
+
+.class-summary-row .field{
+  min-width:0;
+}
+
+/* ===== Tables (Skills, Slots, etc.) ===== */
+.table-wrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius:10px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12.5px;
+  min-width: 560px; /* default (skills) */
+}
+
+th, td{
+  border:2px solid var(--line);
+  padding:6px;
+  vertical-align:middle;
+}
+
+.td-center{
+  text-align:center;
+}
+
+th{
+  background: rgba(0,0,0,.06);
+  text-transform:uppercase;
+  font-size:11px;
+  letter-spacing:.6px;
+  color: var(--text-muted);
+  text-align:left;
+  white-space:nowrap;
+}
+
+:root[data-theme="dark"] th{
+  background: rgba(255,255,255,.06);
+}
+
+td input{
+  border:0;
+  border-radius:0;
+  padding:0;
+  font-size:12.5px;
+  background:transparent;
+  color: var(--text);
+  outline:none;
+  min-width:0;
+}
+
+/* ===== Equip slots table tweaks ===== */
+.equip-slots table{ min-width: 0; font-size: 12.5px; }
+.equip-slots th:nth-child(1){ width: 34%; }
+.equip-slots th:nth-child(2){ width: 66%; }
+
+.equip-core-table{
+  width:100%;
+  min-width:0;
+  table-layout:fixed;
+}
+
+#attacks-table .atk-sequence{
+  min-width:92px;
+}
+
+#comp-attacks-table .comp-atk-sequence{
+  min-width:92px;
+}
+
+#attacks-table{
+  min-width:640px;
+}
+
+#comp-attacks-table{
+  min-width:640px;
+}
+
+#attacks-table th,
+#attacks-table td{
+  padding:8px 10px;
+}
+
+#comp-attacks-table th,
+#comp-attacks-table td{
+  padding:8px 10px;
+}
+
+#attacks-table td .select,
+#attacks-table td input{
+  width:100%;
+}
+
+#comp-attacks-table td .select,
+#comp-attacks-table td input{
+  width:100%;
+}
+
+.equip-core-table th:nth-child(1){ width: 12%; }
+.equip-core-table th:nth-child(2){ width: 26%; }
+.equip-core-table th:nth-child(3),
+.equip-core-table th:nth-child(4),
+.equip-core-table th:nth-child(5){ width: 16%; }
+.equip-core-table th:nth-child(6){ width: 12%; }
+
+.equip-core-table th{
+  white-space:normal;
+  line-height:1.2;
+  font-size:10px;
+  letter-spacing:.4px;
+  text-align:center;
+}
+
+.equip-core-table th,
+.equip-core-table td{
+  padding:5px;
+}
+
+.equip-core-table td input{
+  width:100%;
+}
+
+.equip-core-table td.td-center input[type="checkbox"]{
+  width:16px;
+}
+
+.equip-core-table input[type="checkbox"]{
+  width:16px;
+  height:16px;
+  accent-color: var(--c-equip);
+}
+
+.equip-weapon-inline{
+  display:flex;
+  flex-wrap:nowrap;
+  gap:10px;
+  align-items:end;
+}
+
+.equip-weapon-name-field{
+  flex:0 1 240px;
+  max-width:240px;
+  min-width:180px;
+}
+
+.equip-weapon-legendary-field{
+  flex:0 0 auto;
+  justify-content:flex-end;
+}
+
+.equip-weapon-bonus-pair{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+  align-items:end;
+  margin-top:10px;
+}
+
+.ring-pair{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:8px;
+}
+.ring-pair input{ width:100%; }
+
+.slot-notes textarea{
+  min-height: 90px;
+}
+
+.sword-graphic-card{
+  background: var(--surface);
+  --sword-line:#3f454d;
+}
+
+.sword-graphic-wrap{
+  margin-top:12px;
+  border:2px dashed var(--line);
+  border-radius:14px;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: var(--surface);
+}
+
+.sword-mod-summary{
+  margin-top:10px;
+  padding:6px 10px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  display:inline-block;
+  background: var(--surface);
+}
+
+.legendary-toggle-row{
+  margin-top:8px;
+}
+
+.legendary-enable-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-weight:700;
+}
+
+.legendary-enable-toggle input[type="checkbox"]{
+  width:16px;
+  height:16px;
+  accent-color:var(--c-mitico);
+}
+
+#equip-weapon-legendary{
+  accent-color:var(--c-equip);
+}
+
+.legendary-section{
+  margin-top:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background: var(--surface);
+  padding:8px 10px;
+}
+
+.legendary-section > summary{
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-family:var(--font-display);
+  text-transform:uppercase;
+  color: var(--text);
+  user-select:none;
+  padding-bottom:6px;
+  border-bottom:3px solid var(--c-mitico);
+  list-style:none;
+}
+
+.legendary-section > summary::-webkit-details-marker{
+  display:none;
+}
+
+.legendary-section > summary::marker{
+  content:"";
+}
+
+.legendary-section > summary::after{
+  content:"▾";
+  font-size:12px;
+  line-height:1;
+  color: var(--text-muted);
+}
+
+.legendary-section:not([open]) > summary{
+  padding-bottom:0;
+  border-bottom:0;
+}
+
+.legendary-section:not([open]) > summary::after{
+  content:"▸";
+}
+
+.legendary-summary-wrap input.small{
+  text-align:center;
+}
+
+.sword-graphic{
+  width:min(560px, 100%);
+  height:auto;
+  display:block;
+  overflow:visible;
+}
+
+.sword-outline{
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.legendary-figure{
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.sword-part{
+  stroke:var(--sword-line);
+  stroke-width:6.5;
+}
+
+.sword-graphic-card[data-enhancement="1"] .sword-part{ stroke-width:7.25; }
+.sword-graphic-card[data-enhancement="2"] .sword-part{ stroke-width:7.5; }
+.sword-graphic-card[data-enhancement="3"] .sword-part{ stroke-width:7.75; }
+.sword-graphic-card[data-enhancement="4"] .sword-part{ stroke-width:8; }
+.sword-graphic-card[data-enhancement="5"] .sword-part{ stroke-width:8.25; }
+
+.sword-graphic-card[data-material="steel"]{
+  --sword-line:#4b5563;
+}
+.sword-graphic-card[data-material="cold_iron"]{
+  --sword-line:#334155;
+}
+.sword-graphic-card[data-material="silver"]{
+  --sword-line:#94a3b8;
+}
+.sword-graphic-card[data-material="adamantine"]{
+  --sword-line:#0f766e;
+}
+.sword-graphic-card[data-material="mithral"]{
+  --sword-line:#0ea5e9;
+}
+
+
+/* ===== Badge (mitico) ===== */
+#mythic-badge{
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 520px){
+  .sheet{ padding:12px; }
+  .triple{ grid-template-columns: 1fr; }
+  .pill{ grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 760px){
+  table{
+    font-size:11.5px;
+    min-width:520px;
+  }
+
+  th, td{
+    padding:5px;
+  }
+
+  th{
+    white-space:normal;
+    line-height:1.2;
+  }
+
+  #skills-table{
+    min-width:500px !important;
+  }
+
+  #attacks-table,
+  #comp-attacks-table{
+    min-width:560px !important;
+  }
+
+  .equip-weapon-inline{
+    display:grid;
+    grid-template-columns: 1fr;
+  }
+
+  .equip-weapon-legendary-field{
+    justify-content:flex-start;
+  }
+
+  .equip-weapon-bonus-pair{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px){
+  table{
+    min-width:460px;
+  }
+
+  #skills-table{
+    min-width:440px !important;
+  }
+
+  #attacks-table,
+  #comp-attacks-table{
+    min-width:500px !important;
+  }
+
+  .roll-btn{
+    min-width:44px;
+    padding:5px 8px;
+    font-size:11px;
+  }
+}
+
+/* ===== Print (clean) ===== */
+@media print{
+  body{ background:#fff !important; color:#000 !important; }
+  .sheet{
+    width:auto;
+    margin:0;
+    border:0;
+    border-radius:0;
+    padding:0;
+    box-shadow:none !important;
+    background:#fff !important;
+  }
+  .hint, .tabs, .actions, .top-actions{ display:none !important; }
+  .page{ display:block !important; }
+  input, textarea, .select{ box-shadow:none !important; color:#000 !important; background:#fff !important; }
+  th, td{ border-color:#000 !important; }
+  .tab[aria-selected="true"]{ background:#fff !important; color:#000 !important; }
+}
+/* =====================================
+   CA — layout compatto (FIX COMPLETO)
+   Metti questo BLOCCO IN FONDO al CSS
+====================================== */
+
+/* contenitore componenti */
+#ac-components.ac-grid{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:10px;
+}
+
+/* righe */
+#ac-components .ac-row{
+  display:grid;
+  gap:10px;
+}
+
+/* Riga 1: Armatura | Scudo */
+#ac-components .ac-row.row-1{
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Riga 2: DES | Bonus Des Max | Taglia | Varie */
+#ac-components .ac-row.row-2{
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Riga 3: Note */
+#ac-components .ac-row.row-3{
+  grid-template-columns: 1fr;
+}
+
+.ac-bonus-stack{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.ac-enchant-field{
+  margin:0;
+}
+
+.ac-enchant-field label{
+  margin-bottom:4px;
+}
+
+#attacks-table td input{
+  border:0;
+  border-radius:0;
+  padding:0;
+  background:transparent;
+}
+
+.atk-dmg-builder,
+.atk-crit-builder{
+  display:grid;
+  grid-template-columns: 56px 78px;
+  gap:4px;
+  margin-bottom:0;
+}
+
+.atk-crit-builder{
+  grid-template-columns: 1fr 1fr;
+}
+
+.attack-dmg-line{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto;
+  gap:10px 12px;
+  align-items:start;
+}
+
+.attack-main{
+  min-width:0;
+}
+
+.attack-groups{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.attack-group{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:5px;
+}
+
+.attack-dmg-inline{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:nowrap;
+}
+
+.attack-roll-line{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:6px;
+  justify-content:flex-start;
+}
+
+.attack-roll-line .roll-btn{
+  width:100%;
+  border-radius:999px;
+  border:0;
+  min-width:74px;
+  padding:8px 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.1);
+}
+
+.attack-roll-line .roll-btn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,.15);
+}
+
+.attack-flags{
+  margin-top:8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.attack-subtitle{
+  font-size:12px;
+  letter-spacing:.45px;
+  text-transform:uppercase;
+  color: var(--text-muted);
+  font-weight:700;
+}
+
+.atk-dice-count{
+  border:2px solid var(--line) !important;
+  border-radius:10px !important;
+  padding:6px 8px !important;
+  background: var(--surface) !important;
+}
+
+.attack-flag{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:11px;
+  color: var(--text-muted);
+  white-space:nowrap;
+}
+
+.attack-flag input[type="checkbox"]{
+  width:15px;
+  height:15px;
+  accent-color: var(--c-combattimento);
+}
+
+.atk-dmg-total{
+  min-width:104px;
+  max-width:130px;
+  border:2px solid var(--line) !important;
+  border-radius:10px !important;
+  padding:6px 8px !important;
+  font-size:13px !important;
+  font-weight:700;
+  background: color-mix(in srgb, var(--surface) 88%, var(--c-combattimento) 12%) !important;
+  color: var(--text) !important;
+  text-align:center;
+}
+
+#page-compagno .atk-dmg-total{
+  background: color-mix(in srgb, var(--surface) 88%, var(--c-compagno) 12%) !important;
+}
+
+.atk-dmg-builder .small,
+.atk-dmg-builder .select,
+.atk-crit-builder .select{
+  padding:5px 6px !important;
+  font-size:12px !important;
+  height:32px;
+}
+
+
+.atk-crit,
+.comp-atk-crit{
+  font-size:12px;
+}
+
+/* IMPORTANTISSIMO: annulla la regola globale .field{grid-column: span 3} */
+#ac-components .ac-row > .field{
+  grid-column: auto !important;
+}
+
+/* Note più larga */
+#ac-components .field.wide{
+  grid-column: span 1 !important;
+}
+
+.roll-btn{
+  appearance:none;
+  border:0;
+  background: var(--c-abilita);
+  color: #fff;
+  font-family:var(--font-display);
+  border-radius:999px;
+  padding:8px 14px;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  cursor:pointer;
+  line-height:1.1;
+  min-width:52px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.1);
+  transition: all .2s ease;
+}
+.roll-btn:hover{
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,.15);
+}
+
+td .roll-btn + .roll-btn{
+  margin-left:0px;
+}
+
+#page-identita .btn,
+#page-identita .roll-btn{
+  background: var(--c-identita);
+}
+
+#page-abilita .btn,
+#page-abilita .roll-btn{
+  background: var(--c-abilita);
+}
+
+#page-incantesimi .btn,
+#page-incantesimi .roll-btn{
+  background: var(--c-incantesimi);
+}
+
+#page-talenti .btn,
+#page-talenti .roll-btn{
+  background: var(--c-talenti);
+}
+
+.talents-table{
+  min-width:720px;
+  table-layout:fixed;
+}
+
+.talents-table td:first-child{
+  text-align:center;
+  font-weight:700;
+}
+
+.talent-level-total{
+  font-weight:700;
+}
+
+.talent-level-class{
+  margin-top:3px;
+  font-size:10px;
+  line-height:1.15;
+  color: var(--text-muted);
+  white-space:normal;
+}
+
+.talents-table tr.talent-class-break td{
+  background: color-mix(in srgb, var(--c-talenti) 10%, transparent);
+}
+
+:root[data-theme="dark"] .talents-table tr.talent-class-break td{
+  background: color-mix(in srgb, var(--c-talenti) 16%, transparent);
+}
+
+.talents-table td input{
+  width:100%;
+}
+
+#page-equip .btn,
+#page-equip .roll-btn{
+  background: var(--c-equip);
+}
+
+#page-mitico .btn,
+#page-mitico .roll-btn{
+  background: var(--c-mitico);
+}
+
+#page-note .btn,
+#page-note .roll-btn{
+  background: var(--c-note);
+}
+
+#page-combattimento .btn,
+#page-combattimento .roll-btn{
+  background: var(--c-combattimento);
+}
+
+#page-compagno .btn,
+#page-compagno .roll-btn{
+  background: var(--c-compagno);
+}
+
+.comp-ability-field .comp-ability-pair{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:6px;
+}
+
+.comp-ability-field{
+  border:2px solid var(--line);
+  border-radius:12px;
+  padding:8px;
+  background: var(--surface);
+}
+
+.comp-ability-field > label{
+  text-align:center;
+  margin-bottom:4px;
+  font-size:13px;
+  font-weight:800;
+  color: var(--text);
+  letter-spacing:.6px;
+}
+
+.comp-ability-cell{
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:4px 6px 6px;
+  background: var(--surface);
+}
+
+.comp-ability-field .comp-ability-pair input.small{
+  text-align:center;
+  padding:6px 6px;
+}
+
+.skill-abil-fixed{
+  text-align:center;
+  font-weight:700;
+  letter-spacing:.4px;
+}
+
+/* Compattezza */
+#ac-components .field.compact input.small,
+#ac-components .field.compact input[type="text"]{
+  padding:6px 8px;
+  font-size:13px;
+}
+
+/* scudo inline */
+#ac-components .shield-inline{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* checkbox compatta */
+#ac-components .shield-toggle{
+  font-size:11px;
+  text-transform:none;
+  letter-spacing:0;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  color: var(--text-muted);
+  user-select:none;
+}
+
+#shield-off{
+  width:16px;
+  height:16px;
+  accent-color: var(--c-combattimento);
+  cursor:pointer;
+}
+
+/* Mobile: va a 1 colonna e poi 2 colonne */
+@media (max-width: 520px){
+  #ac-components .ac-row.row-1{ grid-template-columns: 1fr; }
+  #ac-components .ac-row.row-2{ grid-template-columns: 1fr 1fr; }
+  #ac-components .field.wide{ grid-column: span 2 !important; }
+}
+
+</style>
+ 
+
+
+</head>
+
+<body>
+  <main class="sheet">
+    <div class="topbar">
+      <div>
+        <div class="title">Scheda Personaggio — Pathfinder 1E</div>
+
+        <!-- Toggle Dark Mode -->
+        <div class="top-actions">
+          <span class="hint" id="theme-label">Tema</span>
+          <span class="hint wrath-theme-label" id="wrath-theme-label" hidden><em>Ira dei giusti</em> 😈</span>
+          <span class="hint wrath-theme-label" id="vivid-theme-label" hidden><em>Caos cromatico</em> ⚡</span>
+          <span class="hint wrath-theme-label" id="classic-theme-label" hidden><em>Classico</em> 📜</span>
+
+          <label class="switch" aria-label="Attiva/disattiva dark mode">
+            <input id="theme-toggle" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+
+          <span class="hint" id="theme-state">Light ☀</span>
+          <button type="button" id="refresh-page" class="top-refresh-btn" title="Ricarica la pagina">Refresh</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TABS -->
+    <nav class="tabs" role="tablist" aria-label="Pagine scheda personaggio">
+      <button type="button" class="tab" role="tab" aria-selected="true"  aria-controls="page-identita"      id="tab-identita"      data-target="page-identita">Personaggio</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-mitico"        id="tab-mitico"        data-target="page-mitico"> Rango Mitico</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-abilita"       id="tab-abilita"       data-target="page-abilita">Abilità</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-talenti"       id="tab-talenti"       data-target="page-talenti">Talenti</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-combattimento" id="tab-combattimento" data-target="page-combattimento">Combattimento</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-cdp"           id="tab-cdp"           data-target="page-cdp" hidden>Classe di Prestigio</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-incantesimi"   id="tab-incantesimi"   data-target="page-incantesimi" hidden>Incantesimi</button>
+      <button type="button" class="tab" role="tab"  aria-selected="false"  aria-controls="page-compagno"   id="tab-compagno"      data-target="page-compagno" hidden>Compagno Animale</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-equip"         id="tab-equip"         data-target="page-equip">Equipaggiamento</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-note"          id="tab-note"          data-target="page-note">Note</button>
+      <button type="button" class="tab-reset-alert" id="reset-storage" title="Cancella tutti i dati salvati in questo browser">Resetta scheda</button>
+    </nav>
+
+    <!-- PAGE: IDENTITÀ -->
+    <section class="page active" id="page-identita" role="tabpanel" aria-labelledby="tab-identita">
+      <div class="grid">
+        <div class="card">
+          <h2>Personaggio</h2>
+
+          <div class="fields">
+            <div class="field span-12">
+              <label>Nome PG</label>
+              <input type="text" placeholder="Es. Tharivol" />
+            </div>
+
+            <div class="field span-4">
+              <label>Razza</label>
+              <input type="text" placeholder="Es. Umano" />
+            </div>
+            <div class="field span-6">
+              <label>Allineamento</label>
+              <input type="text" placeholder="Es. LB" />
+            </div>
+
+            <!-- Mitico (collegato con tab Mitico via JS) -->
+            <div class="field span-8">
+              <label>Percorso Mitico</label>
+              <select class="select" id="mythic-path-identita">
+                <option value="" selected>— Seleziona —</option>
+                <option value="Arcimago">Arcimago</option>
+                <option value="Campione">Campione</option>
+                <option value="Gerofante">Gerofante</option>
+                <option value="Maresciallo">Maresciallo</option>
+                <option value="Mistificatore">Mistificatore</option>
+                <option value="Protettore">Protettore</option>
+              </select>
+            </div>
+
+            <div class="field span-4">
+              <label>Categoria Mitica</label>
+              <input class="small" id="mythic-tier-identita" type="number" min="0" max="10" step="1" placeholder="0" />
+              <div class="hint" id="mythic-badge" style="display:none;">🔒 Non mitico</div>
+            </div>
+
+            <div class="field span-8">
+              <label>Divinità</label>
+              <input type="text" placeholder="Es. Iomedae" />
+            </div>
+            <div class="field span-4">
+              <label>Taglia</label>
+              <select class="select size-select-sync" id="size-select-identita">
+                <option value="small">Piccola</option>
+                <option value="medium" selected>Media</option>
+                <option value="large">Grande</option>
+              </select>
+            </div>
+
+            <div class="field span-12">
+              <label>Lingue</label>
+              <input type="text" placeholder="Comune, ..." />
+            </div>
+
+            <div class="field span-12 identita-toggles">
+              <label class="identita-toggle-label">
+                <input id="enable-spells-tab" type="checkbox" />
+                <strong>Incantesimi</strong>
+              </label>
+              <label class="identita-toggle-label">
+                <input id="enable-companion-tab" type="checkbox" />
+                <strong>Compagno Animale</strong>
+              </label>
+              <label class="identita-toggle-label">
+                <input id="enable-cdp-section" type="checkbox" />
+                <strong>Classe di prestigio</strong>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Classe</h2>
+          <div class="class-card-rows">
+            <div class="class-entry-row" data-class-slot="1">
+              <div class="field class-entry-class class-entry-inline">
+                <label>Classe 1 • Livello</label>
+                <div class="class-entry-inline-row">
+                <select class="select class-row-select">
+                  <option value="" selected>— Seleziona —</option>
+                  <option value="Barbaro">Barbaro</option>
+                  <option value="Bardo">Bardo</option>
+                  <option value="Chierico">Chierico</option>
+                  <option value="Druido">Druido</option>
+                  <option value="Guerriero">Guerriero</option>
+                  <option value="Ladro">Ladro</option>
+                  <option value="Mago">Mago</option>
+                  <option value="Monaco">Monaco</option>
+                  <option value="Paladino">Paladino</option>
+                  <option value="Ranger">Ranger</option>
+                  <option value="Stregone">Stregone</option>
+                </select>
+                <input class="small class-row-level" type="number" min="0" step="1" value="0" />
+              </div>
+              </div>
+            </div>
+            <div class="class-entry-row" data-class-slot="2" hidden>
+              <div class="field class-entry-class class-entry-inline">
+                <label>Classe 2 • Livello</label>
+                <div class="class-entry-inline-row">
+                <select class="select class-row-select">
+                  <option value="" selected>— Seleziona —</option>
+                  <option value="Barbaro">Barbaro</option>
+                  <option value="Bardo">Bardo</option>
+                  <option value="Chierico">Chierico</option>
+                  <option value="Druido">Druido</option>
+                  <option value="Guerriero">Guerriero</option>
+                  <option value="Ladro">Ladro</option>
+                  <option value="Mago">Mago</option>
+                  <option value="Monaco">Monaco</option>
+                  <option value="Paladino">Paladino</option>
+                  <option value="Ranger">Ranger</option>
+                  <option value="Stregone">Stregone</option>
+                </select>
+                <input class="small class-row-level" type="number" min="0" step="1" value="0" />
+              </div>
+              </div>
+            </div>
+            <div class="class-entry-row" data-class-slot="3" hidden>
+              <div class="field class-entry-class class-entry-inline">
+                <label>Classe 3 • Livello</label>
+                <div class="class-entry-inline-row">
+                <select class="select class-row-select">
+                  <option value="" selected>— Seleziona —</option>
+                  <option value="Barbaro">Barbaro</option>
+                  <option value="Bardo">Bardo</option>
+                  <option value="Chierico">Chierico</option>
+                  <option value="Druido">Druido</option>
+                  <option value="Guerriero">Guerriero</option>
+                  <option value="Ladro">Ladro</option>
+                  <option value="Mago">Mago</option>
+                  <option value="Monaco">Monaco</option>
+                  <option value="Paladino">Paladino</option>
+                  <option value="Ranger">Ranger</option>
+                  <option value="Stregone">Stregone</option>
+                </select>
+                <input class="small class-row-level" type="number" min="0" step="1" value="0" />
+              </div>
+              </div>
+            </div>
+            <div class="class-entry-row cdp-field" data-class-slot="cdp" hidden>
+              <div class="field class-entry-class class-entry-inline">
+                <label>Classe di Prestigio • Livello</label>
+                <div class="class-entry-inline-row">
+                <select id="cdp-name" class="select prestige-class-select">
+                  <option value="" selected>— Seleziona CdP —</option>
+                </select>
+                <input
+                    id="cdp-level"
+                    class="small class-row-level"
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="1"
+                    value="0"
+                />
+              </div>
+              </div>
+            </div>
+          </div>
+          <div class="class-summary-row">
+            <div class="field class-summary-class">
+              <label>Classe</label>
+              <input id="pc-class-free-text" type="text" placeholder="Es. Guerriero 5 / Ladro 2" readonly />
+            </div>
+            <div class="field class-summary-level">
+              <label>Livello Totale</label>
+              <input id="pc-level-total" class="small" type="number" min="0" step="1" value="0" readonly />
+              <div class="class-card-actions">
+                <button type="button" class="btn" id="add-class-row">Aggiungi classe</button>
+                <button type="button" class="btn" id="remove-class-row">Rimuovi classe</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Caratteristiche</h2>
+
+          <div class="stats">
+            <div class="stat" data-ability="FOR">
+              <div class="name">FOR</div>
+              <div class="row">
+                <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
+                <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>
+              </div>
+            </div>
+             <div class="stat" data-ability="INT">
+              <div class="name">INT</div>
+              <div class="row">
+                <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
+                <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div> 
+              </div>
+            </div>
+
+            <div class="stat" data-ability="DES">
+              <div class="name">DES</div>
+              <div class="row">
+                <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
+                 <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>
+              </div>
+            </div>
+
+              <div class="stat" data-ability="SAG">
+              <div class="name">SAG</div>
+              <div class="row">
+                <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
+                <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>                
+              </div>
+            </div>
+
+            <div class="stat" data-ability="COS">
+              <div class="name">COS</div>
+              <div class="row">
+                <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
+                <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>                
+              </div>
+            </div>
+
+            <div class="stat" data-ability="CAR">
+              <div class="name">CAR</div>
+              <div class="row">
+                <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
+                <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>                
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-cdp" role="tabpanel" aria-labelledby="tab-cdp">
+      <div class="grid">
+        <div class="card">
+          <h2>Classe di Prestigio</h2>
+          <div class="fields">
+            <div class="field span-8">
+              <label>Classe di Prestigio</label>
+              <select id="cdp-name-tab" class="select prestige-class-select">
+                <option value="" selected>— Seleziona CdP —</option>
+              </select>
+            </div>
+            <div class="field span-4">
+              <label>Livello CdP</label>
+              <input id="cdp-level-tab" class="small" type="number" min="0" max="10" step="1" value="0" />
+            </div>
+            <div class="field span-4">
+              <label>BAB CdP</label>
+              <input id="cdp-bab-progression" class="small" type="text" value="—" readonly />
+            </div>
+            <div class="field span-4">
+              <label>DV CdP</label>
+              <input id="cdp-hit-die" class="small" type="text" value="—" readonly />
+            </div>
+            <div class="field span-4">
+              <label>TS Fort / Rif / Vol</label>
+              <input id="cdp-save-progression" class="small" type="text" value="—" readonly />
+            </div>
+            <div class="field span-12">
+              <label>Abilità di Classe</label>
+              <textarea id="cdp-class-skills" readonly placeholder="—"></textarea>
+            </div>
+            <div class="field span-12">
+              <div class="table-wrap">
+                <table aria-label="Riepilogo progressione classe di prestigio">
+                  <thead>
+                    <tr>
+                      <th>Livello</th>
+                      <th>Capacità acquisite</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cdp-summary-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="field span-12">
+              <label>Note CdP</label>
+              <textarea id="cdp-notes" placeholder="Prerequisiti, capacità chiave, progressione e appunti..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+   <section class="page" id="page-combattimento" role="tabpanel" aria-labelledby="tab-combattimento">
+  <div class="grid">
+    <div class="card">
+      <h2>Combattimento</h2>
+
+      <div class="fields" style="margin-bottom:12px;">
+        <div class="field span-4"><label>PF Totali</label><input id="hp-total" class="small" type="number" step="1" min="0" placeholder="—" readonly /></div>
+        <div class="field span-4"><label>PF Attuali</label><input id="hp-current" class="small" type="number" step="1" min="0" placeholder="—" /></div>
+        <div class="field span-4"><label>Temp PF</label><input id="hp-temp" class="small" type="number" step="1" min="0" placeholder="0" /></div>
+      </div>
+
+      <!-- Iniziativa / Velocità / RD-RI -->
+      <div class="fields" style="margin-bottom:12px;">
+        <div class="field span-4">
+          <label>Iniziativa (calcolata)</label>
+          <input id="init-total" class="small" type="text" value="+0" readonly />
+                </div>
+
+        <div class="field span-4">
+          <label>Varie Iniziativa</label>
+          <input id="init-misc" class="small" type="number" step="1" value="0" />
+        </div>
+
+        <div class="field span-4"><label>Velocità</label><input id="speed" class="small" type="text" placeholder="9 m" /></div>
+      </div>
+
+      <div class="combat-quick-row">
+        <div class="combat-dr-wrap">
+          <label>RD / RI</label>
+          <input id="dr-sr" class="small" type="text" placeholder="—" />
+        </div>
+        <div class="actions" style="margin-top:0; margin-bottom:0;">
+          <button type="button" class="btn init-roll-btn" title="Tira 1d20 + Iniziativa">Tira Iniziativa</button>
+          <button type="button" class="btn cmb-roll-btn" title="Tira 1d20 + BMC">Tira BMC</button>
+        </div>
+      </div>
+      </div>
+
+      <div class="stack combat-subcards">
+
+        <details class="combat-hp-calc" open>
+          <summary>Punti ferita</summary>
+          <div class="fields">
+            <div class="field span-3">
+              <label>DV Classe</label>
+              <select class="select" id="hp-hit-die">
+                <option value="auto" selected>Auto da classe</option>
+                <option value="6">d6</option>
+                <option value="8">d8</option>
+                <option value="10">d10</option>
+                <option value="12">d12</option>
+              </select>
+            </div>
+            <div class="field span-3">
+              <label>Livelli</label>
+              <input id="hp-levels" class="small" type="number" min="0" step="1" value="0" readonly />
+            </div>
+            <div class="field span-3">
+              <label>PF Classe Preferita</label>
+              <input id="hp-favored-bonus" class="small" type="number" min="0" step="1" value="0" />
+            </div>
+            <div class="field span-3">
+              <label>Bonus PF Vari</label>
+              <input id="hp-misc-bonus" class="small" type="number" step="1" value="0" />
+            </div>
+            <div class="field span-3">
+              <label>Base DV</label>
+              <input id="hp-base-total" class="small" type="text" value="0" readonly />
+            </div>
+            <div class="field span-3">
+              <label>Bonus COS</label>
+              <input id="hp-con-total" class="small" type="text" value="0" readonly />
+            </div>
+            <div class="field span-3">
+              <label>PF Mitici</label>
+              <input id="hp-mythic-total" class="small" type="text" value="0" readonly />
+            </div>
+            <div class="field span-3">
+              <label>Robustezza</label>
+              <input id="hp-toughness-total" class="small" type="text" value="0" readonly />
+            </div>
+            <div class="field span-12 combat-hp-talent-field">
+              <label class="combat-hp-toggle combat-hp-toggle-inline">
+                <input id="hp-toughness" type="checkbox" />
+                Robustezza
+              </label>
+            </div>
+          </div>
+          <div class="hint">Calcolo automatico: 1° livello a DV massimo, livelli successivi a media fissa, poi COS, bonus mitici, classe preferita e bonus vari.</div>
+        </details>
+
+        <!-- CA (già calcolata automaticamente) -->
+        <div class="card" style="padding:10px;">
+          <h2 style="margin-bottom:8px;">Classe Armatura (CA)</h2>
+
+          <div class="fields" style="margin-bottom:10px;">
+            <div class="field span-4">
+              <label>CA Totale</label>
+              <input id="ac-total" class="small" type="text" value="10" readonly />
+            </div>
+            <div class="field span-4">
+              <label>Contatto</label>
+              <input id="ac-touch" class="small" type="text" value="10" readonly />
+            </div>
+            <div class="field span-4">
+              <label>Impreparato</label>
+              <input id="ac-ff" class="small" type="text" value="10" readonly />
+            </div>
+          </div>
+
+          <!-- Componenti CA: usa il tuo blocco ac-components che già hai sistemato -->
+          <div id="ac-components" class="ac-grid">
+            <div class="ac-row row-1">
+              <div class="field compact">
+                <label>Armatura</label>
+                <div class="ac-bonus-stack">
+                  <input id="ac-armor" class="small" type="number" step="1" value="0" />
+                  <div class="field compact ac-enchant-field">
+                    <label>Incantamento Armatura</label>
+                    <select class="select" id="ac-armor-enhancement">
+                      <option value="0" selected>+0</option>
+                      <option value="1">+1</option>
+                      <option value="2">+2</option>
+                      <option value="3">+3</option>
+                      <option value="4">+4</option>
+                      <option value="5">+5</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field compact">
+                <label>Scudo</label>
+                <div class="ac-bonus-stack">
+                  <div class="shield-inline">
+                    <input id="ac-shield" class="small" type="number" step="1" value="0" />
+                    <label class="shield-toggle">
+                      <input id="shield-off" type="checkbox" />
+                      Off
+                    </label>
+                  </div>
+                  <div class="field compact ac-enchant-field">
+                    <label>Incantamento Scudo</label>
+                    <select class="select" id="ac-shield-enhancement">
+                      <option value="0" selected>+0</option>
+                      <option value="1">+1</option>
+                      <option value="2">+2</option>
+                      <option value="3">+3</option>
+                      <option value="4">+4</option>
+                      <option value="5">+5</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ac-row row-2">
+              <div class="field compact">
+                <label>DES</label>
+                <input id="ac-dex" class="small" type="number" step="1" value="0" readonly />
+              </div>
+              <div class="field compact">
+                <label>Bonus Des Max</label>
+                <input id="ac-dex-max" class="small" type="number" step="1" placeholder="—" />
+              </div>
+              <div class="field compact">
+                <label>Taglia</label>
+                <select class="select size-select-sync" id="size-select-ac">
+                  <option value="small">Piccola</option>
+                  <option value="medium" selected>Media</option>
+                  <option value="large">Grande</option>
+                </select>
+              </div>
+              <div class="field compact">
+                <label>Varie</label>
+                <input id="ac-misc" class="small" type="number" step="1" value="0" />
+              </div>
+            </div>
+
+            <div class="ac-row row-3">
+              <div class="field compact wide">
+                <label>Note</label>
+                <input id="ac-notes" type="text" placeholder="Es. Schivare +1..." />
+              </div>
+            </div>
+          </div>
+
+          <div class="hint" style="margin-top:8px;">
+            Tot = 10 + Armatura + Incant. Armatura + Scudo(attivo) + Incant. Scudo + min(DES, Bonus Des Max) + Taglia + Varie • Contatto: no Armatura/Scudo • Impreparato: no DES
+          </div>
+        </div>
+
+        <div class="card" style="padding:10px;">
+  <h2 style="margin-bottom:8px;">Attacchi</h2>
+
+  <!-- Modificatori globali per attacco -->
+  <div class="fields" style="margin-bottom:10px;">
+    <div class="field span-4">
+      <label>BAB</label>
+      <input id="atk-bab" class="small" type="number" step="1" value="0" />
+    </div>
+    <div class="field span-4">
+      <label>Taglia</label>
+      <select class="select size-select-sync" id="size-select-atk">
+        <option value="small">Piccola</option>
+        <option value="medium" selected>Media</option>
+        <option value="large">Grande</option>
+      </select>
+    </div>
+    <div class="field span-4">
+      <label>Varie (globale)</label>
+      <input id="atk-misc" class="small" type="number" step="1" value="0" />
+    </div>
+  </div>
+
+  <div class="fields" style="margin-bottom:10px;">
+    <div class="field span-6">
+      <label>Totale Mischia (base)</label>
+      <input id="atk-melee-total" class="small" type="text" value="+0" readonly />
+    </div>
+    <div class="field span-6">
+      <label>Totale Distanza (base)</label>
+      <input id="atk-ranged-total" class="small" type="text" value="+0" readonly />
+    </div>
+  </div>
+
+  <div class="actions" style="margin-top:0;">
+    <button type="button" class="btn" id="add-attack-row">Aggiungi attacco</button>
+    <button type="button" class="btn" id="remove-attack-row">Rimuovi ultimo</button>
+  </div>
+
+  <div class="table-wrap" style="margin-top:10px;">
+    <table aria-label="Tabella Attacchi" id="attacks-table" style="min-width:640px;">
+      <thead>
+        <tr>
+          <th style="width:28%;">Tipo</th>
+          <th style="width:22%;">BAB Att.</th>
+          <th style="width:18%;">Bonus Mag.</th>
+          <th style="width:14%;">Varie</th>
+          <th style="width:18%;">Tot</th>
+        </tr>
+      </thead>
+      <tbody id="attacks-tbody">
+        <tr class="attack-row">
+          <td>
+            <select class="select atk-type">
+              <option value="melee" selected>Mischia (FOR)</option>
+              <option value="ranged">Distanza (DES)</option>
+            </select>
+          </td>
+          <td>
+            <select class="select atk-sequence">
+              <option value="0" selected>1°</option>
+            </select>
+          </td>
+          <td>
+            <select class="select atk-magic-bonus">
+              <option value="0" selected>+0</option>
+              <option value="1">+1</option>
+              <option value="2">+2</option>
+              <option value="3">+3</option>
+              <option value="4">+4</option>
+              <option value="5">+5</option>
+            </select>
+          </td>
+          <td><input class="small atk-row-misc" type="number" step="1" value="0" /></td>
+          <td><input class="small atk-total" type="text" value="+0" readonly /></td>
+        </tr>
+        <tr class="attack-row-dmg">
+          <td colspan="5">
+            <div class="attack-dmg-line">
+              <div class="attack-main">
+                <div class="attack-groups">
+                  <div class="attack-group">
+                    <span class="attack-subtitle">Danni</span>
+                    <div class="attack-dmg-inline">
+                      <div class="atk-dmg-builder">
+                        <input class="small atk-dice-count" type="number" min="1" step="1" value="1" title="Numero dadi" />
+                        <select class="select atk-die" title="Tipo dado">
+                          <option value="4">d4</option>
+                          <option value="6">d6</option>
+                          <option value="8" selected>d8</option>
+                          <option value="10">d10</option>
+                          <option value="12">d12</option>
+                        </select>
+                      </div>
+                      <input class="small atk-dmg-total" type="text" value="1d8+0" readonly title="Riepilogo danni calcolati" />
+                    </div>
+                  </div>
+                  <div class="attack-group">
+                    <span class="attack-subtitle">Critico</span>
+                    <div class="atk-crit-builder">
+                      <select class="select atk-crit-range" title="Minaccia critico">
+                        <option value="20" selected>20</option>
+                        <option value="19">19-20</option>
+                        <option value="18">18-20</option>
+                        <option value="17">17-20</option>
+                      </select>
+                      <select class="select atk-crit-mult" title="Moltiplicatore critico">
+                        <option value="2" selected>x2</option>
+                        <option value="3">x3</option>
+                        <option value="4">x4</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="attack-flags">
+                  <label class="attack-flag atk-melee-only">
+                    <input class="atk-twohands" type="checkbox" />
+                    2 mani
+                  </label>
+                  <label class="attack-flag atk-melee-only">
+                    <input class="atk-power-attack" type="checkbox" />
+                    Attacco Poderoso
+                  </label>
+                  <label class="attack-flag atk-melee-only">
+                    <input class="atk-furious-focus" type="checkbox" />
+                    Furia Focalizzata
+                  </label>
+                </div>
+              </div>
+              <div class="attack-roll-line">
+                <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
+                <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="hint" style="margin-top:10px;">
+    Tot = BAB + Mod(FOR/DES) + Taglia + Bonus Magico + Varie(globale) + Varie(riga).
+  </div>
+</div>
+
+        <!-- BMC / DMC (in fondo) -->
+        <div class="card" style="padding:10px;">
+          <h2 style="margin-bottom:8px;">Manovre (BMC / DMC)</h2>
+          <div class="fields">
+            <div class="field span-4"><label>BMC</label><input id="cmb" class="small" type="text" value="+0" readonly /></div>
+            <div class="field span-4"><label>DMC</label><input id="cmd" class="small" type="text" value="10" readonly /></div>
+            <div class="field span-4"><label>Note</label><input id="cmb-cmd-notes" class="small" type="text" placeholder="bonus situazionali..." /></div>
+          </div>
+        </div>
+
+      </div>
+  </div>
+</section>
+    <!-- PAGE: ABILITÀ (NUOVA, con CS/ACP/Car e pronta per autocalcolo+auto-CS) -->
+
+    
+    <section class="page" id="page-abilita" role="tabpanel" aria-labelledby="tab-abilita">
+      <div class="grid">
+        <div class="card">
+          <h2>Abilità</h2>
+
+            <div class="fields skills-toolbar" style="margin-bottom:12px;">
+            <div class="field span-6 skills-filters-col">
+              <label>Classi Attive</label>
+              <input id="skills-class-summary" type="text" placeholder="Derivate da Personaggio" readonly />
+            </div>
+
+            <div class="field span-3">
+              <label>Pen. armatura</label>
+              <input id="skills-acp" class="small" type="text" value="0" readonly />
+            </div>
+            <div class="field span-3">
+              <label>Punti abilità tot.</label>
+              <input id="skills-points-total" class="small" type="text" value="0" readonly />
+            </div>
+            <div class="field span-3 skills-filters-col">
+              <label class="skills-filter-label">
+                <input id="filter-class" type="checkbox" />
+                <strong>Mostra solo class skill (CS)</strong>
+              </label>
+            </div>
+            <div class="field span-6 skills-filters-col skills-trained-filter-col">
+              <label class="skills-filter-label">
+                <input id="filter-trained" type="checkbox" />
+                <strong>Mostra solo abilità con gradi &gt; 0</strong>
+              </label>
+            </div>
+            <div class="field span-3">
+              <label>Punti abilità spesi</label>
+              <input id="skills-ranks-spent" class="small" type="text" value="0" readonly />
+            </div>
+          </div>
+          <table aria-label="Tabella Abilità" id="skills-table">
+  <thead>
+    <tr>
+      <th style="width:6%;">CS</th>
+      <th style="width:34%;">Abilità</th>
+      <th style="width:12%;">Car</th>
+      <th style="width:8%;">ACP</th>
+      <th style="width:10%;">Gradi</th>
+      <th style="width:12%;">Varie</th>
+      <th style="width:10%;">Tot</th>
+      <th style="width:8%;">Tiro</th>
+    </tr>
+  </thead>
+        
+              <tbody id="skills-tbody"></tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: INCANTESIMI -->
+    <section class="page" id="page-incantesimi" role="tabpanel" aria-labelledby="tab-incantesimi">
+      <div class="grid">
+        <div class="card">
+          <h2>Lancio Incantesimi</h2>
+          <div class="fields">
+            <div class="field span-4">
+              <label>Classe Incantatrice</label>
+              <select class="select" id="spellcaster-class">
+                <option value="" selected>— Seleziona —</option>
+                <option value="Alchimista">Alchimista</option>
+                <option value="Antipaladino">Antipaladino</option>
+                <option value="Bardo">Bardo</option>
+                <option value="Chierico">Chierico</option>
+                <option value="Convocatore">Convocatore</option>
+                <option value="Druido">Druido</option>
+                <option value="Fattucchiere">Fattucchiere</option>
+                <option value="Inquisitore">Inquisitore</option>
+                <option value="Magus">Magus</option>
+                <option value="Mago">Mago</option>
+                <option value="Oracolo">Oracolo</option>
+                <option value="Paladino">Paladino</option>
+                <option value="Ranger">Ranger</option>
+                <option value="Stregone">Stregone</option>
+              </select>
+            </div>
+            <div class="field span-4"><label>Caratteristica Chiave</label><input id="spellcasting-ability" type="text" value="—" readonly /></div>
+            <div class="field span-4"><label>Mod Caratteristica</label><input id="spellcasting-ability-mod" class="small" type="text" value="+0" readonly /></div>
+          </div>
+          <div class="fields" style="margin-top:10px;">
+            <div class="field span-4"><label>LI (Livello Incantatore)</label><input id="spellcaster-level" class="small" type="number" min="0" step="1" value="0" /></div>
+            <div class="field span-4"><label>Concentrazione</label><input class="small" type="text" value="+0" /></div>
+            <div class="field span-4"><label>Bonus Prove RM</label><input class="small" type="text" value="+0" /></div>
+            <div class="field span-4"><label>Incantesimi Noti</label><input class="small" type="number" min="0" step="1" value="0" /></div>
+            <div class="field span-4"><label>Incantesimi Preparati</label><input class="small" type="number" min="0" step="1" value="0" /></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Slot Giornalieri</h2>
+          <div class="table-wrap">
+            <table aria-label="Slot Incantesimi">
+              <thead>
+                <tr>
+                  <th>Livello</th>
+                  <th style="text-align:center;">CD</th>
+                  <th style="text-align:center;">Totali</th>
+                  <th style="text-align:center;">Usati</th>
+                  <th style="text-align:center;">Rimasti</th>
+                  <th style="text-align:center;">Bonus</th>
+                </tr>
+              </thead>
+              <tbody id="spell-slots-body">
+                <tr class="spell-slot-row" data-level="0"><td>0</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="1"><td>1</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="2"><td>2</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="3"><td>3</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="4"><td>4</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="5"><td>5</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="6"><td>6</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="7"><td>7</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="8"><td>8</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+                <tr class="spell-slot-row" data-level="9"><td>9</td><td><input class="small spell-slot-cd" type="text" value="10" readonly /></td><td><input class="small spell-slot-total" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-used" type="number" min="0" step="1" value="0" /></td><td><input class="small spell-slot-remaining" type="text" value="0" readonly /></td><td><input class="small spell-slot-bonus" type="number" min="0" step="1" value="0" /></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Lista Incantesimi</h2>
+          <div class="spell-levels">
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 0</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-0" data-level="0">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-0" data-level="0">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-0"><input class="spell-name" type="text" placeholder="Incantesimo livello 0" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 1</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-1" data-level="1">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-1" data-level="1">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-1"><input class="spell-name" type="text" placeholder="Incantesimo livello 1" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 2</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-2" data-level="2">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-2" data-level="2">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-2"><input class="spell-name" type="text" placeholder="Incantesimo livello 2" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 3</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-3" data-level="3">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-3" data-level="3">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-3"><input class="spell-name" type="text" placeholder="Incantesimo livello 3" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 4</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-4" data-level="4">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-4" data-level="4">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-4"><input class="spell-name" type="text" placeholder="Incantesimo livello 4" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 5</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-5" data-level="5">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-5" data-level="5">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-5"><input class="spell-name" type="text" placeholder="Incantesimo livello 5" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 6</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-6" data-level="6">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-6" data-level="6">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-6"><input class="spell-name" type="text" placeholder="Incantesimo livello 6" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 7</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-7" data-level="7">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-7" data-level="7">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-7"><input class="spell-name" type="text" placeholder="Incantesimo livello 7" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 8</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-8" data-level="8">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-8" data-level="8">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-8"><input class="spell-name" type="text" placeholder="Incantesimo livello 8" /></div></div></details>
+            <details class="spell-level-block" open><summary class="spell-level-head"><span class="spell-level-label">Livello 9</span></summary><div class="spell-level-content"><div class="actions spell-level-actions"><button type="button" class="btn btn-incantesimi" id="add-spell-9" data-level="9">Aggiungi incantesimo</button><button type="button" class="btn btn-incantesimi" id="remove-spell-9" data-level="9">Rimuovi incantesimo</button></div><div class="spell-list-level" id="spell-list-level-9"><input class="spell-name" type="text" placeholder="Incantesimo livello 9" /></div></div></details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: TALENTI -->
+    <section class="page" id="page-talenti" role="tabpanel" aria-labelledby="tab-talenti">
+      <div class="grid">
+        <div class="card">
+          <h2>Talenti per Livello</h2>
+          <div class="table-wrap">
+            <table aria-label="Tabella talenti per livello" id="talents-table" class="talents-table">
+              <thead>
+                <tr>
+                  <th style="width:12%;">Livello</th>
+                  <th style="width:32%;">Talento</th>
+                  <th style="width:32%;">Talenti Bonus</th>
+                  <th style="width:24%;">Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td><input type="text" placeholder="Es. Attacco Poderoso" /></td><td><input type="text" placeholder="Es. talento umano, bonus guerriero..." /></td><td><input type="text" placeholder="Note" /></td></tr>
+                <tr><td>2</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>3</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>4</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>5</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>6</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>7</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>8</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>9</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>10</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>11</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>12</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>13</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>14</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>15</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>16</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>17</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>18</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>19</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>20</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Tratti • Capacità • Note</h2>
+          <div class="grid" style="gap:12px;">
+            <div class="field span-12"><label>Tratti / Capacità di classe</label><textarea placeholder="Tratti, capacità, privilegi..."></textarea></div>
+            <div class="field span-12"><label>Debolezze / Condizioni / Resistenze</label><textarea placeholder="Note rapide..."></textarea></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: EQUIP -->
+    <section class="page" id="page-equip" role="tabpanel" aria-labelledby="tab-equip">
+      <div class="grid">
+
+        <div class="card equip-slots">
+          <h2>Equipaggiamento — Slot</h2>
+
+          <div class="table-wrap" style="overflow-x:visible;">
+            <table aria-label="Slot equipaggiabili">
+              <thead>
+                <tr>
+                  <th>Slot</th>
+                  <th>Oggetto equipaggiato</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Slot Testa</td><td><input type="text" placeholder="Es. elmo, fascia..." /></td></tr>
+                <tr><td>Slot Fronte</td><td><input type="text" placeholder="Es. diadema..." /></td></tr>
+                <tr><td>Slot Occhi</td><td><input type="text" placeholder="Es. lenti..." /></td></tr>
+                <tr><td>Slot Collo</td><td><input type="text" placeholder="Es. amuleto..." /></td></tr>
+                <tr><td>Slot Spalle</td><td><input type="text" placeholder="Es. mantello..." /></td></tr>
+                <tr><td>Slot Corpo</td><td><input type="text" placeholder="Es. armatura..." /></td></tr>
+                <tr><td>Slot Torace</td><td><input type="text" placeholder="Es. pettorale..." /></td></tr>
+                <tr><td>Slot Polsi</td><td><input type="text" placeholder="Es. bracciali..." /></td></tr>
+                <tr><td>Slot Mani</td><td><input type="text" placeholder="Es. guanti..." /></td></tr>
+                <tr><td>Slot Cintura</td><td><input type="text" placeholder="Es. cintura..." /></td></tr>
+                <tr><td>Slot Piedi</td><td><input type="text" placeholder="Es. stivali..." /></td></tr>
+
+                <tr>
+                  <td>Anelli (x2)</td>
+                  <td>
+                    <div class="ring-pair">
+                      <input type="text" placeholder="Anello 1" />
+                      <input type="text" placeholder="Anello 2" />
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="slot-notes">
+                  <td>Senza Slot</td>
+                  <td><textarea placeholder="Oggetti senza slot&#10;• ...&#10;• ..."></textarea></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="hint" style="margin-top:10px;">
+            “Senza Slot” include oggetti narrativi o che non rientrano negli slot standard.
+          </div>
+        </div>
+
+        <div class="card equip-weapon-card">
+          <h2>Arma</h2>
+          <div class="equip-weapon-inline">
+            <div class="field equip-weapon-name-field">
+              <label>Nome Arma</label>
+              <input id="equip-weapon-name" type="text" placeholder="Es. Spada lunga +1" />
+            </div>
+            <div class="field equip-weapon-legendary-field">
+              <label class="legendary-enable-toggle"><input id="equip-weapon-legendary" type="checkbox" />Ogg. leggendario</label>
+            </div>
+          </div>
+          <div class="equip-weapon-bonus-pair">
+            <div class="field">
+              <label>Bonus Magico</label>
+              <input id="equip-weapon-magic-bonus" class="small" type="number" min="0" max="5" step="1" value="0" />
+            </div>
+            <div class="field">
+              <label>Bonus Capacita</label>
+              <input id="equip-weapon-ability-bonus" class="small" type="number" min="0" max="5" step="1" value="0" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card equip-core-card">
+          <h2>Armatura • Scudo</h2>
+          <div class="table-wrap" style="overflow-x:auto;">
+            <table class="equip-core-table" aria-label="Valori equipaggiamento principale">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Nome Oggetto</th>
+                  <th>CA</th>
+                  <th>Fall. Arcano %</th>
+                  <th>Penalità Armatura</th>
+                  <th>Legg.</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Armatura</td>
+                  <td><input id="equip-armor-name" type="text" placeholder="Es. Corazza di mithral" /></td>
+                  <td><input id="equip-armor-ac" class="small" type="number" step="1" value="0" /></td>
+                  <td><input id="equip-armor-asf" class="small" type="number" min="0" max="100" step="1" value="0" /></td>
+                  <td><input id="equip-armor-acp" class="small" type="number" min="0" step="1" value="0" /></td>
+                  <td class="td-center"><input id="equip-armor-legendary" type="checkbox" /></td>
+                </tr>
+                <tr>
+                  <td>Scudo</td>
+                  <td><input id="equip-shield-name" type="text" placeholder="Es. Scudo pesante +2" /></td>
+                  <td><input id="equip-shield-ac" class="small" type="number" step="1" value="0" /></td>
+                  <td><input id="equip-shield-asf" class="small" type="number" min="0" max="100" step="1" value="0" /></td>
+                  <td><input id="equip-shield-acp" class="small" type="number" min="0" step="1" value="0" /></td>
+                  <td class="td-center"><input id="equip-shield-legendary" type="checkbox" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="hint" style="margin-top:10px;">
+            Le penalità armatura di armatura e scudo vengono sommate automaticamente e inviate al totale nella tab Abilità.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Inventario</h2>
+          <div class="fields">
+            <div class="field span-12">
+              <label>Oggetti / Consumabili / Varie</label>
+              <textarea placeholder="Pozioni, pergamene, componenti, strumenti, materiali..."></textarea>
+            </div>
+            <div class="field span-12">
+              <label>Carico / Peso / Contenitori</label>
+              <textarea placeholder="Zaino, sacche, peso totale, limiti di carico..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Note Equipaggiamento</h2>
+          <textarea placeholder="Annotazioni libere: oggetti importanti, attivazioni, cariche..."></textarea>
+        </div>
+
+        <div class="card">
+          <h2>Ricchezza — Monete</h2>
+          <div class="fields">
+            <div class="field span-4"><label>MO</label><input class="small" type="text" placeholder="0" /></div>
+            <div class="field span-4"><label>MA</label><input class="small" type="text" placeholder="0" /></div>
+            <div class="field span-4"><label>MR</label><input class="small" type="text" placeholder="0" /></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE: MITICO -->
+    <section class="page" id="page-mitico" role="tabpanel" aria-labelledby="tab-mitico">
+      <div class="grid">
+        <div class="card">
+          <h2>Personaggio Mitico</h2>
+          <div class="fields">
+
+            <!-- Collegati con Identità via JS -->
+            <div class="field span-8">
+              <label>Percorso Mitico</label>
+              <select class="select" id="mythic-path-mitico">
+                <option value="" selected>— Seleziona —</option>
+                <option value="Arcimago">Arcimago</option>
+                <option value="Campione">Campione</option>
+                <option value="Gerofante">Gerofante</option>
+                <option value="Maresciallo">Maresciallo</option>
+                <option value="Mistificatore">Mistificatore</option>
+                <option value="Protettore">Protettore</option>
+              </select>
+            </div>
+
+            <div class="field span-4">
+              <label>Categoria Mitica</label>
+              <input class="small" id="mythic-tier-mitico" type="number" min="0" max="10" step="1" placeholder="0" />
+            </div>
+
+            <div class="field span-4"><label>Dado Impulso (attuale)</label><input class="small" id="mythic-surge-die" type="text" value="—" readonly /></div>            <div class="field span-4"><label>Usi Potere Mitico</label><input class="small" id="mythic-power-uses" type="text" value="0" readonly /></div>            <div class="field span-4"><label>Iniziativa Mitica / Bonus</label><input class="small" id="mythic-init-bonus" type="text" value="+0" readonly /></div>
+
+            <div class="field span-12">
+              <label>Reminder dado di impulso</label>
+              <input id="mythic-surge-reminder" type="text" value="Diventa mitico (Categoria 1) per ottenere il dado impulso." readonly />
+            </div>
+
+            <div class="field span-12">
+              <div class="table-wrap">
+                <table aria-label="Progressione dado impulso mitico">
+                  <thead>
+                    <tr>
+                      <th>Categoria Mitica</th>
+                      <th>Aumento Caratteristica</th>
+                      <th>Impulso Mitico</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>1</td><td>—</td><td>1d6</td></tr>
+                    <tr>
+                      <td>2</td>
+                      <td>
+                        <select class="select mythic-ability-pick" data-tier="2">
+                          <option value="" selected>— Seleziona —</option>
+                          <option value="FOR">FOR</option>
+                          <option value="DES">DES</option>
+                          <option value="COS">COS</option>
+                          <option value="INT">INT</option>
+                          <option value="SAG">SAG</option>
+                          <option value="CAR">CAR</option>
+                        </select>
+                      </td>
+                      <td>—</td>
+                    </tr>
+                    <tr><td>3</td><td>—</td><td>1d8</td></tr>
+                    <tr>
+                      <td>4</td>
+                      <td>
+                        <select class="select mythic-ability-pick" data-tier="4">
+                          <option value="" selected>— Seleziona —</option>
+                          <option value="FOR">FOR</option>
+                          <option value="DES">DES</option>
+                          <option value="COS">COS</option>
+                          <option value="INT">INT</option>
+                          <option value="SAG">SAG</option>
+                          <option value="CAR">CAR</option>
+                        </select>
+                      </td>
+                      <td>—</td>
+                    </tr>
+                    <tr><td>5</td><td>—</td><td>—</td></tr>
+                    <tr>
+                      <td>6</td>
+                      <td>
+                        <select class="select mythic-ability-pick" data-tier="6">
+                          <option value="" selected>— Seleziona —</option>
+                          <option value="FOR">FOR</option>
+                          <option value="DES">DES</option>
+                          <option value="COS">COS</option>
+                          <option value="INT">INT</option>
+                          <option value="SAG">SAG</option>
+                          <option value="CAR">CAR</option>
+                        </select>
+                      </td>
+                      <td>1d10</td>
+                    </tr>
+                    <tr><td>7</td><td>—</td><td>—</td></tr>
+                    <tr>
+                      <td>8</td>
+                      <td>
+                        <select class="select mythic-ability-pick" data-tier="8">
+                          <option value="" selected>— Seleziona —</option>
+                          <option value="FOR">FOR</option>
+                          <option value="DES">DES</option>
+                          <option value="COS">COS</option>
+                          <option value="INT">INT</option>
+                          <option value="SAG">SAG</option>
+                          <option value="CAR">CAR</option>
+                        </select>
+                      </td>
+                      <td>—</td>
+                    </tr>
+                    <tr><td>9</td><td>—</td><td>1d12</td></tr>
+                    <tr>
+                      <td>10</td>
+                      <td>
+                        <select class="select mythic-ability-pick" data-tier="10">
+                          <option value="" selected>— Seleziona —</option>
+                          <option value="FOR">FOR</option>
+                          <option value="DES">DES</option>
+                          <option value="COS">COS</option>
+                          <option value="INT">INT</option>
+                          <option value="SAG">SAG</option>
+                          <option value="CAR">CAR</option>
+                        </select>
+                      </td>
+                      <td>—</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="field span-12"><label>Capacità Mitiche</label><textarea placeholder="Capacità base e di percorso..."></textarea></div>
+            <div class="field span-12"><label>Cimenti</label><textarea placeholder="Cimenti completati..."></textarea></div>
+          </div>
+        </div>
+
+        <div class="card sword-graphic-card">
+          <h2>Oggetto Leggendario</h2>
+          <input id="legendary-enabled" type="checkbox" hidden />
+
+          <div id="legendary-content" hidden>
+          <div class="fields">
+            <div class="field span-8">
+              <label>Nome Oggetto</label>
+              <input id="legendary-name" type="text" placeholder="Es. Lama della Stella" />
+            </div>
+            <div class="field span-4">
+              <label>Tipo Oggetto</label>
+              <select id="legendary-item-type" class="select">
+                <option value="weapon" selected>Arma</option>
+                <option value="armor">Armatura</option>
+                <option value="shield">Scudo</option>
+                <option value="wondrous">Altro Oggetto</option>
+              </select>
+            </div>
+
+            <div class="field span-4"><label>Tier Mitico (auto)</label><input id="legendary-tier" class="small" type="text" value="0" readonly /></div>
+            <div class="field span-4"><label>Punti Potere Totali</label><input id="legendary-power-total" class="small" type="text" value="3" readonly /></div>
+            <div class="field span-4"><label>Punti Spesi</label><input id="legendary-power-spent" class="small" type="number" min="0" step="1" value="0" /></div>
+            <div class="field span-4"><label>Punti Rimanenti</label><input id="legendary-power-remaining" class="small" type="text" value="3" readonly /></div>
+            <div class="field span-4"><label>Legendary Surge</label><input id="legendary-surge-die" class="small" type="text" value="—" readonly /></div>
+            <div class="field span-4"><label>Ego</label><input id="legendary-ego" class="small" type="number" min="0" step="1" value="0" /></div>
+            <div class="field span-4"><label>Bonus Magico</label><input id="legendary-magic-bonus" class="small" type="number" min="0" max="5" step="1" value="0" /></div>
+            <div class="field span-4"><label>Bonus Capacità</label><input id="legendary-ability-bonus" class="small" type="number" min="0" max="5" step="1" value="0" /></div>
+            <div class="field span-4"><label>Totale Bonus</label><input id="legendary-total-bonus" class="small" type="text" value="+0 / +10" readonly /></div>
+
+            <div class="field span-6">
+              <label>Materiale</label>
+              <select id="legendary-material" class="select">
+                <option value="steel" selected>Acciaio</option>
+                <option value="cold_iron">Ferro Freddo</option>
+                <option value="silver">Argento Alchemico</option>
+                <option value="adamantine">Adamantio</option>
+                <option value="mithral">Mithral</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="hint sword-mod-summary" id="legendary-mod-summary">Tier 0 • Punti Potere 3/3</div>
+
+          <details class="legendary-section" open>
+            <summary>Poteri dell'Oggetto</summary>
+            <div class="fields" style="margin-top:12px;">
+              <div class="field span-12">
+                <label>Poteri Minori</label>
+                <textarea id="legendary-powers-minor" placeholder="Elenco poteri minori..."></textarea>
+              </div>
+              <div class="field span-12">
+                <label>Poteri Maggiori (Tier 6)</label>
+                <textarea id="legendary-powers-major" placeholder="Elenco poteri maggiori..."></textarea>
+              </div>
+              <div class="field span-12">
+                <label>Poteri Supremi (Tier 9)</label>
+                <textarea id="legendary-powers-supreme" placeholder="Elenco poteri supremi..."></textarea>
+              </div>
+            </div>
+          </details>
+
+          <details class="legendary-section" open>
+            <summary>Riepilogo Meccanico</summary>
+            <div class="table-wrap legendary-summary-wrap" style="margin-top:10px;">
+              <table aria-label="Riepilogo meccanico oggetto leggendario">
+                <thead>
+                  <tr>
+                    <th>Tier</th>
+                    <th>PP Totali</th>
+                    <th>PP Spesi</th>
+                    <th>PP Rimanenti</th>
+                    <th>Surge</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><input id="legendary-tier-out" class="small" type="text" value="0" readonly /></td>
+                    <td><input id="legendary-power-total-out" class="small" type="text" value="3" readonly /></td>
+                    <td><input id="legendary-power-spent-out" class="small" type="text" value="0" readonly /></td>
+                    <td><input id="legendary-power-remaining-out" class="small" type="text" value="3" readonly /></td>
+                    <td><input id="legendary-surge-out" class="small" type="text" value="—" readonly /></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+          <div class="hint" id="legendary-enhancement-warning" style="margin-top:8px; display:none;">
+            Cap applicato: massimo +5 bonus magico, +5 capacità, totale combinato +10.
+          </div>
+
+          <details class="legendary-section" open>
+            <summary>Tavola Effetti Arma</summary>
+            <div class="table-wrap" style="margin-top:12px;">
+              <table aria-label="Tavola poteri leggendari">
+                <thead>
+                  <tr>
+                    <th>Potere</th>
+                    <th>Categoria</th>
+                    <th>Costo PP</th>
+                    <th>Meccanica</th>
+                    <th>Vincoli</th>
+                  </tr>
+                </thead>
+                <tbody id="legendary-power-catalog-body"></tbody>
+              </table>
+            </div>
+          </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- PAGE: COMPAGNO ANIMALE -->
+<section class="page" id="page-compagno" role="tabpanel" aria-labelledby="tab-compagno">
+  <div class="grid">
+
+    <div class="card">
+      <h2>Compagno Animale</h2>
+      <div class="fields">
+        <div class="field span-12">
+          <label>Nome Compagno</label>
+          <input type="text" placeholder="Es. Tyr" />
+        </div>
+
+        <div class="field span-8">
+          <label>Tipo / Specie</label>
+          <input type="text" placeholder="Es. Lupo, Leopardo, Cavallo..." />
+        </div>
+        <div class="field span-4">
+          <label>Taglia</label>
+          <select class="select size-select-sync" id="size-select-compagno">
+            <option value="small">Piccola</option>
+            <option value="medium" selected>Media</option>
+            <option value="large">Grande</option>
+          </select>
+        </div>
+
+        <div class="field span-3">
+          <label>Livello / DV</label>
+          <input id="comp-level" class="small" type="number" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="field span-3">
+          <label>Livello Effettivo</label>
+          <input id="comp-effective-level" class="small" type="text" value="0" readonly />
+        </div>
+        <div class="field span-3">
+          <label>PF Totali</label>
+          <input class="small" type="number" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="field span-3">
+          <label>PF Attuali</label>
+          <input class="small" type="number" min="0" step="1" placeholder="0" />
+        </div>
+
+        <div class="field span-4">
+          <label>Iniziativa</label>
+          <div class="save-roll-inline">
+            <input id="comp-init" class="small save-roll-value" type="text" value="+0" />
+            <button type="button" class="roll-btn save-roll-btn" data-target="comp-init" data-label="Iniziativa Compagno" title="Tira 1d20 + Iniziativa">Tiro</button>
+          </div>
+          <label class="skills-filter-label companion-toggle">
+            <input id="comp-boon-companion" type="checkbox" />
+            Boon Companion
+          </label>
+        </div>
+        <div class="field span-4">
+          <label>Velocità</label>
+          <input class="small" type="text" placeholder="12 m" />
+        </div>
+        <div class="field span-4">
+          <label>RD / RI</label>
+          <input class="small" type="text" placeholder="—" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Caratteristiche &amp; TS</h2>
+      <div class="fields">
+        <div class="field span-4 comp-ability-field" data-ability="FOR">
+          <label>FOR</label>
+          <div class="comp-ability-pair">
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-score" type="number" min="1" max="50" step="1" value="10" title="Valore FOR" />
+            </div>
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-mod" type="number" step="1" value="0" title="Mod FOR" />
+            </div>
+          </div>
+        </div>
+        <div class="field span-4 comp-ability-field" data-ability="DES">
+          <label>DES</label>
+          <div class="comp-ability-pair">
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-score" type="number" min="1" max="50" step="1" value="10" title="Valore DES" />
+            </div>
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-mod" type="number" step="1" value="0" title="Mod DES" />
+            </div>
+          </div>
+        </div>
+        <div class="field span-4 comp-ability-field" data-ability="COS">
+          <label>COS</label>
+          <div class="comp-ability-pair">
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-score" type="number" min="1" max="50" step="1" value="10" title="Valore COS" />
+            </div>
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-mod" type="number" step="1" value="0" title="Mod COS" />
+            </div>
+          </div>
+        </div>
+
+        <div class="field span-4 comp-ability-field" data-ability="INT">
+          <label>INT</label>
+          <div class="comp-ability-pair">
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-score" type="number" min="1" max="50" step="1" value="10" title="Valore INT" />
+            </div>
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-mod" type="number" step="1" value="0" title="Mod INT" />
+            </div>
+          </div>
+        </div>
+        <div class="field span-4 comp-ability-field" data-ability="SAG">
+          <label>SAG</label>
+          <div class="comp-ability-pair">
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-score" type="number" min="1" max="50" step="1" value="10" title="Valore SAG" />
+            </div>
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-mod" type="number" step="1" value="0" title="Mod SAG" />
+            </div>
+          </div>
+        </div>
+        <div class="field span-4 comp-ability-field" data-ability="CAR">
+          <label>CAR</label>
+          <div class="comp-ability-pair">
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-score" type="number" min="1" max="50" step="1" value="10" title="Valore CAR" />
+            </div>
+            <div class="comp-ability-cell">
+              <input class="small comp-ability-mod" type="number" step="1" value="0" title="Mod CAR" />
+            </div>
+          </div>
+        </div>
+
+        <div class="field span-4">
+          <label>Tempra</label>
+          <div class="save-roll-inline">
+            <input id="comp-save-fort" class="small save-roll-value" type="text" value="+0" />
+            <button type="button" class="roll-btn save-roll-btn" data-target="comp-save-fort" data-label="Tempra Compagno" title="Tira 1d20 + Tempra">Tiro</button>
+          </div>
+        </div>
+        <div class="field span-4">
+          <label>Riflessi</label>
+          <div class="save-roll-inline">
+            <input id="comp-save-ref" class="small save-roll-value" type="text" value="+0" />
+            <button type="button" class="roll-btn save-roll-btn" data-target="comp-save-ref" data-label="Riflessi Compagno" title="Tira 1d20 + Riflessi">Tiro</button>
+          </div>
+        </div>
+        <div class="field span-4">
+          <label>Volontà</label>
+          <div class="save-roll-inline">
+            <input id="comp-save-will" class="small save-roll-value" type="text" value="+0" />
+            <button type="button" class="roll-btn save-roll-btn" data-target="comp-save-will" data-label="Volontà Compagno" title="Tira 1d20 + Volontà">Tiro</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>CA &amp; Attacchi</h2>
+      <div class="fields">
+        <div class="field span-4"><label>CA</label><input class="small" type="text" placeholder="10" /></div>
+        <div class="field span-4"><label>Contatto</label><input class="small" type="text" placeholder="10" /></div>
+        <div class="field span-4"><label>Impreparato</label><input class="small" type="text" placeholder="10" /></div>
+      </div>
+
+      <div class="fields" style="margin-top:10px;">
+        <div class="field span-3"><label>BAB Compagno</label><input id="comp-atk-bab" class="small" type="number" step="1" value="0" /></div>
+        <div class="field span-3"><label>Mod FOR</label><input id="comp-atk-str-mod" class="small" type="number" step="1" value="0" /></div>
+        <div class="field span-3"><label>Mod DES</label><input id="comp-atk-dex-mod" class="small" type="number" step="1" value="0" /></div>
+        <div class="field span-3"><label>Varie (globale)</label><input id="comp-atk-misc" class="small" type="number" step="1" value="0" /></div>
+      </div>
+
+      <div class="actions" style="margin-top:8px;">
+        <button type="button" class="btn" id="add-comp-attack-row">Aggiungi attacco</button>
+        <button type="button" class="btn" id="remove-comp-attack-row">Rimuovi ultimo</button>
+      </div>
+
+      <div class="table-wrap" style="margin-top:10px;">
+        <table aria-label="Tabella Attacchi Compagno" id="comp-attacks-table" style="min-width:640px;">
+          <thead>
+            <tr>
+              <th style="width:32%;">Tipo</th>
+              <th style="width:24%;">BAB Att.</th>
+              <th style="width:20%;">Varie</th>
+              <th style="width:24%;">Tot</th>
+            </tr>
+          </thead>
+          <tbody id="comp-attacks-tbody">
+            <tr class="comp-attack-row">
+              <td>
+                <select class="select comp-atk-type">
+                  <option value="melee" selected>Mischia (FOR)</option>
+                  <option value="ranged">Distanza (DES)</option>
+                </select>
+              </td>
+              <td>
+                <select class="select comp-atk-sequence">
+                  <option value="0" selected>1°</option>
+                </select>
+              </td>
+              <td><input class="small comp-atk-row-misc" type="number" step="1" value="0" /></td>
+              <td><input class="small comp-atk-total" type="text" value="+0" readonly /></td>
+            </tr>
+            <tr class="comp-attack-row-dmg">
+              <td colspan="4">
+                <div class="attack-dmg-line">
+                  <div class="attack-main">
+                    <div class="attack-groups">
+                      <div class="attack-group">
+                        <span class="attack-subtitle">Danni</span>
+                        <div class="attack-dmg-inline">
+                          <div class="atk-dmg-builder">
+                            <input class="small comp-atk-dice-count" type="number" min="1" step="1" value="1" title="Numero dadi" />
+                            <select class="select comp-atk-die" title="Tipo dado">
+                              <option value="4">d4</option>
+                              <option value="6" selected>d6</option>
+                              <option value="8">d8</option>
+                              <option value="10">d10</option>
+                              <option value="12">d12</option>
+                            </select>
+                          </div>
+                          <input class="small atk-dmg-total comp-atk-dmg-total" type="text" value="1d6+0" readonly title="Riepilogo danni calcolati" />
+                        </div>
+                      </div>
+                      <div class="attack-group">
+                        <span class="attack-subtitle">Critico</span>
+                        <div class="atk-crit-builder">
+                          <select class="select comp-atk-crit-range" title="Minaccia critico">
+                            <option value="20" selected>20</option>
+                            <option value="19">19-20</option>
+                            <option value="18">18-20</option>
+                            <option value="17">17-20</option>
+                          </select>
+                          <select class="select comp-atk-crit-mult" title="Moltiplicatore critico">
+                            <option value="2" selected>x2</option>
+                            <option value="3">x3</option>
+                            <option value="4">x4</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="attack-roll-line">
+                    <button type="button" class="roll-btn comp-atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
+                    <button type="button" class="roll-btn comp-atk-dmg-roll-btn" title="Tira danni">Danni</button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="fields" style="margin-top:10px;">
+        <div class="field span-12">
+          <label>Attacchi speciali / Capacità</label>
+          <input type="text" placeholder="Es. afferrare, trip, compagno..." />
+        </div>
+      </div>
+
+      <div class="hint" style="margin-top:10px;">
+        Tot = BAB + Mod(FOR/DES) + Taglia + Varie(globale) + Varie(riga).
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Abilità, Trucchi, Equip</h2>
+      <div class="fields">
+        <div class="field span-12">
+          <label>Abilità (skills)</label>
+          <textarea placeholder="Percezione +..., Furtività +..., ecc."></textarea>
+        </div>
+        <div class="field span-12">
+          <label>Trucchi / Addestramento</label>
+          <textarea placeholder="Trucchi noti, comandi, addestramento..."></textarea>
+        </div>
+        <div class="field span-12">
+          <label>Note / Equipaggiamento</label>
+          <textarea placeholder="Bardatura, oggetti, condizioni, note varie..."></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+    <!-- PAGE: NOTE -->
+    <section class="page" id="page-note" role="tabpanel" aria-labelledby="tab-note">
+      <div class="grid">
+        <div class="card">
+          <h2>Note &amp; Background</h2>
+          <textarea placeholder="Aspetto, personalità, legami, note di campagna..."></textarea>
+        </div>
+        <div class="card">
+          <h2>Temi</h2>
+          <div class="fields">
+            <div class="field span-12">
+              <label class="theme-variant-toggle">
+                <strong>Tema Ira dei Giusti</strong>
+                <input id="theme-wrath-toggle" type="checkbox" />
+              </label>
+            </div>
+            <div class="field span-12">
+              <label class="theme-variant-toggle">
+                <strong>Tema Caos Cromatico</strong>
+                <input id="theme-vivid-toggle" type="checkbox" />
+              </label>
+            </div>
+            <div class="field span-12">
+              <label class="theme-variant-toggle">
+                <strong>Tema Classico</strong>
+                <input id="theme-classic-toggle" type="checkbox" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_tables.js?v=1.0.2" defer></script>
+  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_spells.js?v=1.0.2" defer></script>
+  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_equipment.js?v=1.0.2" defer></script>
+  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/scheda_pathfinder.js?v=1.0.2" defer></script>
+</body>
+</html>
+
+<!-- Francesco Culo è stato qui ma ci ha aiutati a risolvere dei problemi -->
+
+
+
+
+
+
