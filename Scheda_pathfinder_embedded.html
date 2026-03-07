@@ -4006,9 +4006,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const COMP_ATK_STORAGE_KEY = "pf1e_comp_attacks_extra_rows_v1";
   const SPELLS_EXTRA_KEY = "pf1e_spells_extra_rows_v1";
   const MAX_CHARACTER_LEVEL = 20;
+  const storage = (() => {
+    try {
+      const backend = window.localStorage;
+      const probeKey = "__pf1e_storage_probe__";
+      backend.setItem(probeKey, "1");
+      backend.removeItem(probeKey);
+      return backend;
+    } catch {
+      return null;
+    }
+  })();
 
   const $ = (sel, root = document) => root.querySelector(sel);
-  const $ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
   const num = (v) => {
     const n = Number(v);
@@ -4016,6 +4027,23 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+  const storageGet = (key, fallback = null) => {
+    try {
+      return storage?.getItem(key) ?? fallback;
+    } catch {
+      return fallback;
+    }
+  };
+  const storageSet = (key, value) => {
+    try {
+      storage?.setItem(key, String(value));
+    } catch {}
+  };
+  const storageRemove = (key) => {
+    try {
+      storage?.removeItem(key);
+    } catch {}
+  };
 
   const fmtSigned = (n) => {
     const v = Math.trunc(num(n));
@@ -4339,14 +4367,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isDark) document.documentElement.setAttribute("data-theme", "dark");
     else document.documentElement.removeAttribute("data-theme");
 
-    localStorage.setItem(THEME_KEY, mode);
+    storageSet(THEME_KEY, mode);
 
     if (themeToggle) themeToggle.checked = isDark;
     if (themeState) themeState.textContent = isDark ? "Dark 🌙" : "Light ☀";
   }
 
   function preferredTheme() {
-    const saved = localStorage.getItem(THEME_KEY);
+    const saved = storageGet(THEME_KEY);
     if (saved === "dark" || saved === "light") return saved;
     const prefersDark =
       window.matchMedia &&
@@ -4441,13 +4469,13 @@ document.addEventListener("DOMContentLoaded", () => {
   ========================= */
   function loadState() {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      return JSON.parse(storageGet(STORAGE_KEY, "{}") || "{}");
     } catch {
       return {};
     }
   }
   function saveState(state) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    storageSet(STORAGE_KEY, JSON.stringify(state));
   }
 
   const state = loadState();
@@ -4850,7 +4878,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function loadSpellExtraMap() {
     try {
-      const parsed = JSON.parse(localStorage.getItem(SPELLS_EXTRA_KEY) || "{}");
+      const parsed = JSON.parse(storageGet(SPELLS_EXTRA_KEY, "{}") || "{}");
       return parsed && typeof parsed === "object" ? parsed : {};
     } catch {
       return {};
@@ -4858,7 +4886,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function saveSpellExtraMap(map) {
-    localStorage.setItem(SPELLS_EXTRA_KEY, JSON.stringify(map || {}));
+    storageSet(SPELLS_EXTRA_KEY, JSON.stringify(map || {}));
   }
 
   function getSpellExtraCount(level) {
@@ -5557,10 +5585,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getAtkExtraCount() {
-    return parseInt(localStorage.getItem(ATK_STORAGE_KEY) || "0", 10) || 0;
+    return parseInt(storageGet(ATK_STORAGE_KEY, "0") || "0", 10) || 0;
   }
   function setAtkExtraCount(n) {
-    localStorage.setItem(ATK_STORAGE_KEY, String(Math.max(0, n)));
+    storageSet(ATK_STORAGE_KEY, String(Math.max(0, n)));
   }
 
   function makeAttackRow() {
@@ -5784,10 +5812,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getCompAtkExtraCount() {
-    return parseInt(localStorage.getItem(COMP_ATK_STORAGE_KEY) || "0", 10) || 0;
+    return parseInt(storageGet(COMP_ATK_STORAGE_KEY, "0") || "0", 10) || 0;
   }
   function setCompAtkExtraCount(n) {
-    localStorage.setItem(COMP_ATK_STORAGE_KEY, String(Math.max(0, n)));
+    storageSet(COMP_ATK_STORAGE_KEY, String(Math.max(0, n)));
   }
 
   function makeCompAttackRow() {
@@ -6700,10 +6728,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getExtraRowsCount() {
-    return parseInt(localStorage.getItem(SKILLS_EXTRA_KEY) || "0", 10) || 0;
+    return parseInt(storageGet(SKILLS_EXTRA_KEY, "0") || "0", 10) || 0;
   }
   function setExtraRowsCount(n) {
-    localStorage.setItem(SKILLS_EXTRA_KEY, String(Math.max(0, n)));
+    storageSet(SKILLS_EXTRA_KEY, String(Math.max(0, n)));
   }
 
   function rebuildExtraSkillRows() {
@@ -7064,7 +7092,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function initCollapsibleCards() {
     $(".page .card").forEach((card) => {
       if (card.classList.contains("card-collapsible")) return;
-      const head = card.querySelector(":scope > h2");
+      const head =
+        (card.firstElementChild && card.firstElementChild.tagName === "H2"
+          ? card.firstElementChild
+          : null) || card.querySelector("h2");
       if (!head) return;
 
       card.classList.add("card-collapsible");
@@ -7684,15 +7715,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetBtn = document.getElementById("reset-storage");
   if (resetBtn) {
     resetBtn.addEventListener("click", () => {
-      const theme = localStorage.getItem(THEME_KEY);
+      const theme = storageGet(THEME_KEY);
 
       // 1) Rimuove stato salvato e contatori righe dinamiche.
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(SKILLS_EXTRA_KEY);
-      localStorage.removeItem(ATK_STORAGE_KEY);
-      localStorage.removeItem(COMP_ATK_STORAGE_KEY);
-      localStorage.removeItem(SPELLS_EXTRA_KEY);
-      if (theme) localStorage.setItem(THEME_KEY, theme);
+      storageRemove(STORAGE_KEY);
+      storageRemove(SKILLS_EXTRA_KEY);
+      storageRemove(ATK_STORAGE_KEY);
+      storageRemove(COMP_ATK_STORAGE_KEY);
+      storageRemove(SPELLS_EXTRA_KEY);
+      if (theme) storageSet(THEME_KEY, theme);
 
       // 2) Svuota stato in memoria.
       Object.keys(state).forEach((k) => delete state[k]);
