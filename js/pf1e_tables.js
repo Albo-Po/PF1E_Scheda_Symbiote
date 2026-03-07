@@ -62,6 +62,50 @@
     return CLASS_BAB_PROGRESSION[cls] || null;
   }
 
+  const CLASS_HIT_DICE = {
+    Barbaro: 12,
+    Bardo: 8,
+    Chierico: 8,
+    Druido: 8,
+    Guerriero: 10,
+    Ladro: 8,
+    Mago: 6,
+    Monaco: 8,
+    Paladino: 10,
+    Ranger: 10,
+    Stregone: 6,
+  };
+
+  const CLASS_SKILL_POINTS = {
+    Barbaro: 4,
+    Bardo: 6,
+    Chierico: 2,
+    Druido: 4,
+    Guerriero: 2,
+    Ladro: 8,
+    Mago: 2,
+    Monaco: 4,
+    Paladino: 2,
+    Ranger: 6,
+    Stregone: 2,
+  };
+
+  function getHitDieByClass(className) {
+    const cls = String(className || "").trim();
+    return CLASS_HIT_DICE[cls] || null;
+  }
+
+  function getAverageHitPointsForDie(hitDie) {
+    const die = Number(hitDie);
+    if (!Number.isFinite(die) || die <= 0) return 0;
+    return Math.floor(die / 2) + 1;
+  }
+
+  function getSkillPointsByClass(className) {
+    const cls = String(className || "").trim();
+    return CLASS_SKILL_POINTS[cls] || null;
+  }
+
   const SPELL_PROGRESSION_THRESHOLDS = {
     full_9_with_cantrips: [1, 1, 3, 5, 7, 9, 11, 13, 15, 17],
     six_with_cantrips: [1, 2, 4, 7, 10, 13, 16],
@@ -119,6 +163,17 @@
     getByProgression: getBabByProgression,
     getByClass: getBabByClass,
     getProgressionByClass: getProgressionByClass,
+  };
+
+  window.PF1EData.tables.hitPoints = {
+    byClassDie: CLASS_HIT_DICE,
+    getHitDieByClass: getHitDieByClass,
+    getAveragePerLevel: getAverageHitPointsForDie,
+  };
+
+  window.PF1EData.tables.skills = {
+    pointsByClass: CLASS_SKILL_POINTS,
+    getPointsByClass: getSkillPointsByClass,
   };
 
   window.PF1EData.tables.spells = {

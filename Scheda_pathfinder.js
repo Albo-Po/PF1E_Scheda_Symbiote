@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const ATK_STORAGE_KEY = "pf1e_attacks_extra_rows_v1";
   const COMP_ATK_STORAGE_KEY = "pf1e_comp_attacks_extra_rows_v1";
   const SPELLS_EXTRA_KEY = "pf1e_spells_extra_rows_v1";
+  const MAX_CHARACTER_LEVEL = 20;
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -104,16 +105,18 @@ document.addEventListener("DOMContentLoaded", () => {
   function tryTaleSpireDiceRoll(formula, cleanLabel, mod, trackResult = true) {
     const diceApi = window?.TS?.dice;
     if (!diceApi) return false;
+    const queueEntry =
+      trackResult === false ? null : { label: cleanLabel, mod, kind: trackResult === "formula" ? "formula" : "d20" };
 
     if (typeof diceApi.putDiceInTray === "function") {
       const legacyTrayRequest = [{ name: cleanLabel, roll: String(formula).toUpperCase() }];
       try {
-        if (trackResult) pendingTsRolls.push({ label: cleanLabel, mod });
+        if (queueEntry) pendingTsRolls.push(queueEntry);
         diceApi.putDiceInTray(legacyTrayRequest);
         toast(`${cleanLabel}: inviato nel tray TaleSpire (${formula})`);
         return true;
       } catch (err) {
-        if (trackResult) pendingTsRolls.pop();
+        if (queueEntry) pendingTsRolls.pop();
         console.error("Errore con TS.dice.putDiceInTray (legacy):", err);
       }
     }
@@ -135,12 +138,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const descriptors = diceApi.makeRollDescriptors(formula);
         if (!Array.isArray(descriptors) || descriptors.length === 0) return false;
 
-        if (trackResult) pendingTsRolls.push({ label: cleanLabel, mod });
+        if (queueEntry) pendingTsRolls.push(queueEntry);
         diceApi.putDiceInTray(descriptors, false);
         toast(`${cleanLabel}: inviato nel tray TaleSpire (${formula})`);
         return true;
       } catch (err) {
-        if (trackResult) pendingTsRolls.pop();
+        if (queueEntry) pendingTsRolls.pop();
         console.error("Errore con TS.dice.makeRollDescriptors/putDiceInTray:", err);
       }
     }
@@ -155,14 +158,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof fn !== "function") continue;
 
       try {
-        if (trackResult) pendingTsRolls.push({ label: cleanLabel, mod });
+        if (queueEntry) pendingTsRolls.push(queueEntry);
         fn.call(diceApi, formula);
         const action =
           spec.mode === "roll" ? "tirato in TaleSpire" : "inviato nel tray TaleSpire";
         toast(`${cleanLabel}: ${action} (${formula})`);
         return true;
       } catch (err) {
-        if (trackResult) pendingTsRolls.pop();
+        if (queueEntry) pendingTsRolls.pop();
         console.error(`Errore con TS.dice.${spec.method}:`, err);
       }
     }
@@ -189,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!cleanFormula) return;
 
     const tsRollSent =
-      typeof window !== "undefined" && tryTaleSpireDiceRoll(cleanFormula, cleanLabel, 0, false);
+      typeof window !== "undefined" && tryTaleSpireDiceRoll(cleanFormula, cleanLabel, 0, "formula");
     if (tsRollSent) return;
 
     toast(`${cleanLabel}: formula ${cleanFormula}`);
@@ -197,7 +200,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.handleRollResult = async (payload) => {
     if (payload?.kind === "rollRemoved") {
-      toast("Un tiro è stato rimosso dal tray");
+      const removed = pendingTsRolls.shift();
+      toast(`${removed?.label || "Un tiro"}: rimosso dal tray`);
       return;
     }
 
@@ -227,6 +231,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (ctx?.kind === "formula") {
+      toast(`${label}: risultato ${total}`);
+      return;
+    }
+
     const baseRoll = total - mod;
     toast(
       `${label}: d20(${baseRoll}) + Tot(${mod >= 0 ? "+" : ""}${mod}) = ${total}`
@@ -248,6 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const pages = $$(".page");
   const tabIncantesimi = document.getElementById("tab-incantesimi");
   const tabCompagno = document.getElementById("tab-compagno");
+  const tabCdp = document.getElementById("tab-cdp");
   const enableCdpSection = document.getElementById("enable-cdp-section");
   const enableSpellsTab = document.getElementById("enable-spells-tab");
   const enableCompanionTab = document.getElementById("enable-companion-tab");
@@ -288,6 +298,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    if (tabCdp) {
+      tabCdp.hidden = !cdpEnabled;
+      tabCdp.setAttribute("aria-hidden", String(!cdpEnabled));
+      if (!cdpEnabled && tabCdp.getAttribute("aria-selected") === "true") {
+        activate("page-identita", true);
+      }
+    }
+
     if (tabIncantesimi) {
       tabIncantesimi.hidden = !spellsEnabled;
       tabIncantesimi.setAttribute("aria-hidden", String(!spellsEnabled));
@@ -309,8 +327,16 @@ document.addEventListener("DOMContentLoaded", () => {
      Theme (dark mode) — stabile
   ========================= */
   const themeToggle = document.getElementById("theme-toggle");
+  const wrathThemeToggle = document.getElementById("theme-wrath-toggle");
+  const wrathThemeLabel = document.getElementById("wrath-theme-label");
+  const vividThemeToggle = document.getElementById("theme-vivid-toggle");
+  const vividThemeLabel = document.getElementById("vivid-theme-label");
+  const classicThemeToggle = document.getElementById("theme-classic-toggle");
+  const classicThemeLabel = document.getElementById("classic-theme-label");
   const themeState = document.getElementById("theme-state");
   const refreshPageBtn = document.getElementById("refresh-page");
+  const themeSwitch = themeToggle?.closest(".switch") || null;
+  let previousThemeBeforeVariant = null;
 
   function applyTheme(mode) {
     const isDark = mode === "dark";
@@ -334,9 +360,75 @@ document.addEventListener("DOMContentLoaded", () => {
 
   applyTheme(preferredTheme());
 
+  function applyThemeVariant() {
+    const variant = wrathThemeToggle?.checked
+      ? "wrath"
+      : vividThemeToggle?.checked
+        ? "vivid"
+        : classicThemeToggle?.checked
+          ? "classic"
+          : "";
+    const enabled = !!variant;
+    if (enabled) {
+      previousThemeBeforeVariant = themeToggle?.checked ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme-variant", variant);
+      applyTheme(variant === "classic" ? "light" : "dark");
+    } else {
+      document.documentElement.removeAttribute("data-theme-variant");
+      if (previousThemeBeforeVariant) applyTheme(previousThemeBeforeVariant);
+    }
+
+    if (themeSwitch) themeSwitch.hidden = enabled;
+    if (themeState) themeState.hidden = enabled;
+    if (wrathThemeLabel) wrathThemeLabel.hidden = variant !== "wrath";
+    if (vividThemeLabel) vividThemeLabel.hidden = variant !== "vivid";
+    if (classicThemeLabel) classicThemeLabel.hidden = variant !== "classic";
+  }
+
+  applyThemeVariant();
+
   if (themeToggle) {
     themeToggle.addEventListener("change", () => {
       applyTheme(themeToggle.checked ? "dark" : "light");
+    });
+  }
+
+  if (wrathThemeToggle) {
+    wrathThemeToggle.addEventListener("input", () => {
+      if (wrathThemeToggle.checked && vividThemeToggle) vividThemeToggle.checked = false;
+      if (wrathThemeToggle.checked && classicThemeToggle) classicThemeToggle.checked = false;
+      applyThemeVariant();
+    });
+    wrathThemeToggle.addEventListener("change", () => {
+      if (wrathThemeToggle.checked && vividThemeToggle) vividThemeToggle.checked = false;
+      if (wrathThemeToggle.checked && classicThemeToggle) classicThemeToggle.checked = false;
+      applyThemeVariant();
+    });
+  }
+
+  if (vividThemeToggle) {
+    vividThemeToggle.addEventListener("input", () => {
+      if (vividThemeToggle.checked && wrathThemeToggle) wrathThemeToggle.checked = false;
+      if (vividThemeToggle.checked && classicThemeToggle) classicThemeToggle.checked = false;
+      applyThemeVariant();
+    });
+    vividThemeToggle.addEventListener("change", () => {
+      if (vividThemeToggle.checked && wrathThemeToggle) wrathThemeToggle.checked = false;
+      if (vividThemeToggle.checked && classicThemeToggle) classicThemeToggle.checked = false;
+      applyThemeVariant();
+    });
+  }
+
+  if (classicThemeToggle) {
+    classicThemeToggle.addEventListener("input", () => {
+      if (classicThemeToggle.checked && wrathThemeToggle) wrathThemeToggle.checked = false;
+      if (classicThemeToggle.checked && vividThemeToggle) vividThemeToggle.checked = false;
+      applyThemeVariant();
+    });
+    classicThemeToggle.addEventListener("change", () => {
+      if (classicThemeToggle.checked && wrathThemeToggle) wrathThemeToggle.checked = false;
+      if (classicThemeToggle.checked && vividThemeToggle) vividThemeToggle.checked = false;
+      applyThemeVariant();
     });
   }
 
@@ -447,10 +539,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getSizeAbilityScoreBonus(code) {
     const size = getCurrentSizeKey();
-    // Bonus punteggio da taglia (coerente con i mod attuali: +4 score => +2 mod)
-    if (size === "large" && code === "FOR") return 4;
-    if (size === "small" && code === "DES") return 4;
-    return 0;
+    const adjustmentsBySize = {
+      small: { FOR: -2, DES: 2 },
+      medium: { FOR: 0, DES: 0 },
+      large: { FOR: 2, DES: -2 },
+    };
+    return adjustmentsBySize[size]?.[code] ?? 0;
   }
 
   function getSizeAbilityModBonus(code) {
@@ -470,7 +564,6 @@ document.addEventListener("DOMContentLoaded", () => {
   sizeSelectors.forEach((sel) => {
     if (!sel) return;
     const onSizeChange = () => {
-      syncAllAbilityBaseFromVisibleScores();
       setAllSizeSelectors(sel.value);
       applyMythicAbilityBonusToScores();
       recalcDerived();
@@ -526,8 +619,24 @@ document.addEventListener("DOMContentLoaded", () => {
     syncCompAttackModsFromAbilities();
   }
 
+  function recalcCompanionEffectiveLevel() {
+    const companionLevelEl = document.getElementById("comp-level");
+    const effectiveLevelEl = document.getElementById("comp-effective-level");
+    if (!effectiveLevelEl) return;
+
+    const pcLevel = Math.max(0, Math.trunc(num(document.getElementById("pc-level-total")?.value)));
+    const companionLevel = Math.max(0, Math.trunc(num(companionLevelEl?.value)));
+    const hasBoonCompanion = !!document.getElementById("comp-boon-companion")?.checked;
+
+    let effectiveLevel = companionLevel + (hasBoonCompanion ? 4 : 0);
+    if (pcLevel > 0) effectiveLevel = Math.min(effectiveLevel, pcLevel);
+
+    effectiveLevelEl.value = String(Math.max(0, effectiveLevel));
+  }
+
   updateAllAbilityMods();
   updateAllCompAbilityMods();
+  recalcCompanionEffectiveLevel();
 
   function getMythicAbilityBonusFor(code) {
     const tierA = document.getElementById("mythic-tier-identita");
@@ -1015,6 +1124,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.max(va, vb, 0);
   }
 
+  function getMythicPath() {
+    const pathA = String(pathI?.value || "").trim();
+    const pathB = String(pathM?.value || "").trim();
+    return pathB || pathA || "";
+  }
+
   function getSurgeDieByTier(tier) {
     if (tier >= 9) return "d12";
     if (tier >= 6) return "d10";
@@ -1112,6 +1227,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  [pathI, pathM].forEach((el) => {
+    if (!el) return;
+    el.addEventListener("input", recalcHitPoints);
+    el.addEventListener("change", recalcHitPoints);
+  });
+
   if (mythicAbilityPicks.length) {
     const onMythicAbilityChange = () => {
       updateMythicAbilityPickAvailability();
@@ -1164,6 +1285,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function recalcAC() {
     const armorEl = document.getElementById("ac-armor");
     const shieldEl = document.getElementById("ac-shield");
+    const armorEnhancementEl = document.getElementById("ac-armor-enhancement");
+    const shieldEnhancementEl = document.getElementById("ac-shield-enhancement");
     const dexEl = document.getElementById("ac-dex");
     const dexMaxEl = document.getElementById("ac-dex-max");
     const miscEl = document.getElementById("ac-misc");
@@ -1173,11 +1296,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const touchEl = document.getElementById("ac-touch");
     const ffEl = document.getElementById("ac-ff");
 
-    if (!armorEl || !shieldEl || !dexEl || !miscEl) return;
+    if (!armorEl || !shieldEl || !armorEnhancementEl || !shieldEnhancementEl || !dexEl || !miscEl) return;
     if (!totalEl || !touchEl || !ffEl) return;
 
     const armor = num(armorEl.value);
+    const armorEnhancement = clamp(Math.trunc(num(armorEnhancementEl.value)), 0, 5);
     const shieldBase = num(shieldEl.value);
+    const shieldEnhancement = clamp(Math.trunc(num(shieldEnhancementEl.value)), 0, 5);
     const dex = num(dexEl.value);
     const dexMaxRaw = String(dexMaxEl?.value ?? "").trim();
     const hasDexMax = dexMaxRaw !== "" && Number.isFinite(Number(dexMaxRaw));
@@ -1186,14 +1311,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const misc = num(miscEl.value);
 
     const shieldActive = !(shieldOffEl && shieldOffEl.checked);
-    const shield = shieldActive ? shieldBase : 0;
+    const shield = shieldActive ? shieldBase + shieldEnhancement : 0;
+    const armorTotal = armor + armorEnhancement;
 
-    totalEl.value = String(10 + armor + shield + dexApplied + size + misc);
+    totalEl.value = String(10 + armorTotal + shield + dexApplied + size + misc);
     touchEl.value = String(10 + dexApplied + size + misc);
-    ffEl.value = String(10 + armor + shield + size + misc);
+    ffEl.value = String(10 + armorTotal + shield + size + misc);
 
     if (shieldOffEl) {
       shieldEl.disabled = !!shieldOffEl.checked;
+      shieldEnhancementEl.disabled = !!shieldOffEl.checked;
     }
   }
 
@@ -1235,6 +1362,43 @@ document.addEventListener("DOMContentLoaded", () => {
     const rangedOut = document.getElementById("atk-ranged-total");
     if (meleeOut) meleeOut.value = fmtSigned(attackVars.melee.total);
     if (rangedOut) rangedOut.value = fmtSigned(attackVars.ranged.total);
+  }
+
+  function getAvailableAttackCount() {
+    const bab = Math.max(0, Math.trunc(num(document.getElementById("atk-bab")?.value)));
+    return Math.max(1, Math.floor(Math.max(0, bab - 1) / 5) + 1);
+  }
+
+  function buildAttackSequenceOptions() {
+    const count = getAvailableAttackCount();
+    const bab = Math.max(0, Math.trunc(num(document.getElementById("atk-bab")?.value)));
+    const options = [];
+    for (let i = 0; i < count; i++) {
+      options.push({
+        value: String(i),
+        label: `${i + 1}°`,
+        babValue: Math.max(0, bab - i * 5),
+        penalty: i * 5,
+      });
+    }
+    return options;
+  }
+
+  function refreshAttackSequenceSelectors() {
+    const options = buildAttackSequenceOptions();
+    $$(".atk-sequence", attacksTbody || document).forEach((sel) => {
+      const current = String(sel.value || "0");
+      sel.innerHTML = "";
+      options.forEach((opt) => {
+        const option = document.createElement("option");
+        option.value = opt.value;
+        option.textContent = `${opt.label} (${fmtSigned(opt.babValue)})`;
+        if (opt.value === current) option.selected = true;
+        sel.appendChild(option);
+      });
+      if (![...sel.options].some((opt) => opt.value === current)) sel.value = "0";
+      sel.disabled = options.length <= 1;
+    });
   }
 
   function recalcCmbCmd() {
@@ -1361,10 +1525,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!tr) return;
     const derived = syncAttackRowDerivedFields(tr);
     const type = tr.querySelector(".atk-type")?.value || "melee";
+    const sequenceIndex = Math.max(0, Math.trunc(num(tr.querySelector(".atk-sequence")?.value)));
     const magicBonus = clamp(Math.trunc(num(tr.querySelector(".atk-magic-bonus")?.value)), 0, 5);
     const rowMisc = num(tr.querySelector(".atk-row-misc")?.value);
     const base = type === "ranged" ? attackVars.ranged.total : attackVars.melee.total;
-    const total = base + magicBonus + rowMisc - num(derived?.attackPenalty);
+    const iterativePenalty = sequenceIndex * 5;
+    const total = base + magicBonus + rowMisc - num(derived?.attackPenalty) - iterativePenalty;
     const out = tr.querySelector(".atk-total");
     if (out) out.value = fmtSigned(total);
   }
@@ -1409,7 +1575,11 @@ document.addEventListener("DOMContentLoaded", () => {
           <option value="ranged">Distanza (DES)</option>
         </select>
       </td>
-      <td><input class="atk-name" type="text" placeholder="Es. Arma" /></td>
+      <td>
+        <select class="select atk-sequence">
+          <option value="0" selected>1°</option>
+        </select>
+      </td>
       <td>
         <select class="select atk-magic-bonus">
           <option value="0" selected>+0</option>
@@ -1481,7 +1651,6 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
           <div class="attack-roll-line">
             <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
-            <button type="button" class="roll-btn atk-full-roll-btn" title="Tira attacco completo">Full</button>
             <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
           </div>
         </div>
@@ -1503,10 +1672,12 @@ document.addEventListener("DOMContentLoaded", () => {
       wireAutosave(hitRow);
       wireAutosave(dmgRow);
     }
+    refreshAttackSequenceSelectors();
     recalcAllAttacks();
   }
 
   rebuildAttackExtraRows();
+  refreshAttackSequenceSelectors();
 
   if (addAtkBtn && attacksTbody) {
     addAtkBtn.addEventListener("click", () => {
@@ -1518,6 +1689,7 @@ document.addEventListener("DOMContentLoaded", () => {
       applySavedValues(dmgRow);
       wireAutosave(hitRow);
       wireAutosave(dmgRow);
+      refreshAttackSequenceSelectors();
       recalcAttackRow(hitRow);
     });
   }
@@ -1557,16 +1729,53 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  function getCompAvailableAttackCount() {
+    const bab = Math.max(0, Math.trunc(num(document.getElementById("comp-atk-bab")?.value)));
+    return Math.max(1, Math.floor(Math.max(0, bab - 1) / 5) + 1);
+  }
+
+  function buildCompAttackSequenceOptions() {
+    const count = getCompAvailableAttackCount();
+    const bab = Math.max(0, Math.trunc(num(document.getElementById("comp-atk-bab")?.value)));
+    const options = [];
+    for (let i = 0; i < count; i++) {
+      options.push({
+        value: String(i),
+        label: `${i + 1}°`,
+        babValue: Math.max(0, bab - i * 5),
+      });
+    }
+    return options;
+  }
+
+  function refreshCompAttackSequenceSelectors() {
+    const options = buildCompAttackSequenceOptions();
+    $$(".comp-atk-sequence", compAttacksTbody || document).forEach((sel) => {
+      const current = String(sel.value || "0");
+      sel.innerHTML = "";
+      options.forEach((opt) => {
+        const option = document.createElement("option");
+        option.value = opt.value;
+        option.textContent = `${opt.label} (${fmtSigned(opt.babValue)})`;
+        if (opt.value === current) option.selected = true;
+        sel.appendChild(option);
+      });
+      if (![...sel.options].some((opt) => opt.value === current)) sel.value = "0";
+      sel.disabled = options.length <= 1;
+    });
+  }
+
   function recalcCompAttackRow(tr) {
     if (!tr) return;
     syncCompAttackRowDerivedFields(tr);
     const type = tr.querySelector(".comp-atk-type")?.value || "melee";
+    const sequenceIndex = Math.max(0, Math.trunc(num(tr.querySelector(".comp-atk-sequence")?.value)));
     const rowMisc = num(tr.querySelector(".comp-atk-row-misc")?.value);
 
     const { bab, size, misc, str, dex } = getCompAtkGlobals();
     const abil = type === "ranged" ? dex : str;
 
-    const total = bab + abil + size + misc + rowMisc;
+    const total = bab + abil + size + misc + rowMisc - sequenceIndex * 5;
     const out = tr.querySelector(".comp-atk-total");
     if (out) out.value = fmtSigned(total);
   }
@@ -1593,7 +1802,11 @@ document.addEventListener("DOMContentLoaded", () => {
           <option value="ranged">Distanza (DES)</option>
         </select>
       </td>
-      <td><input class="comp-atk-name" type="text" placeholder="Es. Arma compagno" /></td>
+      <td>
+        <select class="select comp-atk-sequence">
+          <option value="0" selected>1°</option>
+        </select>
+      </td>
       <td><input class="small comp-atk-row-misc" type="number" step="1" value="0" /></td>
       <td><input class="small comp-atk-total" type="text" value="+0" readonly /></td>
     `;
@@ -1641,7 +1854,6 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
           <div class="attack-roll-line">
             <button type="button" class="roll-btn comp-atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
-            <button type="button" class="roll-btn comp-atk-full-roll-btn" title="Tira attacco completo">Full</button>
             <button type="button" class="roll-btn comp-atk-dmg-roll-btn" title="Tira danni">Danni</button>
           </div>
         </div>
@@ -1662,10 +1874,12 @@ document.addEventListener("DOMContentLoaded", () => {
       wireAutosave(hitRow);
       wireAutosave(dmgRow);
     }
+    refreshCompAttackSequenceSelectors();
     recalcAllCompAttacks();
   }
 
   rebuildCompAttackExtraRows();
+  refreshCompAttackSequenceSelectors();
 
   if (addCompAtkBtn && compAttacksTbody) {
     addCompAtkBtn.addEventListener("click", () => {
@@ -1677,6 +1891,7 @@ document.addEventListener("DOMContentLoaded", () => {
       applySavedValues(dmgRow);
       wireAutosave(hitRow);
       wireAutosave(dmgRow);
+      refreshCompAttackSequenceSelectors();
       recalcCompAttackRow(hitRow);
     });
   }
@@ -1695,6 +1910,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (lastDmg) lastDmg.remove();
       lastHit.remove();
       setCompAtkExtraCount(getCompAtkExtraCount() - 1);
+      refreshCompAttackSequenceSelectors();
       recalcAllCompAttacks();
     });
   }
@@ -1718,7 +1934,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const SKILL_ALIASES = {
     osservare: "percezione",
     ascoltare: "percezione",
-    intuizione: "senso motivazioni",
+    "senso motivazioni": "intuizione",
     "utilizzare oggetti magici": "utilizzare congegni magici",
     furtivita: "furtività",
   };
@@ -1730,17 +1946,128 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const CLASS_SKILLS = {
     Barbaro: ["acrobazia","addestrare animali","artigianato","cavalcare","intimidire","nuotare","percezione","scalare","sopravvivenza"],
-    Bardo: ["acrobazia","addestrare animali","artigianato","artista della fuga","camuffare","diplomazia","furtività","intimidire","intrattenere","linguistica","percezione","professione","raggirare","rapidità di mano","sapienza magica","senso motivazioni","utilizzare congegni magici","valutare","conoscenze (tutte)"],
-    Chierico: ["artigianato","diplomazia","guarire","linguistica","professione","sapienza magica","senso motivazioni","conoscenze (arcane)","conoscenze (nobiltà)","conoscenze (piani)","conoscenze (religioni)"],
+    Bardo: ["acrobazia","addestrare animali","artigianato","artista della fuga","camuffare","diplomazia","furtività","intimidire","intrattenere","linguistica","percezione","professione","raggirare","rapidità di mano","sapienza magica","intuizione","utilizzare congegni magici","valutare","conoscenze (tutte)"],
+    Chierico: ["artigianato","diplomazia","guarire","linguistica","professione","sapienza magica","intuizione","conoscenze (arcane)","conoscenze (nobiltà)","conoscenze (piani)","conoscenze (religioni)"],
     Druido: ["addestrare animali","artigianato","cavalcare","guarire","percezione","professione","sapienza magica","sopravvivenza","conoscenze (natura)"],
     Guerriero: ["addestrare animali","artigianato","cavalcare","intimidire","nuotare","professione","scalare","sopravvivenza"],
-    Ladro: ["acrobazia","artista della fuga","camuffare","diplomazia","disattivare congegni","furtività","intimidire","intrattenere","linguistica","nuotare","percezione","raggirare","rapidità di mano","scalare","senso motivazioni","utilizzare congegni magici","valutare","conoscenze (dungeon)","conoscenze (locali)"],
+    Ladro: ["acrobazia","artista della fuga","camuffare","diplomazia","disattivare congegni","furtività","intimidire","intrattenere","linguistica","nuotare","percezione","raggirare","rapidità di mano","scalare","intuizione","utilizzare congegni magici","valutare","conoscenze (dungeon)","conoscenze (locali)"],
     Mago: ["artigianato","linguistica","professione","sapienza magica","conoscenze (tutte)"],
-    Monaco: ["acrobazia","artigianato","artista della fuga","intimidire","nuotare","percezione","professione","scalare","senso motivazioni"],
-    Paladino: ["addestrare animali","artigianato","cavalcare","diplomazia","guarire","professione","sapienza magica","senso motivazioni","conoscenze (nobiltà)","conoscenze (religioni)"],
+    Monaco: ["acrobazia","artigianato","artista della fuga","intimidire","nuotare","percezione","professione","scalare","intuizione"],
+    Paladino: ["addestrare animali","artigianato","cavalcare","diplomazia","guarire","professione","sapienza magica","intuizione","conoscenze (nobiltà)","conoscenze (religioni)"],
     Ranger: ["addestrare animali","artigianato","cavalcare","furtività","guarire","intimidire","nuotare","percezione","professione","scalare","sopravvivenza","conoscenze (dungeon)","conoscenze (geografia)","conoscenze (natura)"],
     Stregone: ["artigianato","conoscenze (arcane)","professione","sapienza magica","utilizzare congegni magici"],
   };
+
+  const PRESTIGE_CLASS_OPTIONS = [
+    "Arcane Archer",
+    "Arcane Trickster",
+    "Dragon Disciple",
+    "Duelist",
+    "Eldritch Knight",
+    "Evangelist",
+    "Exalted",
+    "Hellknight",
+    "Hellknight Signifer",
+    "Holy Vindicator",
+    "Loremaster",
+    "Mystic Theurge",
+    "Pathfinder Chronicler",
+    "Red Mantis Assassin",
+    "Sentinel",
+    "Shadowdancer",
+  ];
+
+  const PRESTIGE_CLASS_DATA = {
+    "Arcane Archer": { bab: "full", hitDie: 10, skillPoints: 4, saves: { fort: "good", ref: "good", will: "poor" }, classSkills: "Artigianato, Cavalcare, Intimidire, Percezione, Sopravvivenza", featuresByLevel: {} },
+    "Arcane Trickster": { bab: "half", hitDie: 6, skillPoints: 4, saves: { fort: "poor", ref: "good", will: "good" }, classSkills: "Artista della Fuga, Conoscenze (arcane), Disattivare Congegni, Furtività, Percezione, Rapidità di Mano, Raggirare, Sapienza Magica", featuresByLevel: {} },
+    "Dragon Disciple": { bab: "three_quarters", hitDie: 12, skillPoints: 2, saves: { fort: "good", ref: "poor", will: "good" }, classSkills: "Artigianato, Conoscenze (arcane), Percezione, Sapienza Magica, Volare", featuresByLevel: {} },
+    Duelist: { bab: "full", hitDie: 10, skillPoints: 4, saves: { fort: "poor", ref: "good", will: "poor" }, classSkills: "Acrobazia, Artista della Fuga, Diplomazia, Intuizione, Percezione, Raggirare, Rapidità di Mano", featuresByLevel: {} },
+    "Eldritch Knight": { bab: "full", hitDie: 10, skillPoints: 2, saves: { fort: "good", ref: "poor", will: "poor" }, classSkills: "Conoscenze (arcane), Cavalcare, Intimidire, Sapienza Magica, Scalare", featuresByLevel: {} },
+    Evangelist: { bab: "three_quarters", hitDie: 8, skillPoints: 6, saves: { fort: "poor", ref: "poor", will: "good" }, classSkills: "Artigianato, Diplomazia, Guarire, Intuizione, Conoscenze (religioni), Professione, Sapienza Magica", featuresByLevel: {} },
+    Exalted: { bab: "three_quarters", hitDie: 8, skillPoints: 4, saves: { fort: "good", ref: "poor", will: "good" }, classSkills: "Diplomazia, Guarire, Intimidire, Conoscenze (nobiltà), Conoscenze (religioni), Percezione, Professione, Intuizione", featuresByLevel: {} },
+    Hellknight: { bab: "full", hitDie: 10, skillPoints: 2, saves: { fort: "good", ref: "poor", will: "good" }, classSkills: "Artigianato, Cavalcare, Diplomazia, Intimidire, Conoscenze (piani), Professione, Intuizione", featuresByLevel: {} },
+    "Hellknight Signifer": { bab: "three_quarters", hitDie: 8, skillPoints: 2, saves: { fort: "poor", ref: "poor", will: "good" }, classSkills: "Conoscenze (arcane), Conoscenze (piani), Linguistica, Professione, Sapienza Magica, Utilizzare Congegni Magici", featuresByLevel: {} },
+    "Holy Vindicator": { bab: "full", hitDie: 10, skillPoints: 2, saves: { fort: "good", ref: "poor", will: "good" }, classSkills: "Diplomazia, Guarire, Intimidire, Conoscenze (religioni), Professione, Sapienza Magica", featuresByLevel: {} },
+    Loremaster: { bab: "half", hitDie: 6, skillPoints: 2, saves: { fort: "poor", ref: "poor", will: "good" }, classSkills: "Conoscenze (tutte), Linguistica, Sapienza Magica, Valutare", featuresByLevel: {} },
+    "Mystic Theurge": { bab: "half", hitDie: 6, skillPoints: 2, saves: { fort: "poor", ref: "poor", will: "good" }, classSkills: "Conoscenze (arcane), Conoscenze (religioni), Professione, Sapienza Magica", featuresByLevel: {} },
+    "Pathfinder Chronicler": { bab: "three_quarters", hitDie: 8, skillPoints: 6, saves: { fort: "poor", ref: "good", will: "good" }, classSkills: "Diplomazia, Furtività, Intrattenere, Linguistica, Percezione, Professione, Sapienza Magica, Utilizzare Congegni Magici", featuresByLevel: {} },
+    "Red Mantis Assassin": { bab: "three_quarters", hitDie: 8, skillPoints: 4, saves: { fort: "poor", ref: "good", will: "poor" }, classSkills: "Acrobazia, Camuffare, Furtività, Intimidire, Percezione, Raggirare, Scalare", featuresByLevel: {} },
+    Sentinel: { bab: "full", hitDie: 10, skillPoints: 2, saves: { fort: "good", ref: "poor", will: "good" }, classSkills: "Cavalcare, Diplomazia, Guarire, Intimidire, Percezione, Professione, Intuizione, Sopravvivenza", featuresByLevel: {} },
+    Shadowdancer: { bab: "three_quarters", hitDie: 8, skillPoints: 4, saves: { fort: "poor", ref: "good", will: "poor" }, classSkills: "Acrobazia, Artista della Fuga, Furtività, Percezione, Rapidità di Mano, Sapienza Magica", featuresByLevel: {} },
+  };
+
+  function getPrestigeClassData(name) {
+    return PRESTIGE_CLASS_DATA[String(name || "").trim()] || null;
+  }
+
+  function formatBabProgressionLabel(key) {
+    if (key === "full") return "Pieno";
+    if (key === "three_quarters" || key === "two_thirds") return "Medio";
+    if (key === "half") return "Scarso";
+    return "—";
+  }
+
+  function getSaveBonusByProgression(level, progression) {
+    const lvl = Math.max(0, Math.trunc(num(level)));
+    if (lvl <= 0) return 0;
+    return progression === "good" ? 2 + Math.floor(lvl / 2) : Math.floor(lvl / 3);
+  }
+
+  function formatSaveProgressionLabel(saves) {
+    if (!saves) return "—";
+    const short = (key) => (key === "good" ? "B" : "S");
+    return `${short(saves.fort)} / ${short(saves.ref)} / ${short(saves.will)}`;
+  }
+
+  function initPrestigeClassSelects() {
+    $$(".prestige-class-select").forEach((sel) => {
+      const saved = Object.prototype.hasOwnProperty.call(state, keyFor(sel)) ? state[keyFor(sel)] : sel.value;
+      const current = String(saved || "").trim();
+      sel.innerHTML = '<option value="" selected>— Seleziona CdP —</option>';
+      PRESTIGE_CLASS_OPTIONS.forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        if (name === current) option.selected = true;
+        sel.appendChild(option);
+      });
+    });
+  }
+
+  function updatePrestigeDerivedFields() {
+    const prestigeName =
+      String(document.getElementById("cdp-name")?.value || document.getElementById("cdp-name-tab")?.value || "").trim();
+    const prestigeLevel = Math.max(
+      0,
+      Math.trunc(
+        num(document.getElementById("cdp-level")?.value || document.getElementById("cdp-level-tab")?.value)
+      )
+    );
+    const data = getPrestigeClassData(prestigeName);
+    const babEl = document.getElementById("cdp-bab-progression");
+    const hitDieEl = document.getElementById("cdp-hit-die");
+    const saveEl = document.getElementById("cdp-save-progression");
+    const skillsEl = document.getElementById("cdp-class-skills");
+    const summaryBody = document.getElementById("cdp-summary-body");
+    if (babEl) babEl.value = data ? formatBabProgressionLabel(data.bab) : "—";
+    if (hitDieEl) hitDieEl.value = data ? `d${data.hitDie}` : "—";
+    if (saveEl) saveEl.value = data ? formatSaveProgressionLabel(data.saves) : "—";
+    if (skillsEl) skillsEl.value = data?.classSkills || "";
+    if (summaryBody) {
+      summaryBody.innerHTML = "";
+      if (data && prestigeLevel > 0) {
+        for (let level = 1; level <= prestigeLevel; level++) {
+          const tr = document.createElement("tr");
+          const featureText = String(data.featuresByLevel?.[level] || "Da compilare");
+          tr.innerHTML = `
+            <td>${level}</td>
+            <td>${featureText}</td>
+          `;
+          summaryBody.appendChild(tr);
+        }
+      }
+    }
+  }
 
   const BASE_SKILLS = [
     { name: "Acrobazia", abil: "DES", acp: true },
@@ -1763,6 +2090,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { name: "Furtività", abil: "DES", acp: true },
     { name: "Guarire", abil: "SAG", acp: false },
     { name: "Intimidire", abil: "CAR", acp: false },
+    { name: "Intuizione", abil: "SAG", acp: false },
     { name: "Intrattenere (Canto)", abil: "CAR", acp: false },
     { name: "Linguistica", abil: "INT", acp: false },
     { name: "Nuotare", abil: "FOR", acp: true },
@@ -1772,48 +2100,439 @@ document.addEventListener("DOMContentLoaded", () => {
     { name: "Rapidità di Mano", abil: "DES", acp: false },
     { name: "Sapienza Magica", abil: "INT", acp: false },
     { name: "Scalare", abil: "FOR", acp: true },
-    { name: "Senso Motivazioni", abil: "SAG", acp: false },
     { name: "Sopravvivenza", abil: "SAG", acp: false },
     { name: "Utilizzare Congegni Magici", abil: "CAR", acp: false },
     { name: "Valutare", abil: "INT", acp: false },
     { name: "Volare", abil: "DES", acp: true },
   ];
 
+  function getClassEntries() {
+    return $$('.class-entry-row[data-class-slot="1"], .class-entry-row[data-class-slot="2"], .class-entry-row[data-class-slot="3"]')
+      .map((row) => {
+        const className = String(row.querySelector(".class-row-select")?.value || "").trim();
+        const level = Math.max(0, Math.trunc(num(row.querySelector(".class-row-level")?.value)));
+        return { className, level };
+      })
+      .filter((entry) => entry.className && entry.level > 0);
+  }
+
+  function getPrestigeEntry() {
+    const className = String(document.getElementById("cdp-name")?.value || "").trim();
+    const level = Math.max(0, Math.trunc(num(document.getElementById("cdp-level")?.value)));
+    if (!enableCdpSection?.checked || !className || level <= 0) return null;
+    const data = getPrestigeClassData(className);
+    return {
+      className,
+      level,
+      babProgression: data?.bab || "half",
+      hitDie: data?.hitDie || 8,
+      isPrestige: true,
+    };
+  }
+
+  let isPrestigeSyncing = false;
+
+  function syncPrestigeFields(source = "card") {
+    if (isPrestigeSyncing) return;
+    isPrestigeSyncing = true;
+
+    const cardNameEl = document.getElementById("cdp-name");
+    const cardLevelEl = document.getElementById("cdp-level");
+    const tabNameEl = document.getElementById("cdp-name-tab");
+    const tabLevelEl = document.getElementById("cdp-level-tab");
+
+    if (source === "tab") {
+      if (cardNameEl && tabNameEl) cardNameEl.value = tabNameEl.value;
+      if (cardLevelEl && tabLevelEl) cardLevelEl.value = tabLevelEl.value;
+    } else {
+      if (tabNameEl && cardNameEl) tabNameEl.value = cardNameEl.value;
+      if (tabLevelEl && cardLevelEl) tabLevelEl.value = cardLevelEl.value;
+    }
+
+    updatePrestigeDerivedFields();
+    isPrestigeSyncing = false;
+  }
+
+  function parseClassSkillsText(rawSkills = "") {
+    return String(rawSkills || "")
+      .split(",")
+      .map((skill) => canonicalSkill(skill.trim()))
+      .filter(Boolean);
+  }
+
+  function getSelectedSkillSources() {
+    const baseClasses = getClassEntries().map((entry) => entry.className);
+    const prestigeEntry = getPrestigeEntry();
+    const prestigeClasses = prestigeEntry ? [prestigeEntry.className] : [];
+    return Array.from(new Set([...baseClasses, ...prestigeClasses].filter(Boolean)));
+  }
+
   function getSelectedClasses() {
-    const sel = document.getElementById("pf-class-select");
-    if (!sel) return [];
-    const v = String(sel.value || "").trim();
-    return v ? [v] : [];
+    return Array.from(new Set(getClassEntries().map((entry) => entry.className)));
+  }
+
+  function getCardClassLevelInputs() {
+    return $$(".class-entry-row .class-row-level");
+  }
+
+  function resolveCardLevelInput(inputEl) {
+    if (!inputEl) return null;
+    if (inputEl.id === "cdp-level-tab") return document.getElementById("cdp-level");
+    return inputEl;
+  }
+
+  function enforceCharacterLevelCap(preferredInput = null) {
+    const levelInputs = getCardClassLevelInputs();
+    if (!levelInputs.length) return;
+
+    const values = new Map(levelInputs.map((input) => [input, Math.max(0, Math.trunc(num(input.value)))]));
+    let total = Array.from(values.values()).reduce((sum, value) => sum + value, 0);
+    if (total <= MAX_CHARACTER_LEVEL) return;
+
+    const preferredCardInput = resolveCardLevelInput(preferredInput);
+    const orderedInputs = [];
+    if (preferredCardInput && values.has(preferredCardInput)) orderedInputs.push(preferredCardInput);
+    levelInputs
+      .slice()
+      .reverse()
+      .forEach((input) => {
+        if (!orderedInputs.includes(input)) orderedInputs.push(input);
+      });
+
+    let excess = total - MAX_CHARACTER_LEVEL;
+    orderedInputs.forEach((input) => {
+      if (excess <= 0) return;
+      const current = values.get(input) || 0;
+      if (current <= 0) return;
+      const reduction = Math.min(current, excess);
+      const nextValue = current - reduction;
+      input.value = String(nextValue);
+      values.set(input, nextValue);
+      excess -= reduction;
+    });
+  }
+
+  function refreshClassLevelCaps() {
+    const levelInputs = getCardClassLevelInputs();
+    if (!levelInputs.length) return;
+
+    levelInputs.forEach((input) => {
+      const current = Math.max(0, Math.trunc(num(input.value)));
+      const othersTotal = levelInputs.reduce((sum, other) => {
+        if (other === input) return sum;
+        return sum + Math.max(0, Math.trunc(num(other.value)));
+      }, 0);
+      const hardMax = input.id === "cdp-level" ? 10 : MAX_CHARACTER_LEVEL;
+      const dynamicMax = Math.min(hardMax, Math.max(0, MAX_CHARACTER_LEVEL - othersTotal + current));
+      input.max = String(dynamicMax);
+      if (current > dynamicMax) input.value = String(dynamicMax);
+    });
+
+    const cdpTabLevelEl = document.getElementById("cdp-level-tab");
+    const cdpCardLevelEl = document.getElementById("cdp-level");
+    if (cdpTabLevelEl && cdpCardLevelEl) {
+      cdpTabLevelEl.max = cdpCardLevelEl.max || "10";
+      cdpTabLevelEl.value = cdpCardLevelEl.value;
+    }
+  }
+
+  function refreshClassRowVisibility() {
+    const rows = $$('.class-entry-row[data-class-slot="1"], .class-entry-row[data-class-slot="2"], .class-entry-row[data-class-slot="3"]');
+    const addBtn = document.getElementById("add-class-row");
+    const removeBtn = document.getElementById("remove-class-row");
+    const hiddenRows = rows.filter((row) => row.hidden);
+    const visibleRows = rows.filter((row) => !row.hidden);
+    if (addBtn) addBtn.hidden = hiddenRows.length === 0;
+    if (removeBtn) removeBtn.hidden = visibleRows.length <= 1;
+  }
+
+  function initClassCard() {
+    const rows = $$('.class-entry-row[data-class-slot="1"], .class-entry-row[data-class-slot="2"], .class-entry-row[data-class-slot="3"]');
+    const addBtn = document.getElementById("add-class-row");
+    const removeBtn = document.getElementById("remove-class-row");
+    if (!rows.length) return;
+
+    let highestUsedIndex = 0;
+    rows.forEach((row, index) => {
+      const className = String(row.querySelector(".class-row-select")?.value || "").trim();
+      const level = Math.max(0, Math.trunc(num(row.querySelector(".class-row-level")?.value)));
+      if (className || level > 0) highestUsedIndex = index;
+    });
+
+    rows.forEach((row, index) => {
+      row.hidden = index > Math.max(0, highestUsedIndex);
+    });
+
+    if (addBtn) {
+      addBtn.addEventListener("click", () => {
+        const nextHidden = rows.find((row) => row.hidden);
+        if (!nextHidden) return;
+        nextHidden.hidden = false;
+        refreshClassRowVisibility();
+        nextHidden.querySelector(".class-row-select")?.focus();
+      });
+    }
+
+    if (removeBtn) {
+      removeBtn.addEventListener("click", () => {
+        const visibleRows = rows.filter((row) => !row.hidden);
+        if (visibleRows.length <= 1) return;
+        const lastVisible = visibleRows[visibleRows.length - 1];
+        lastVisible.querySelectorAll("input, select").forEach((el) => {
+          if (el.tagName === "SELECT") {
+            const idx = Array.from(el.options).findIndex((o) => o.defaultSelected);
+            el.selectedIndex = idx >= 0 ? idx : 0;
+          } else {
+            el.value = el.defaultValue ?? "";
+          }
+          delete state[keyFor(el)];
+        });
+        saveState(state);
+        lastVisible.hidden = true;
+        refreshClassRowVisibility();
+        syncClassSummaryFields();
+        applyAutoClassSkills();
+        applyAutoBabFromClass();
+        recalcHitPoints();
+      });
+    }
+
+    refreshClassRowVisibility();
+    refreshClassLevelCaps();
+  }
+
+  function syncClassSummaryFields() {
+    const classSummaryEl = document.getElementById("pc-class-free-text");
+    const totalLevelEl = document.getElementById("pc-level-total");
+    const hpLevelsEl = document.getElementById("hp-levels");
+    const skillsSummaryEl = document.getElementById("skills-class-summary");
+    const entries = getClassEntries();
+    const prestigeEntry = getPrestigeEntry();
+    const summaryEntries = prestigeEntry ? [...entries, prestigeEntry] : entries;
+    const summary = summaryEntries.map((entry) => `${entry.className} ${entry.level}`).join(" / ");
+    const totalLevel = summaryEntries.reduce((sum, entry) => sum + entry.level, 0);
+
+    if (classSummaryEl) classSummaryEl.value = summary;
+    if (totalLevelEl) totalLevelEl.value = String(totalLevel);
+    if (hpLevelsEl) hpLevelsEl.value = String(totalLevel);
+
+    if (skillsSummaryEl) {
+      skillsSummaryEl.value = summary || "";
+      skillsSummaryEl.title = summary || "Nessuna classe selezionata";
+    }
+
+    recalcCompanionEffectiveLevel();
+    refreshClassLevelCaps();
+    updateTalentLevelMarkers(summaryEntries);
+  }
+
+  function updateTalentLevelMarkers(summaryEntries = null) {
+    const rows = $$("#talents-table tbody tr");
+    if (!rows.length) return;
+
+    const entries = Array.isArray(summaryEntries)
+      ? summaryEntries
+      : (() => {
+          const classEntries = getClassEntries();
+          const prestigeEntry = getPrestigeEntry();
+          return prestigeEntry ? [...classEntries, prestigeEntry] : classEntries;
+        })();
+
+    const progression = [];
+    entries.forEach((entry) => {
+      const levelCount = Math.max(0, Math.trunc(num(entry.level)));
+      for (let classLevel = 1; classLevel <= levelCount; classLevel++) {
+        progression.push({
+          className: entry.className,
+          classLevel,
+          isNewClass: classLevel === 1,
+        });
+      }
+    });
+
+    rows.forEach((row, index) => {
+      const totalLevel = index + 1;
+      const levelCell = row.cells?.[0];
+      if (!levelCell) return;
+
+      const info = progression[index] || null;
+      row.classList.toggle("talent-class-break", !!info && info.isNewClass && totalLevel > 1);
+
+      if (!info) {
+        levelCell.innerHTML = `<div class="talent-level-total">${totalLevel}</div>`;
+        row.dataset.className = "";
+        row.dataset.classLevel = "";
+        return;
+      }
+
+      levelCell.innerHTML = `
+        <div class="talent-level-total">${totalLevel}</div>
+        <div class="talent-level-class">${info.className} ${info.classLevel}</div>
+      `;
+      row.dataset.className = info.className;
+      row.dataset.classLevel = String(info.classLevel);
+    });
   }
 
   function getBabApi() {
     return window.PF1EData?.tables?.bab || null;
   }
 
-  function applyAutoBabFromClass() {
-    const classes = getSelectedClasses();
-    if (!classes.length) return;
+  function getHitPointApi() {
+    return window.PF1EData?.tables?.hitPoints || null;
+  }
 
+  function getSkillPointApi() {
+    return window.PF1EData?.tables?.skills || null;
+  }
+
+  function getResolvedHitDie() {
+    const hpHitDieEl = document.getElementById("hp-hit-die");
+    if (!hpHitDieEl) return 0;
+
+    const raw = String(hpHitDieEl.value || "auto").trim();
+    if (raw !== "auto") return Math.max(0, Math.trunc(num(raw)));
+
+    const cls = getClassEntries()[0]?.className || "";
+    const hpApi = getHitPointApi();
+    if (!hpApi || typeof hpApi.getHitDieByClass !== "function") return 8;
+    return Math.max(0, Math.trunc(num(hpApi.getHitDieByClass(cls) || 8)));
+  }
+
+  function getMythicHitPointsPerTier() {
+    const path = getMythicPath();
+    const bonusByPath = {
+      Arcimago: 3,
+      Campione: 5,
+      Gerofante: 4,
+      Maresciallo: 4,
+      Mistificatore: 4,
+      Protettore: 5,
+    };
+    return bonusByPath[path] || 0;
+  }
+
+  function recalcHitPoints() {
+    const hpTotalEl = document.getElementById("hp-total");
+    const hpCurrentEl = document.getElementById("hp-current");
+    const hpTempEl = document.getElementById("hp-temp");
+    const hpLevelsEl = document.getElementById("hp-levels");
+    const hpHitDieEl = document.getElementById("hp-hit-die");
+    const hpFavoredBonusEl = document.getElementById("hp-favored-bonus");
+    const hpMiscBonusEl = document.getElementById("hp-misc-bonus");
+    const hpBaseTotalEl = document.getElementById("hp-base-total");
+    const hpConTotalEl = document.getElementById("hp-con-total");
+    const hpMythicTotalEl = document.getElementById("hp-mythic-total");
+    const hpToughnessEl = document.getElementById("hp-toughness");
+    const hpToughnessTotalEl = document.getElementById("hp-toughness-total");
     const levelEl = document.getElementById("pc-level-total");
+
+    if (
+      !hpTotalEl ||
+      !hpCurrentEl ||
+      !hpTempEl ||
+      !hpLevelsEl ||
+      !hpHitDieEl ||
+      !hpFavoredBonusEl ||
+      !hpMiscBonusEl ||
+      !hpBaseTotalEl ||
+      !hpConTotalEl ||
+      !hpMythicTotalEl ||
+      !hpToughnessEl ||
+      !hpToughnessTotalEl ||
+      !levelEl
+    ) {
+      return;
+    }
+
+    const entries = getClassEntries();
+    const prestigeEntry = getPrestigeEntry();
+    const hpEntries = prestigeEntry ? [...entries, prestigeEntry] : entries;
+    const levelFromIdentity = Math.max(0, Math.trunc(num(levelEl.value)));
+    const levels = levelFromIdentity;
+    const hitDie = getResolvedHitDie();
+    const hpApi = getHitPointApi();
+    const avgPerLevel =
+      hpApi && typeof hpApi.getAveragePerLevel === "function"
+        ? Math.max(0, Math.trunc(num(hpApi.getAveragePerLevel(hitDie))))
+        : Math.max(0, Math.floor(hitDie / 2) + 1);
+    const conMod = Math.trunc(getAbilityModByCode("COS"));
+    const mythicTier = Math.max(0, Math.trunc(getMythicTier()));
+    const mythicTotal = mythicTier * getMythicHitPointsPerTier();
+    const toughnessTotal = hpToughnessEl.checked ? Math.max(3, levels) : 0;
+    const favoredBonus = Math.max(0, Math.trunc(num(hpFavoredBonusEl.value)));
+    const miscBonus = Math.trunc(num(hpMiscBonusEl.value));
+    const tempHp = Math.max(0, Math.trunc(num(hpTempEl.value)));
+
+    let baseTotal = 0;
+    if (String(hpHitDieEl.value || "auto").trim() === "auto" && hpEntries.length && hpApi) {
+      hpEntries.forEach((entry, idx) => {
+        const classHitDie = entry.isPrestige
+          ? Math.max(0, Math.trunc(num(entry.hitDie || 8)))
+          : Math.max(0, Math.trunc(num(hpApi.getHitDieByClass?.(entry.className) || 8)));
+        const classAvg = Math.max(0, Math.trunc(num(hpApi.getAveragePerLevel?.(classHitDie) || (Math.floor(classHitDie / 2) + 1))));
+        if (idx === 0) {
+          baseTotal += classHitDie + classAvg * Math.max(0, entry.level - 1);
+        } else {
+          baseTotal += classAvg * entry.level;
+        }
+      });
+    } else {
+      const firstLevelHp = levels <= 0 ? 0 : hitDie;
+      const otherLevelsHp = levels > 1 ? avgPerLevel * (levels - 1) : 0;
+      baseTotal = firstLevelHp + otherLevelsHp;
+    }
+    const conTotal = conMod * levels;
+    const totalBase = Math.max(0, baseTotal + conTotal + mythicTotal + toughnessTotal + favoredBonus + miscBonus);
+    const total = totalBase + tempHp;
+
+    hpLevelsEl.value = String(levels);
+    levelEl.value = String(levels);
+    hpFavoredBonusEl.value = String(favoredBonus);
+    hpMiscBonusEl.value = String(miscBonus);
+    hpTempEl.value = String(tempHp);
+    hpBaseTotalEl.value = String(baseTotal);
+    hpConTotalEl.value = fmtSigned(conTotal);
+    hpMythicTotalEl.value = fmtSigned(mythicTotal);
+    hpToughnessTotalEl.value = fmtSigned(toughnessTotal);
+    hpTotalEl.value = String(total);
+
+    const prevAutoTotal = Math.max(0, Math.trunc(num(hpCurrentEl.dataset.autoTotal)));
+    const currentRaw = String(hpCurrentEl.value || "").trim();
+    const currentValue = Math.max(0, Math.trunc(num(hpCurrentEl.value)));
+    const shouldAutofillCurrent = currentRaw === "" || currentValue === prevAutoTotal;
+    hpCurrentEl.value = String(shouldAutofillCurrent ? total : clamp(currentValue, 0, total));
+    hpCurrentEl.dataset.autoTotal = String(total);
+  }
+
+  function applyAutoBabFromClass() {
+    const entries = getClassEntries();
+    const prestigeEntry = getPrestigeEntry();
     const atkBabEl = document.getElementById("atk-bab");
-    if (!levelEl || !atkBabEl) return;
+    if (!atkBabEl) return;
 
-    const level = num(levelEl.value);
-    if (level <= 0) return;
-
-    const cls = classes[0];
     const babApi = getBabApi();
     if (!babApi || typeof babApi.getByClass !== "function") return;
 
-    const autoBab = babApi.getByClass(level, cls);
-    atkBabEl.value = String(autoBab);
+    const autoBabBase = entries.reduce(
+      (sum, entry) => sum + babApi.getByClass(entry.level, entry.className),
+      0
+    );
+    const autoBabPrestige = prestigeEntry
+      ? babApi.getByProgression(prestigeEntry.level, prestigeEntry.babProgression)
+      : 0;
+    atkBabEl.value = String(autoBabBase + autoBabPrestige);
+    refreshAttackSequenceSelectors();
     recalcAllAttacks();
     recalcCmbCmd();
   }
 
   function buildClassSkillSet(classes) {
     const set = new Set();
-    classes.forEach((cls) => (CLASS_SKILLS[cls] || []).forEach((sk) => set.add(canonicalSkill(sk))));
+    classes.forEach((cls) => {
+      (CLASS_SKILLS[cls] || []).forEach((sk) => set.add(canonicalSkill(sk)));
+      parseClassSkillsText(getPrestigeClassData(cls)?.classSkills).forEach((sk) => set.add(sk));
+    });
     return set;
   }
 
@@ -1824,8 +2543,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function applyAutoClassSkills() {
-    const classes = getSelectedClasses();
-    if (!classes.length) {
+    const skillSources = getSelectedSkillSources();
+    if (!skillSources.length) {
       $$("#skills-tbody tr.skill-row .skill-cs").forEach((el) => {
         el.checked = false;
       });
@@ -1833,7 +2552,7 @@ document.addEventListener("DOMContentLoaded", () => {
       applySkillFilters();
       return;
     }
-    const csSet = buildClassSkillSet(classes);
+    const csSet = buildClassSkillSet(skillSources);
 
     $$("#skills-tbody tr.skill-row").forEach((tr) => {
       const nameEl = tr.querySelector(".skill-name");
@@ -1881,8 +2600,44 @@ document.addEventListener("DOMContentLoaded", () => {
     totalEl.value = fmtSigned(ranks + abilMod + misc + csBonus - acpPenalty + sizeStealth);
   }
 
+  function updateSkillPointsTotal() {
+    const outEl = document.getElementById("skills-points-total");
+    if (!outEl) return;
+    const skillApi = getSkillPointApi();
+    const entries = getClassEntries();
+    const prestigeEntry = getPrestigeEntry();
+    const summaryEntries = prestigeEntry ? [...entries, prestigeEntry] : entries;
+    const intMod = Math.trunc(getAbilityModByCode("INT"));
+
+    let totalPoints = 0;
+    summaryEntries.forEach((entry) => {
+      const level = Math.max(0, Math.trunc(num(entry.level)));
+      if (level <= 0) return;
+
+      const classBasePoints = entry.isPrestige
+        ? Math.max(1, Math.trunc(num(entry.skillPoints || 2)))
+        : Math.max(1, Math.trunc(num(skillApi?.getPointsByClass?.(entry.className) || 2)));
+      const perLevelPoints = Math.max(1, classBasePoints + intMod);
+      totalPoints += perLevelPoints * level;
+    });
+
+    outEl.value = String(Math.max(0, totalPoints));
+  }
+
+  function updateSkillRanksSpent() {
+    const outEl = document.getElementById("skills-ranks-spent");
+    if (!outEl) return;
+    const spentRanks = $$("#skills-tbody tr.skill-row .skill-ranks").reduce(
+      (sum, el) => sum + Math.max(0, Math.trunc(num(el.value))),
+      0
+    );
+    outEl.value = String(spentRanks);
+  }
+
   function recalcAllSkills() {
     $$("#skills-tbody tr.skill-row").forEach(recalcSkillRow);
+    updateSkillPointsTotal();
+    updateSkillRanksSpent();
   }
 
   function applySkillFilters() {
@@ -2039,10 +2794,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("change", (e) => {
     const t = e.target;
     if (!t) return;
-    if (t.id === "pf-class-select") {
-      applyAutoClassSkills();
-      applyAutoBabFromClass();
-    }
     if (t.id === "spellcaster-class") {
       updateSpellcastingClassFields();
       updateSpellLevelsVisibility();
@@ -2069,12 +2820,33 @@ document.addEventListener("DOMContentLoaded", () => {
     return tr || null;
   }
 
+  function getAttackSequenceLabel(tr, selector = ".atk-sequence") {
+    const sequenceEl = tr?.querySelector(selector);
+    const selectedOption = sequenceEl?.selectedOptions?.[0];
+    return String(selectedOption?.textContent || sequenceEl?.value || "1°").trim();
+  }
+
+  function getAttackRollLabel(tr, cfg) {
+    const explicitName = cfg.nameSelector ? tr?.querySelector(cfg.nameSelector)?.value?.trim() : "";
+    if (explicitName) return explicitName;
+    if (cfg.hitRowClass === "attack-row") {
+      const type = tr?.querySelector(".atk-type")?.value === "ranged" ? "Attacco distanza" : "Attacco mischia";
+      return `${type} ${getAttackSequenceLabel(tr)}`;
+    }
+    if (cfg.hitRowClass === "comp-attack-row") {
+      const type =
+        tr?.querySelector(".comp-atk-type")?.value === "ranged" ? "Attacco compagno distanza" : "Attacco compagno mischia";
+      return `${type} ${getAttackSequenceLabel(tr, ".comp-atk-sequence")}`;
+    }
+    return cfg.fallbackLabel;
+  }
+
   function handleToHitRoll(btnEl, cfg) {
     const tr = getLinkedHitRowFromButton(btnEl, cfg.hitRowClass, cfg.dmgRowClass);
     if (!tr) return false;
     cfg.recalcRow(tr);
     const tot = parseSignedInt(tr.querySelector(cfg.totalSelector)?.value);
-    const name = tr.querySelector(cfg.nameSelector)?.value?.trim() || cfg.fallbackLabel;
+    const name = getAttackRollLabel(tr, cfg);
     rollViaTaleSpire(tot, name);
     return true;
   }
@@ -2085,7 +2857,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cfg.recalcRow(tr);
     const tot = parseSignedInt(tr.querySelector(cfg.totalSelector)?.value);
     const bab = num(document.getElementById(cfg.babId)?.value);
-    const name = tr.querySelector(cfg.nameSelector)?.value?.trim() || cfg.fallbackLabel;
+    const name = getAttackRollLabel(tr, cfg);
     rollFullAttackSequence(tot, bab, name);
     return true;
   }
@@ -2095,7 +2867,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!tr) return false;
     cfg.recalcRow(tr);
     const formula = tr.dataset.dmgFormula || cfg.fallbackFormula || "1d6";
-    const name = tr.querySelector(cfg.nameSelector)?.value?.trim() || cfg.fallbackLabel;
+    const name = getAttackRollLabel(tr, cfg);
     rollFormulaViaTaleSpire(formula, `${name} - Danni`);
     return true;
   }
@@ -2216,22 +2988,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const atkFullBtn = e.target.closest?.(".atk-full-roll-btn");
-    if (
-      atkFullBtn &&
-      handleFullAttackRoll(atkFullBtn, {
-        hitRowClass: "attack-row",
-        dmgRowClass: "attack-row-dmg",
-        recalcRow: recalcAttackRow,
-        totalSelector: ".atk-total",
-        nameSelector: ".atk-name",
-        babId: "atk-bab",
-        fallbackLabel: "Attacco",
-      })
-    ) {
-      return;
-    }
-
     const atkDmgBtn = e.target.closest?.(".atk-dmg-roll-btn");
     if (
       atkDmgBtn &&
@@ -2255,23 +3011,6 @@ document.addEventListener("DOMContentLoaded", () => {
         dmgRowClass: "comp-attack-row-dmg",
         recalcRow: recalcCompAttackRow,
         totalSelector: ".comp-atk-total",
-        nameSelector: ".comp-atk-name",
-        fallbackLabel: "Attacco compagno",
-      })
-    ) {
-      return;
-    }
-
-    const compAtkFullBtn = e.target.closest?.(".comp-atk-full-roll-btn");
-    if (
-      compAtkFullBtn &&
-      handleFullAttackRoll(compAtkFullBtn, {
-        hitRowClass: "comp-attack-row",
-        dmgRowClass: "comp-attack-row-dmg",
-        recalcRow: recalcCompAttackRow,
-        totalSelector: ".comp-atk-total",
-        nameSelector: ".comp-atk-name",
-        babId: "comp-atk-bab",
         fallbackLabel: "Attacco compagno",
       })
     ) {
@@ -2285,7 +3024,6 @@ document.addEventListener("DOMContentLoaded", () => {
         hitRowClass: "comp-attack-row",
         dmgRowClass: "comp-attack-row-dmg",
         recalcRow: recalcCompAttackRow,
-        nameSelector: ".comp-atk-name",
         fallbackLabel: "Danni attacco compagno",
         fallbackFormula: "1d6",
       })
@@ -2325,6 +3063,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // skills (perché abilMod cambia)
     recalcAllSkills();
+
+    // PF
+    recalcHitPoints();
 
     // incantesimi (caratteristica chiave + mod)
     updateSpellcastingClassFields();
@@ -2549,29 +3290,38 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    let syncingDefenseFields = false;
+
     const legendaryLinks = [
       { type: "weapon", el: weaponLegendaryEl },
       { type: "armor", el: armorLegendaryEl },
       { type: "shield", el: shieldLegendaryEl },
     ];
 
-    const syncEquipDefenseToCore = () => {
-      const armorAc = Math.max(0, Math.trunc(num(armorAcEl.value)));
-      const shieldAc = Math.max(0, Math.trunc(num(shieldAcEl.value)));
+    const syncDefenseFields = (source = "equip") => {
+      if (syncingDefenseFields) return;
+      syncingDefenseFields = true;
+
+      const sourceArmorAc = source === "core" ? acArmorEl : armorAcEl;
+      const sourceShieldAc = source === "core" ? acShieldEl : shieldAcEl;
       const armorAcp = Math.max(0, Math.trunc(num(armorAcpEl.value)));
       const shieldAcp = Math.max(0, Math.trunc(num(shieldAcpEl.value)));
+      const nextArmorAc = Math.max(0, Math.trunc(num(sourceArmorAc.value)));
+      const nextShieldAc = Math.max(0, Math.trunc(num(sourceShieldAc.value)));
 
-      armorAcEl.value = String(armorAc);
-      shieldAcEl.value = String(shieldAc);
+      armorAcEl.value = String(nextArmorAc);
+      shieldAcEl.value = String(nextShieldAc);
+      acArmorEl.value = String(nextArmorAc);
+      acShieldEl.value = String(nextShieldAc);
+
       armorAcpEl.value = String(armorAcp);
       shieldAcpEl.value = String(shieldAcp);
-
-      acArmorEl.value = String(armorAc);
-      acShieldEl.value = String(shieldAc);
       skillsAcpEl.value = String(armorAcp + shieldAcp);
+      skillsAcpEl.readOnly = true;
 
       recalcAC();
       recalcAllSkills();
+      syncingDefenseFields = false;
     };
 
     const syncWeaponLegendaryStats = () => {
@@ -2602,8 +3352,12 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     [armorAcEl, shieldAcEl, armorAcpEl, shieldAcpEl].forEach((el) => {
-      el.addEventListener("input", syncEquipDefenseToCore);
-      el.addEventListener("change", syncEquipDefenseToCore);
+      el.addEventListener("input", () => syncDefenseFields("equip"));
+      el.addEventListener("change", () => syncDefenseFields("equip"));
+    });
+    [acArmorEl, acShieldEl].forEach((el) => {
+      el.addEventListener("input", () => syncDefenseFields("core"));
+      el.addEventListener("change", () => syncDefenseFields("core"));
     });
     [weaponMagicBonusEl, weaponAbilityBonusEl].forEach((el) => {
       el.addEventListener("input", syncWeaponLegendaryStats);
@@ -2628,7 +3382,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     refreshEquipLegendaryBridgeUI = () => {
-      syncEquipDefenseToCore();
+      syncDefenseFields("equip");
       syncWeaponLegendaryStats();
       syncLegendaryToggle();
     };
@@ -2644,7 +3398,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.addEventListener("change", recalcInitiative);
   });
 
-  ["ac-armor", "ac-shield", "ac-dex-max", "ac-misc", "shield-off"].forEach((id) => {
+  ["ac-armor", "ac-shield", "ac-armor-enhancement", "ac-shield-enhancement", "ac-dex-max", "ac-misc", "shield-off"].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener("input", recalcAC);
@@ -2654,11 +3408,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const atkBabEl = document.getElementById("atk-bab");
   if (atkBabEl) {
     atkBabEl.addEventListener("input", () => {
+      refreshAttackSequenceSelectors();
       recalcAllAttacks();
       recalcCmbCmd();
       recalcAllSpellRows();
     });
     atkBabEl.addEventListener("change", () => {
+      refreshAttackSequenceSelectors();
       recalcAllAttacks();
       recalcCmbCmd();
       recalcAllSpellRows();
@@ -2694,8 +3450,14 @@ document.addEventListener("DOMContentLoaded", () => {
   ["comp-atk-bab", "comp-atk-str-mod", "comp-atk-dex-mod", "comp-atk-misc"].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener("input", recalcAllCompAttacks);
-    el.addEventListener("change", recalcAllCompAttacks);
+    el.addEventListener("input", () => {
+      refreshCompAttackSequenceSelectors();
+      recalcAllCompAttacks();
+    });
+    el.addEventListener("change", () => {
+      refreshCompAttackSequenceSelectors();
+      recalcAllCompAttacks();
+    });
   });
 
   function resolveLinkedRowFromEventTarget(target, hitRowClass, dmgRowClass) {
@@ -2713,7 +3475,98 @@ document.addEventListener("DOMContentLoaded", () => {
   if (pcLevelEl) {
     pcLevelEl.addEventListener("input", applyAutoBabFromClass);
     pcLevelEl.addEventListener("change", applyAutoBabFromClass);
+    pcLevelEl.addEventListener("input", recalcHitPoints);
+    pcLevelEl.addEventListener("change", recalcHitPoints);
+    pcLevelEl.addEventListener("input", recalcCompanionEffectiveLevel);
+    pcLevelEl.addEventListener("change", recalcCompanionEffectiveLevel);
   }
+
+  ["comp-level", "comp-boon-companion"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", recalcCompanionEffectiveLevel);
+    el.addEventListener("change", recalcCompanionEffectiveLevel);
+  });
+
+  ["hp-hit-die", "hp-favored-bonus", "hp-misc-bonus", "hp-toughness"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", recalcHitPoints);
+    el.addEventListener("change", recalcHitPoints);
+  });
+
+  $$(".class-entry-row .class-row-select, .class-entry-row .class-row-level").forEach((el) => {
+    el.addEventListener("input", () => {
+      if (el.classList.contains("class-row-level")) {
+        enforceCharacterLevelCap(el);
+        refreshClassLevelCaps();
+      }
+      syncClassSummaryFields();
+      applyAutoClassSkills();
+      applyAutoBabFromClass();
+      recalcHitPoints();
+    });
+    el.addEventListener("change", () => {
+      if (el.classList.contains("class-row-level")) {
+        enforceCharacterLevelCap(el);
+        refreshClassLevelCaps();
+      }
+      syncClassSummaryFields();
+      applyAutoClassSkills();
+      applyAutoBabFromClass();
+      recalcHitPoints();
+    });
+  });
+
+  ["cdp-name", "cdp-level", "enable-cdp-section"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      if (id === "cdp-level") {
+        enforceCharacterLevelCap(el);
+        refreshClassLevelCaps();
+      }
+      if (id === "cdp-name" || id === "cdp-level") syncPrestigeFields("card");
+      syncClassSummaryFields();
+      applyAutoBabFromClass();
+      recalcHitPoints();
+    });
+    el.addEventListener("change", () => {
+      if (id === "cdp-level") {
+        enforceCharacterLevelCap(el);
+        refreshClassLevelCaps();
+      }
+      if (id === "cdp-name" || id === "cdp-level") syncPrestigeFields("card");
+      syncClassSummaryFields();
+      applyAutoBabFromClass();
+      recalcHitPoints();
+    });
+  });
+
+  ["cdp-name-tab", "cdp-level-tab"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      if (id === "cdp-level-tab") {
+        enforceCharacterLevelCap(el);
+        refreshClassLevelCaps();
+      }
+      syncPrestigeFields("tab");
+      syncClassSummaryFields();
+      applyAutoBabFromClass();
+      recalcHitPoints();
+    });
+    el.addEventListener("change", () => {
+      if (id === "cdp-level-tab") {
+        enforceCharacterLevelCap(el);
+        refreshClassLevelCaps();
+      }
+      syncPrestigeFields("tab");
+      syncClassSummaryFields();
+      applyAutoBabFromClass();
+      recalcHitPoints();
+    });
+  });
 
   function targetHasAnyClass(target, classNames) {
     if (!target?.classList) return false;
@@ -2728,6 +3581,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "atk-row-misc",
         "atk-magic-bonus",
         "atk-type",
+        "atk-sequence",
         "atk-dice-count",
         "atk-die",
         "atk-crit-range",
@@ -2748,6 +3602,7 @@ document.addEventListener("DOMContentLoaded", () => {
       targetHasAnyClass(e.target, [
         "comp-atk-row-misc",
         "comp-atk-type",
+        "comp-atk-sequence",
         "comp-atk-dice-count",
         "comp-atk-die",
         "comp-atk-crit-range",
@@ -2918,6 +3773,11 @@ document.addEventListener("DOMContentLoaded", () => {
       applyMythicAbilityBonusToScores();
       updateMythicSurgeUI();
       updateOptionalTabsVisibility();
+      initPrestigeClassSelects();
+      syncPrestigeFields("card");
+      updatePrestigeDerivedFields();
+      initClassCard();
+      syncClassSummaryFields();
       applyAutoClassSkills();
       applySkillFilters();
       updateSpellcastingClassFields();
@@ -2935,6 +3795,11 @@ document.addEventListener("DOMContentLoaded", () => {
      Init finale
   ========================= */
   // Dopo restore: ricalcoli + auto-CS + filtri
+  initPrestigeClassSelects();
+  syncPrestigeFields("card");
+  updatePrestigeDerivedFields();
+  initClassCard();
+  syncClassSummaryFields();
   applyAutoClassSkills();
   applySkillFilters();
   applyAutoBabFromClass();

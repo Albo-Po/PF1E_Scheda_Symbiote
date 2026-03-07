@@ -4,13 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Scheda Personaggio — Pathfinder 1E</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Cormorant+Garamond:wght@400;600;700&family=Crimson+Text:wght@400;600;700&family=IM+Fell+English+SC&family=Space+Grotesk:wght@400;500;700&family=Uncial+Antiqua&display=swap" rel="stylesheet">
 
-<!-- CSS delvelopment -->
-<link rel="stylesheet" href="scheda_pathfinder.css">
+<!-- CSS delvelopment
+<link rel="stylesheet" href="scheda_pathfinder.css"> -->
 
 
  <!-- CSS esterno -->
-<!-- <link rel="stylesheet" href="https://albo-po.github.io/PF1E_Scheda_Symbiote/scheda_pathfinder.css" -->
+  <link rel="stylesheet" href="https://albo-po.github.io/PF1E_Scheda_Symbiote/scheda_pathfinder.css"
  
 
 
@@ -25,6 +28,9 @@
         <!-- Toggle Dark Mode -->
         <div class="top-actions">
           <span class="hint" id="theme-label">Tema</span>
+          <span class="hint wrath-theme-label" id="wrath-theme-label" hidden><em>Ira dei giusti</em> 😈</span>
+          <span class="hint wrath-theme-label" id="vivid-theme-label" hidden><em>Caos cromatico</em> ⚡</span>
+          <span class="hint wrath-theme-label" id="classic-theme-label" hidden><em>Classico</em> 📜</span>
 
           <label class="switch" aria-label="Attiva/disattiva dark mode">
             <input id="theme-toggle" type="checkbox" />
@@ -45,6 +51,7 @@
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-abilita"       id="tab-abilita"       data-target="page-abilita">Abilità</button>
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-talenti"       id="tab-talenti"       data-target="page-talenti">Talenti</button>
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-combattimento" id="tab-combattimento" data-target="page-combattimento">Combattimento</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-cdp"           id="tab-cdp"           data-target="page-cdp" hidden>Classe di Prestigio</button>
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-incantesimi"   id="tab-incantesimi"   data-target="page-incantesimi" hidden>Incantesimi</button>
       <button type="button" class="tab" role="tab"  aria-selected="false"  aria-controls="page-compagno"   id="tab-compagno"      data-target="page-compagno" hidden>Compagno Animale</button>
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-equip"         id="tab-equip"         data-target="page-equip">Equipaggiamento</button>
@@ -71,34 +78,6 @@
             <div class="field span-6">
               <label>Allineamento</label>
               <input type="text" placeholder="Es. LB" />
-            </div>
-
-            <div class="field span-8">
-              <label>Classe</label>
-              <input id="pc-class-free-text" type="text" placeholder="Es. Guerriero 5 / Ladro 2" />
-            </div>
-            <div class="field span-4">
-              <label>Livello Totale</label>
-              <input id="pc-level-total" class="small" type="number" min="1" step="1" placeholder="7" />
-            </div>
-
-
-            <div class="field span-8 cdp-field">
-              <label>Classe di Prestigio</label>
-              <input type="text" placeholder="Es. Cavaliere dell'Aquila 2" />
-            </div>
-           
-            <div class="field span-4 cdp-field">
-                <label>Livello CdP</label>
-                <input 
-                    id="cdp-level"
-                    class="small"
-                    type="number"
-                    min="0"
-                    max="10"
-                    step="1"
-                    value="0"
-                />
             </div>
 
             <!-- Mitico (collegato con tab Mitico via JS) -->
@@ -157,6 +136,111 @@
         </div>
 
         <div class="card">
+          <h2>Classe</h2>
+          <div class="class-card-rows">
+            <div class="class-entry-row" data-class-slot="1">
+              <div class="field class-entry-class class-entry-inline">
+                <label>Classe 1 • Livello</label>
+                <div class="class-entry-inline-row">
+                <select class="select class-row-select">
+                  <option value="" selected>— Seleziona —</option>
+                  <option value="Barbaro">Barbaro</option>
+                  <option value="Bardo">Bardo</option>
+                  <option value="Chierico">Chierico</option>
+                  <option value="Druido">Druido</option>
+                  <option value="Guerriero">Guerriero</option>
+                  <option value="Ladro">Ladro</option>
+                  <option value="Mago">Mago</option>
+                  <option value="Monaco">Monaco</option>
+                  <option value="Paladino">Paladino</option>
+                  <option value="Ranger">Ranger</option>
+                  <option value="Stregone">Stregone</option>
+                </select>
+                <input class="small class-row-level" type="number" min="0" step="1" value="0" />
+              </div>
+              </div>
+            </div>
+            <div class="class-entry-row" data-class-slot="2" hidden>
+              <div class="field class-entry-class class-entry-inline">
+                <label>Classe 2 • Livello</label>
+                <div class="class-entry-inline-row">
+                <select class="select class-row-select">
+                  <option value="" selected>— Seleziona —</option>
+                  <option value="Barbaro">Barbaro</option>
+                  <option value="Bardo">Bardo</option>
+                  <option value="Chierico">Chierico</option>
+                  <option value="Druido">Druido</option>
+                  <option value="Guerriero">Guerriero</option>
+                  <option value="Ladro">Ladro</option>
+                  <option value="Mago">Mago</option>
+                  <option value="Monaco">Monaco</option>
+                  <option value="Paladino">Paladino</option>
+                  <option value="Ranger">Ranger</option>
+                  <option value="Stregone">Stregone</option>
+                </select>
+                <input class="small class-row-level" type="number" min="0" step="1" value="0" />
+              </div>
+              </div>
+            </div>
+            <div class="class-entry-row" data-class-slot="3" hidden>
+              <div class="field class-entry-class class-entry-inline">
+                <label>Classe 3 • Livello</label>
+                <div class="class-entry-inline-row">
+                <select class="select class-row-select">
+                  <option value="" selected>— Seleziona —</option>
+                  <option value="Barbaro">Barbaro</option>
+                  <option value="Bardo">Bardo</option>
+                  <option value="Chierico">Chierico</option>
+                  <option value="Druido">Druido</option>
+                  <option value="Guerriero">Guerriero</option>
+                  <option value="Ladro">Ladro</option>
+                  <option value="Mago">Mago</option>
+                  <option value="Monaco">Monaco</option>
+                  <option value="Paladino">Paladino</option>
+                  <option value="Ranger">Ranger</option>
+                  <option value="Stregone">Stregone</option>
+                </select>
+                <input class="small class-row-level" type="number" min="0" step="1" value="0" />
+              </div>
+              </div>
+            </div>
+            <div class="class-entry-row cdp-field" data-class-slot="cdp" hidden>
+              <div class="field class-entry-class class-entry-inline">
+                <label>Classe di Prestigio • Livello</label>
+                <div class="class-entry-inline-row">
+                <select id="cdp-name" class="select prestige-class-select">
+                  <option value="" selected>— Seleziona CdP —</option>
+                </select>
+                <input
+                    id="cdp-level"
+                    class="small class-row-level"
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="1"
+                    value="0"
+                />
+              </div>
+              </div>
+            </div>
+          </div>
+          <div class="class-summary-row">
+            <div class="field class-summary-class">
+              <label>Classe</label>
+              <input id="pc-class-free-text" type="text" placeholder="Es. Guerriero 5 / Ladro 2" readonly />
+            </div>
+            <div class="field class-summary-level">
+              <label>Livello Totale</label>
+              <input id="pc-level-total" class="small" type="number" min="0" step="1" value="0" readonly />
+              <div class="class-card-actions">
+                <button type="button" class="btn" id="add-class-row">Aggiungi classe</button>
+                <button type="button" class="btn" id="remove-class-row">Rimuovi classe</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
           <h2>Caratteristiche</h2>
 
           <div class="stats">
@@ -165,7 +249,6 @@
               <div class="row">
                 <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
                 <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>
-                <div><span>Temp</span><input class="small ability-temp" type="number" min="0" max="50" step="1" placeholder="—"></div>
               </div>
             </div>
              <div class="stat" data-ability="INT">
@@ -173,7 +256,6 @@
               <div class="row">
                 <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
                 <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div> 
-                <div><span>Temp</span><input class="small ability-temp" type="number" min="0" max="50" step="1" placeholder="—"></div>
               </div>
             </div>
 
@@ -182,7 +264,6 @@
               <div class="row">
                 <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
                  <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>
-                <div><span>Temp</span><input class="small ability-temp" type="number" min="0" max="50" step="1" placeholder="—"></div>
               </div>
             </div>
 
@@ -191,7 +272,6 @@
               <div class="row">
                 <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
                 <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>                
-                <div><span>Temp</span><input class="small ability-temp" type="number" min="0" max="50" step="1" placeholder="—"></div>
               </div>
             </div>
 
@@ -200,7 +280,6 @@
               <div class="row">
                 <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
                 <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>                
-                <div><span>Temp</span><input class="small ability-temp" type="number" min="0" max="50" step="1" placeholder="—"></div>
               </div>
             </div>
 
@@ -209,11 +288,63 @@
               <div class="row">
                 <div><span>Punteggio</span><input class="small ability-score" type="number" min="1" max="50" step="1" value="10"></div>
                 <div><span>Mod</span><input class="small ability-mod" type="number" step="1" value="0"></div>                
-                <div><span>Temp</span><input class="small ability-temp" type="number" min="0" max="50" step="1" placeholder="—"></div>
               </div>
             </div>
           </div>
 
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-cdp" role="tabpanel" aria-labelledby="tab-cdp">
+      <div class="grid">
+        <div class="card">
+          <h2>Classe di Prestigio</h2>
+          <div class="fields">
+            <div class="field span-8">
+              <label>Classe di Prestigio</label>
+              <select id="cdp-name-tab" class="select prestige-class-select">
+                <option value="" selected>— Seleziona CdP —</option>
+              </select>
+            </div>
+            <div class="field span-4">
+              <label>Livello CdP</label>
+              <input id="cdp-level-tab" class="small" type="number" min="0" max="10" step="1" value="0" />
+            </div>
+            <div class="field span-4">
+              <label>BAB CdP</label>
+              <input id="cdp-bab-progression" class="small" type="text" value="—" readonly />
+            </div>
+            <div class="field span-4">
+              <label>DV CdP</label>
+              <input id="cdp-hit-die" class="small" type="text" value="—" readonly />
+            </div>
+            <div class="field span-4">
+              <label>TS Fort / Rif / Vol</label>
+              <input id="cdp-save-progression" class="small" type="text" value="—" readonly />
+            </div>
+            <div class="field span-12">
+              <label>Abilità di Classe</label>
+              <textarea id="cdp-class-skills" readonly placeholder="—"></textarea>
+            </div>
+            <div class="field span-12">
+              <div class="table-wrap">
+                <table aria-label="Riepilogo progressione classe di prestigio">
+                  <thead>
+                    <tr>
+                      <th>Livello</th>
+                      <th>Capacità acquisite</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cdp-summary-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="field span-12">
+              <label>Note CdP</label>
+              <textarea id="cdp-notes" placeholder="Prerequisiti, capacità chiave, progressione e appunti..."></textarea>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -224,9 +355,8 @@
     <div class="card">
       <h2>Combattimento</h2>
 
-      <!-- PF -->
       <div class="fields" style="margin-bottom:12px;">
-        <div class="field span-4"><label>PF Totali</label><input id="hp-total" class="small" type="number" step="1" min="0" placeholder="—" /></div>
+        <div class="field span-4"><label>PF Totali</label><input id="hp-total" class="small" type="number" step="1" min="0" placeholder="—" readonly /></div>
         <div class="field span-4"><label>PF Attuali</label><input id="hp-current" class="small" type="number" step="1" min="0" placeholder="—" /></div>
         <div class="field span-4"><label>Temp PF</label><input id="hp-temp" class="small" type="number" step="1" min="0" placeholder="0" /></div>
       </div>
@@ -256,9 +386,60 @@
           <button type="button" class="btn cmb-roll-btn" title="Tira 1d20 + BMC">Tira BMC</button>
         </div>
       </div>
-    </div>
+      </div>
 
       <div class="stack combat-subcards">
+
+        <details class="combat-hp-calc" open>
+          <summary>Punti ferita</summary>
+          <div class="fields">
+            <div class="field span-3">
+              <label>DV Classe</label>
+              <select class="select" id="hp-hit-die">
+                <option value="auto" selected>Auto da classe</option>
+                <option value="6">d6</option>
+                <option value="8">d8</option>
+                <option value="10">d10</option>
+                <option value="12">d12</option>
+              </select>
+            </div>
+            <div class="field span-3">
+              <label>Livelli</label>
+              <input id="hp-levels" class="small" type="number" min="0" step="1" value="0" readonly />
+            </div>
+            <div class="field span-3">
+              <label>PF Classe Preferita</label>
+              <input id="hp-favored-bonus" class="small" type="number" min="0" step="1" value="0" />
+            </div>
+            <div class="field span-3">
+              <label>Bonus PF Vari</label>
+              <input id="hp-misc-bonus" class="small" type="number" step="1" value="0" />
+            </div>
+            <div class="field span-3">
+              <label>Base DV</label>
+              <input id="hp-base-total" class="small" type="text" value="0" readonly />
+            </div>
+            <div class="field span-3">
+              <label>Bonus COS</label>
+              <input id="hp-con-total" class="small" type="text" value="0" readonly />
+            </div>
+            <div class="field span-3">
+              <label>PF Mitici</label>
+              <input id="hp-mythic-total" class="small" type="text" value="0" readonly />
+            </div>
+            <div class="field span-3">
+              <label>Robustezza</label>
+              <input id="hp-toughness-total" class="small" type="text" value="0" readonly />
+            </div>
+            <div class="field span-12 combat-hp-talent-field">
+              <label class="combat-hp-toggle combat-hp-toggle-inline">
+                <input id="hp-toughness" type="checkbox" />
+                Robustezza
+              </label>
+            </div>
+          </div>
+          <div class="hint">Calcolo automatico: 1° livello a DV massimo, livelli successivi a media fissa, poi COS, bonus mitici, classe preferita e bonus vari.</div>
+        </details>
 
         <!-- CA (già calcolata automaticamente) -->
         <div class="card" style="padding:10px;">
@@ -284,17 +465,43 @@
             <div class="ac-row row-1">
               <div class="field compact">
                 <label>Armatura</label>
-                <input id="ac-armor" class="small" type="number" step="1" value="0" />
+                <div class="ac-bonus-stack">
+                  <input id="ac-armor" class="small" type="number" step="1" value="0" />
+                  <div class="field compact ac-enchant-field">
+                    <label>Incantamento Armatura</label>
+                    <select class="select" id="ac-armor-enhancement">
+                      <option value="0" selected>+0</option>
+                      <option value="1">+1</option>
+                      <option value="2">+2</option>
+                      <option value="3">+3</option>
+                      <option value="4">+4</option>
+                      <option value="5">+5</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
               <div class="field compact">
                 <label>Scudo</label>
-                <div class="shield-inline">
-                  <input id="ac-shield" class="small" type="number" step="1" value="0" />
-                  <label class="shield-toggle">
-                    <input id="shield-off" type="checkbox" />
-                    Off
-                  </label>
+                <div class="ac-bonus-stack">
+                  <div class="shield-inline">
+                    <input id="ac-shield" class="small" type="number" step="1" value="0" />
+                    <label class="shield-toggle">
+                      <input id="shield-off" type="checkbox" />
+                      Off
+                    </label>
+                  </div>
+                  <div class="field compact ac-enchant-field">
+                    <label>Incantamento Scudo</label>
+                    <select class="select" id="ac-shield-enhancement">
+                      <option value="0" selected>+0</option>
+                      <option value="1">+1</option>
+                      <option value="2">+2</option>
+                      <option value="3">+3</option>
+                      <option value="4">+4</option>
+                      <option value="5">+5</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -331,7 +538,7 @@
           </div>
 
           <div class="hint" style="margin-top:8px;">
-            Tot = 10 + Armatura + Scudo(attivo) + min(DES, Bonus Des Max) + Taglia + Varie • Contatto: no Armatura/Scudo • Impreparato: no DES
+            Tot = 10 + Armatura + Incant. Armatura + Scudo(attivo) + Incant. Scudo + min(DES, Bonus Des Max) + Taglia + Varie • Contatto: no Armatura/Scudo • Impreparato: no DES
           </div>
         </div>
 
@@ -375,14 +582,14 @@
   </div>
 
   <div class="table-wrap" style="margin-top:10px;">
-    <table aria-label="Tabella Attacchi" id="attacks-table" style="min-width:560px;">
+    <table aria-label="Tabella Attacchi" id="attacks-table" style="min-width:640px;">
       <thead>
         <tr>
-          <th style="width:16%;">Tipo</th>
-          <th style="width:38%;">Arma</th>
-          <th style="width:14%;">Bonus Mag.</th>
-          <th style="width:16%;">Varie</th>
-          <th style="width:16%;">Tot</th>
+          <th style="width:28%;">Tipo</th>
+          <th style="width:22%;">BAB Att.</th>
+          <th style="width:18%;">Bonus Mag.</th>
+          <th style="width:14%;">Varie</th>
+          <th style="width:18%;">Tot</th>
         </tr>
       </thead>
       <tbody id="attacks-tbody">
@@ -393,7 +600,11 @@
               <option value="ranged">Distanza (DES)</option>
             </select>
           </td>
-          <td><input class="atk-name" type="text" placeholder="Es. Spada lunga" /></td>
+          <td>
+            <select class="select atk-sequence">
+              <option value="0" selected>1°</option>
+            </select>
+          </td>
           <td>
             <select class="select atk-magic-bonus">
               <option value="0" selected>+0</option>
@@ -462,7 +673,6 @@
               </div>
               <div class="attack-roll-line">
                 <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
-                <button type="button" class="roll-btn atk-full-roll-btn" title="Tira attacco completo">Full</button>
                 <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
               </div>
             </div>
@@ -496,41 +706,37 @@
     <section class="page" id="page-abilita" role="tabpanel" aria-labelledby="tab-abilita">
       <div class="grid">
         <div class="card">
-          <h2>Abilità (Skills)</h2>
+          <h2>Abilità</h2>
 
             <div class="fields skills-toolbar" style="margin-bottom:12px;">
             <div class="field span-6 skills-filters-col">
-              <label>Classe</label>
-              <select class="select" id="pf-class-select">
-                <option value="" selected>— Seleziona —</option>
-                <option value="Barbaro">Barbaro</option>
-                <option value="Bardo">Bardo</option>
-                <option value="Chierico">Chierico</option>
-                <option value="Druido">Druido</option>
-                <option value="Guerriero">Guerriero</option>
-                <option value="Ladro">Ladro</option>
-                <option value="Mago">Mago</option>
-                <option value="Monaco">Monaco</option>
-                <option value="Paladino">Paladino</option>
-                <option value="Ranger">Ranger</option>
-                <option value="Stregone">Stregone</option>
-              </select>
+              <label>Classi Attive</label>
+              <input id="skills-class-summary" type="text" placeholder="Derivate da Personaggio" readonly />
+            </div>
 
+            <div class="field span-3">
+              <label>Pen. armatura</label>
+              <input id="skills-acp" class="small" type="text" value="0" readonly />
+            </div>
+            <div class="field span-3">
+              <label>Punti abilità tot.</label>
+              <input id="skills-points-total" class="small" type="text" value="0" readonly />
+            </div>
+            <div class="field span-3 skills-filters-col">
               <label class="skills-filter-label">
                 <input id="filter-class" type="checkbox" />
                 <strong>Mostra solo class skill (CS)</strong>
               </label>
-
+            </div>
+            <div class="field span-6 skills-filters-col skills-trained-filter-col">
               <label class="skills-filter-label">
                 <input id="filter-trained" type="checkbox" />
                 <strong>Mostra solo abilità con gradi &gt; 0</strong>
               </label>
-
             </div>
-
-            <div class="field span-6">
-              <label>Penalità Armatura</label>
-              <input id="skills-acp" class="small" type="number" step="1" value="0" />
+            <div class="field span-3">
+              <label>Punti abilità spesi</label>
+              <input id="skills-ranks-spent" class="small" type="text" value="0" readonly />
             </div>
           </div>
           <table aria-label="Tabella Abilità" id="skills-table">
@@ -645,9 +851,45 @@
     <section class="page" id="page-talenti" role="tabpanel" aria-labelledby="tab-talenti">
       <div class="grid">
         <div class="card">
-          <h2>Talenti • Tratti • Capacità</h2>
+          <h2>Talenti per Livello</h2>
+          <div class="table-wrap">
+            <table aria-label="Tabella talenti per livello" id="talents-table" class="talents-table">
+              <thead>
+                <tr>
+                  <th style="width:12%;">Livello</th>
+                  <th style="width:32%;">Talento</th>
+                  <th style="width:32%;">Talenti Bonus</th>
+                  <th style="width:24%;">Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td><input type="text" placeholder="Es. Attacco Poderoso" /></td><td><input type="text" placeholder="Es. talento umano, bonus guerriero..." /></td><td><input type="text" placeholder="Note" /></td></tr>
+                <tr><td>2</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>3</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>4</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>5</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>6</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>7</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>8</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>9</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>10</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>11</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>12</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>13</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>14</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>15</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>16</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>17</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>18</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>19</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+                <tr><td>20</td><td><input type="text" /></td><td><input type="text" /></td><td><input type="text" /></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Tratti • Capacità • Note</h2>
           <div class="grid" style="gap:12px;">
-            <div class="field span-12"><label>Talenti</label><textarea placeholder="Elenco talenti..."></textarea></div>
             <div class="field span-12"><label>Tratti / Capacità di classe</label><textarea placeholder="Tratti, capacità, privilegi..."></textarea></div>
             <div class="field span-12"><label>Debolezze / Condizioni / Resistenze</label><textarea placeholder="Note rapide..."></textarea></div>
           </div>
@@ -709,10 +951,15 @@
         <div class="card equip-weapon-card">
           <h2>Arma</h2>
           <div class="equip-weapon-inline">
-            <div class="field">
+            <div class="field equip-weapon-name-field">
               <label>Nome Arma</label>
               <input id="equip-weapon-name" type="text" placeholder="Es. Spada lunga +1" />
             </div>
+            <div class="field equip-weapon-legendary-field">
+              <label class="legendary-enable-toggle"><input id="equip-weapon-legendary" type="checkbox" />Ogg. leggendario</label>
+            </div>
+          </div>
+          <div class="equip-weapon-bonus-pair">
             <div class="field">
               <label>Bonus Magico</label>
               <input id="equip-weapon-magic-bonus" class="small" type="number" min="0" max="5" step="1" value="0" />
@@ -720,11 +967,6 @@
             <div class="field">
               <label>Bonus Capacita</label>
               <input id="equip-weapon-ability-bonus" class="small" type="number" min="0" max="5" step="1" value="0" />
-            </div>
-          </div>
-          <div class="fields">
-            <div class="field span-12">
-              <label class="legendary-enable-toggle"><input id="equip-weapon-legendary" type="checkbox" />Oggetto leggendario</label>
             </div>
           </div>
         </div>
@@ -739,7 +981,7 @@
                   <th>Nome Oggetto</th>
                   <th>CA</th>
                   <th>Fall. Arcano %</th>
-                  <th>Pen. Abilita</th>
+                  <th>Penalità Armatura</th>
                   <th>Legg.</th>
                 </tr>
               </thead>
@@ -764,7 +1006,7 @@
             </table>
           </div>
           <div class="hint" style="margin-top:10px;">
-            Le penalita abilita vengono sommate automaticamente e inviate al campo ACP globale delle abilita.
+            Le penalità armatura di armatura e scudo vengono sommate automaticamente e inviate al totale nella tab Abilità.
           </div>
         </div>
 
@@ -935,12 +1177,7 @@
 
         <div class="card sword-graphic-card">
           <h2>Oggetto Leggendario</h2>
-          <div class="legendary-toggle-row">
-            <label class="legendary-enable-toggle">
-              <input id="legendary-enabled" type="checkbox" />
-              Attiva Oggetto Leggendario
-            </label>
-          </div>
+          <input id="legendary-enabled" type="checkbox" hidden />
 
           <div id="legendary-content" hidden>
           <div class="fields">
@@ -1077,15 +1314,19 @@
           </select>
         </div>
 
-        <div class="field span-4">
+        <div class="field span-3">
           <label>Livello / DV</label>
-          <input class="small" type="number" min="0" step="1" placeholder="0" />
+          <input id="comp-level" class="small" type="number" min="0" step="1" placeholder="0" />
         </div>
-        <div class="field span-4">
+        <div class="field span-3">
+          <label>Livello Effettivo</label>
+          <input id="comp-effective-level" class="small" type="text" value="0" readonly />
+        </div>
+        <div class="field span-3">
           <label>PF Totali</label>
           <input class="small" type="number" min="0" step="1" placeholder="0" />
         </div>
-        <div class="field span-4">
+        <div class="field span-3">
           <label>PF Attuali</label>
           <input class="small" type="number" min="0" step="1" placeholder="0" />
         </div>
@@ -1096,6 +1337,10 @@
             <input id="comp-init" class="small save-roll-value" type="text" value="+0" />
             <button type="button" class="roll-btn save-roll-btn" data-target="comp-init" data-label="Iniziativa Compagno" title="Tira 1d20 + Iniziativa">Tiro</button>
           </div>
+          <label class="skills-filter-label companion-toggle">
+            <input id="comp-boon-companion" type="checkbox" />
+            Boon Companion
+          </label>
         </div>
         <div class="field span-4">
           <label>Velocità</label>
@@ -1224,13 +1469,13 @@
       </div>
 
       <div class="table-wrap" style="margin-top:10px;">
-        <table aria-label="Tabella Attacchi Compagno" id="comp-attacks-table" style="min-width:560px;">
+        <table aria-label="Tabella Attacchi Compagno" id="comp-attacks-table" style="min-width:640px;">
           <thead>
             <tr>
-              <th style="width:18%;">Tipo</th>
-              <th style="width:46%;">Arma</th>
-              <th style="width:18%;">Varie</th>
-              <th style="width:18%;">Tot</th>
+              <th style="width:32%;">Tipo</th>
+              <th style="width:24%;">BAB Att.</th>
+              <th style="width:20%;">Varie</th>
+              <th style="width:24%;">Tot</th>
             </tr>
           </thead>
           <tbody id="comp-attacks-tbody">
@@ -1241,7 +1486,11 @@
                   <option value="ranged">Distanza (DES)</option>
                 </select>
               </td>
-              <td><input class="comp-atk-name" type="text" placeholder="Es. Morso" /></td>
+              <td>
+                <select class="select comp-atk-sequence">
+                  <option value="0" selected>1°</option>
+                </select>
+              </td>
               <td><input class="small comp-atk-row-misc" type="number" step="1" value="0" /></td>
               <td><input class="small comp-atk-total" type="text" value="+0" readonly /></td>
             </tr>
@@ -1286,7 +1535,6 @@
                   </div>
                   <div class="attack-roll-line">
                     <button type="button" class="roll-btn comp-atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
-                    <button type="button" class="roll-btn comp-atk-full-roll-btn" title="Tira attacco completo">Full</button>
                     <button type="button" class="roll-btn comp-atk-dmg-roll-btn" title="Tira danni">Danni</button>
                   </div>
                 </div>
@@ -1336,22 +1584,45 @@
           <h2>Note &amp; Background</h2>
           <textarea placeholder="Aspetto, personalità, legami, note di campagna..."></textarea>
         </div>
+        <div class="card">
+          <h2>Temi</h2>
+          <div class="fields">
+            <div class="field span-12">
+              <label class="theme-variant-toggle">
+                <strong>Tema Ira dei Giusti</strong>
+                <input id="theme-wrath-toggle" type="checkbox" />
+              </label>
+            </div>
+            <div class="field span-12">
+              <label class="theme-variant-toggle">
+                <strong>Tema Caos Cromatico</strong>
+                <input id="theme-vivid-toggle" type="checkbox" />
+              </label>
+            </div>
+            <div class="field span-12">
+              <label class="theme-variant-toggle">
+                <strong>Tema Classico</strong>
+                <input id="theme-classic-toggle" type="checkbox" />
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
   </main>
 
-  <!-- JS locale (sviluppo): decommenta queste righe e commenta quelle esterne sopra -->
+  <!-- JS locale (sviluppo): decommenta queste righe e commenta quelle esterne sopra
    <script src="js/pf1e_tables.js" defer></script>
    <script src="js/pf1e_spells.js" defer></script>
    <script src="js/pf1e_equipment.js" defer></script>
-   <script src="scheda_pathfinder.js" defer></script>
+   <script src="scheda_pathfinder.js" defer></script> -->
 
   <!-- JS esterno -->
- <!-- <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_tables.js" defer></script>
+  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_tables.js" defer></script>
   <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_spells.js" defer></script>
   <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_equipment.js" defer></script>
-  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/scheda_pathfinder.js" defer></script> -->
+  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/scheda_pathfinder.js" defer></script>
 </body>
 </html>
 

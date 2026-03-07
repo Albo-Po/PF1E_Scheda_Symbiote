@@ -18,6 +18,7 @@
   --c-talenti:#6f3aa8;       /* viola */
   --c-equip:#9a5a12;         /* arancione */
   --c-mitico:#8f2f9e;        /* magenta */
+  --c-cdp:#7a2336;           /* bordeaux */
   --c-compagno:#1a6f84;      /* azzurro/teal */
   --c-note:#2f665f;          /* teal */
 
@@ -53,8 +54,166 @@
   --c-talenti:#c084fc;
   --c-equip:#fbbf24;
   --c-mitico:#730fed;
+  --c-cdp:#fb7185;
   --c-compagno:#22d3ee;
   --c-note:#2dd4bf;
+}
+
+/* ===== Variant: Ira dei Giusti ===== */
+:root[data-theme-variant="wrath"]{
+  --ink:#261616;
+  --muted:#6c5148;
+  --line:#5f2f2b;
+  --font:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-display:"Uncial Antiqua", Georgia, serif;
+  --page-bg:
+    radial-gradient(circle at top, rgba(178,70,47,.18), transparent 32%),
+    linear-gradient(145deg, #efe0cc 0%, #d6b49a 46%, #4a2527 100%);
+  --surface:#f4e4d3;
+  --surface-2:#e3c4af;
+  --text:var(--ink);
+  --text-muted:var(--muted);
+  --shadow:0 12px 34px rgba(56,22,18,.22);
+
+  --c-identita:#8a2f2c;
+  --c-combattimento:#b44027;
+  --c-abilita:#7d5f2e;
+  --c-incantesimi:#5f4b63;
+  --c-talenti:#6a2c43;
+  --c-equip:#9a4f24;
+  --c-mitico:#8b1e30;
+  --c-cdp:#5b1f2e;
+  --c-compagno:#6c3d2d;
+  --c-note:#7a2336;
+}
+
+:root[data-theme="dark"][data-theme-variant="wrath"]{
+  --page-bg:
+    radial-gradient(circle at top, rgba(220,94,68,.18), transparent 30%),
+    linear-gradient(155deg, #170d0d 0%, #251212 48%, #090506 100%);
+  --surface:#211313;
+  --surface-2:#2b1818;
+  --text:#f2e7da;
+  --text-muted:#c0a79b;
+  --line:#7c3b35;
+  --shadow:0 12px 34px rgba(0,0,0,.42);
+
+  --c-identita:#d36a57;
+  --c-combattimento:#ef7b45;
+  --c-abilita:#b69a53;
+  --c-incantesimi:#a88db2;
+  --c-talenti:#c96b83;
+  --c-equip:#d78f4a;
+  --c-mitico:#d9485a;
+  --c-cdp:#bc5a72;
+  --c-compagno:#b57457;
+  --c-note:#d1634f;
+}
+
+/* ===== Variant: Caos Cromatico ===== */
+:root[data-theme-variant="vivid"]{
+  --ink:#220a38;
+  --muted:#4f3569;
+  --line:#a3186f;
+  --font:"Space Grotesk", "Trebuchet MS", Arial, sans-serif;
+  --font-display:"Bungee", Impact, fantasy;
+  --page-bg:
+    radial-gradient(circle at 18% 18%, rgba(255,255,0,.3), transparent 18%),
+    radial-gradient(circle at 82% 20%, rgba(0,255,255,.26), transparent 22%),
+    radial-gradient(circle at 50% 78%, rgba(255,0,140,.28), transparent 24%),
+    linear-gradient(145deg, #ff6a00 0%, #ff00a8 32%, #6100ff 68%, #00d1ff 100%);
+  --surface:#fff4b8;
+  --surface-2:#ffd4f1;
+  --text:var(--ink);
+  --text-muted:var(--muted);
+  --shadow:0 14px 36px rgba(100,0,80,.26);
+
+  --c-identita:#ff006e;
+  --c-combattimento:#ff5400;
+  --c-abilita:#06d6a0;
+  --c-incantesimi:#118ab2;
+  --c-talenti:#8338ec;
+  --c-equip:#ffbe0b;
+  --c-mitico:#ff006e;
+  --c-cdp:#3a86ff;
+  --c-compagno:#00b4d8;
+  --c-note:#fb5607;
+}
+
+:root[data-theme="dark"][data-theme-variant="vivid"]{
+  --page-bg:
+    radial-gradient(circle at 14% 14%, rgba(255,214,10,.22), transparent 18%),
+    radial-gradient(circle at 84% 18%, rgba(0,229,255,.22), transparent 22%),
+    radial-gradient(circle at 55% 82%, rgba(255,0,140,.2), transparent 24%),
+    linear-gradient(150deg, #10031a 0%, #1d0430 30%, #120a3d 62%, #032034 100%);
+  --surface:#1f1031;
+  --surface-2:#2d1540;
+  --text:#fff2fb;
+  --text-muted:#e5bde0;
+  --line:#ff4db8;
+  --shadow:0 14px 36px rgba(0,0,0,.42);
+
+  --c-identita:#ff5ea8;
+  --c-combattimento:#ff7a18;
+  --c-abilita:#37f3c1;
+  --c-incantesimi:#4fd8ff;
+  --c-talenti:#bd7bff;
+  --c-equip:#ffd84d;
+  --c-mitico:#ff4db8;
+  --c-cdp:#67a7ff;
+  --c-compagno:#3ce6ff;
+  --c-note:#ff8a3d;
+}
+
+/* ===== Variant: Classico ===== */
+:root[data-theme-variant="classic"]{
+  --ink:#2b1f13;
+  --muted:#6b5a46;
+  --line:#6f4a2a;
+  --font:"Crimson Text", Georgia, "Times New Roman", serif;
+  --font-display:"IM Fell English SC", Georgia, serif;
+  --page-bg:
+    radial-gradient(circle at top, rgba(128,75,28,.12), transparent 30%),
+    linear-gradient(145deg, #efe2c6 0%, #e1cfaa 52%, #c5ab78 100%);
+  --surface:#f6ead1;
+  --surface-2:#ead8b4;
+  --text:var(--ink);
+  --text-muted:var(--muted);
+  --shadow:0 12px 32px rgba(78,50,21,.18);
+
+  --c-identita:#7b2f24;
+  --c-combattimento:#9f3c2f;
+  --c-abilita:#6b5a2d;
+  --c-incantesimi:#375772;
+  --c-talenti:#5f3d75;
+  --c-equip:#8a5a1f;
+  --c-mitico:#7a2f52;
+  --c-cdp:#6a2831;
+  --c-compagno:#556b5d;
+  --c-note:#725a34;
+}
+
+:root[data-theme="dark"][data-theme-variant="classic"]{
+  --page-bg:
+    radial-gradient(circle at top, rgba(194,147,88,.12), transparent 28%),
+    linear-gradient(150deg, #17110c 0%, #221913 46%, #120d09 100%);
+  --surface:#241b14;
+  --surface-2:#30231b;
+  --text:#f0e3cf;
+  --text-muted:#c8b596;
+  --line:#9b7a55;
+  --shadow:0 12px 32px rgba(0,0,0,.4);
+
+  --c-identita:#c66d52;
+  --c-combattimento:#d27c5f;
+  --c-abilita:#bca168;
+  --c-incantesimi:#7fb0d1;
+  --c-talenti:#ba98d8;
+  --c-equip:#d4a15f;
+  --c-mitico:#c27b9f;
+  --c-cdp:#d38793;
+  --c-compagno:#9eb39a;
+  --c-note:#d0b07d;
 }
 
 *{ box-sizing:border-box; }
@@ -121,11 +280,18 @@ body{
   gap:10px;
 }
 
+.wrath-theme-label{
+  color:var(--text);
+  font-size:12px;
+  white-space:nowrap;
+}
+
 .top-refresh-btn{
   appearance:none;
   border:2px solid var(--line);
   background: var(--surface-2);
   color: var(--text);
+  font-family:var(--font-display);
   border-radius:999px;
   padding:5px 10px;
   font-size:11px;
@@ -216,6 +382,7 @@ body{
   border:2px solid var(--line);
   background: transparent;
   color: var(--text);
+  font-family:var(--font-display);
   border-radius:999px;
   padding:8px 12px;
   font-size:12px;
@@ -237,6 +404,7 @@ body{
   border:2px solid transparent;
   background:#b91c1c;
   color:#fff;
+  font-family:var(--font-display);
   border-radius:999px;
   padding:6px 10px;
   font-size:11px;
@@ -267,6 +435,7 @@ body{
 #tab-talenti[aria-selected="true"]{ background:var(--c-talenti); }
 #tab-equip[aria-selected="true"]{ background:var(--c-equip); }
 #tab-mitico[aria-selected="true"]{ background:var(--c-mitico); }
+#tab-cdp[aria-selected="true"]{ background:var(--c-cdp); }
 #tab-note[aria-selected="true"]{ background:var(--c-note); }
 #tab-compagno[aria-selected="true"]{ background:var(--c-compagno); }
 
@@ -294,6 +463,7 @@ body{
   border:0;
   background: var(--c-identita);
   color:#fff;
+  font-family:var(--font-display);
   border-radius:999px;
   padding:8px 14px;
   font-size:12px;
@@ -343,6 +513,11 @@ body{
   align-items:center;
   text-transform:none;
   letter-spacing:0;
+  white-space:nowrap;
+}
+
+.skills-trained-filter-col{
+  padding-left:50px;
 }
 
 .skills-reset-wrap{
@@ -777,11 +952,21 @@ body{
   font-family:var(--font-display);
   margin:0 0 10px 0;
   font-size:12px;
+  line-height:1.2;
+  font-weight:700;
   text-transform:uppercase;
   letter-spacing:.6px;
   padding-bottom:6px;
   border-bottom:3px solid var(--c-identita);
   color: var(--text);
+}
+
+.combat-hp-calc > summary,
+.legendary-section > summary{
+  font-size:12px;
+  line-height:1.2;
+  font-weight:700;
+  letter-spacing:.6px;
 }
 
 .card.card-collapsible .card-collapse-head{
@@ -813,10 +998,12 @@ body{
 }
 
 #page-identita .card h2{ border-bottom-color: var(--c-identita); }
+#page-mitico .card{ background: var(--surface); }
 #page-mitico .card h2{ border-bottom-color: var(--c-mitico); }
 #page-abilita .card h2{ border-bottom-color: var(--c-abilita); }
 #page-incantesimi .card h2{ border-bottom-color: var(--c-incantesimi); }
 #page-talenti .card h2{ border-bottom-color: var(--c-talenti); }
+#page-cdp .card h2{ border-bottom-color: var(--c-cdp); }
 #page-combattimento .card h2{ border-bottom-color: var(--c-combattimento); }
 #page-equip .card h2{ border-bottom-color: var(--c-equip); }
 #page-compagno .card h2{ border-bottom-color: var(--c-compagno); }
@@ -902,7 +1089,7 @@ input:focus, textarea:focus, .select:focus{
 
 .stat .row{
   display:grid;
-  grid-template-columns:1fr 1fr 1fr;
+  grid-template-columns:1fr 1fr;
   gap:6px;
   align-items:center;
 }
@@ -918,6 +1105,11 @@ input:focus, textarea:focus, .select:focus{
   color: var(--text-muted);
   text-transform:uppercase;
   letter-spacing:.55px;
+}
+
+.stat .row .ability-score,
+.stat .row .ability-mod{
+  text-align:center;
 }
 
 /* ===== Combat helpers ===== */
@@ -951,6 +1143,19 @@ input:focus, textarea:focus, .select:focus{
   min-width:58px;
 }
 
+.companion-toggle{
+  margin-top:8px;
+  font-size:13px;
+  font-weight:600;
+  gap:10px;
+}
+
+.companion-toggle input[type="checkbox"]{
+  accent-color: var(--c-compagno);
+  width:18px;
+  height:18px;
+}
+
 .combat-quick-row{
   display:flex;
   align-items:flex-end;
@@ -971,6 +1176,162 @@ input:focus, textarea:focus, .select:focus{
 
 .combat-dr-wrap #dr-sr{
   max-width:230px;
+}
+
+.combat-hp-calc{
+  border:2px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+  background: var(--surface);
+}
+
+.combat-hp-calc > summary{
+  cursor:pointer;
+  font-family:var(--font-display);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  color: var(--text);
+  list-style:none;
+  user-select:none;
+  margin:0 0 10px 0;
+  padding-bottom:6px;
+  border-bottom:3px solid var(--c-combattimento);
+}
+
+.combat-hp-calc > summary::-webkit-details-marker{
+  display:none;
+}
+
+.combat-hp-calc > summary::before{
+  content:none;
+}
+
+.combat-hp-calc > summary::after{
+  content:"▾";
+  font-size:12px;
+  line-height:1;
+  color: var(--text-muted);
+}
+
+.combat-hp-calc:not([open]) > summary{
+  margin-bottom:0;
+}
+
+.combat-hp-calc:not([open]) > summary::after{
+  content:"▸";
+}
+
+.combat-hp-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-weight:700;
+  text-transform:none;
+  letter-spacing:0;
+  color: var(--text);
+}
+
+.combat-hp-toggle-inline{
+  width:auto;
+  min-height:auto;
+  padding:0;
+  justify-content:flex-start;
+  align-self:flex-start;
+  margin-left:0;
+  font-size:12px;
+}
+
+.combat-hp-talent-field{
+  justify-content:flex-start;
+}
+
+.combat-hp-talent-field .combat-hp-toggle-inline{
+  max-width:none;
+}
+
+.combat-hp-calc .fields .field span-3,
+.combat-hp-calc .field.span-3{
+  min-width:0;
+}
+
+.combat-hp-calc .field.span-3 label{
+  font-size:10px;
+  letter-spacing:.35px;
+}
+
+.combat-hp-calc .field.span-3 input,
+.combat-hp-calc .field.span-3 .select{
+  padding:7px 8px;
+  font-size:13px;
+}
+
+.combat-hp-calc .hint{
+  margin-top:10px;
+  line-height:1.35;
+}
+
+.theme-variant-toggle{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:700;
+  text-transform:none;
+  letter-spacing:0;
+  color:var(--text);
+  justify-content:flex-start;
+  font-size:13px;
+  line-height:1.3;
+  width:max-content;
+  align-self:flex-start;
+  white-space:nowrap;
+}
+
+.theme-variant-toggle input[type="checkbox"]{
+  accent-color:var(--c-note);
+}
+
+.class-card-rows{
+  display:grid;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.class-entry-row{
+  display:block;
+}
+
+.class-entry-row .field{
+  min-width:0;
+}
+
+.class-entry-inline-row{
+  display:grid;
+  grid-template-columns: minmax(0, 1fr) 86px;
+  gap:10px;
+  align-items:end;
+}
+
+.class-card-actions{
+  display:flex;
+  justify-content:flex-start;
+  gap:8px;
+  align-items:end;
+  margin:8px 0 0 0;
+  flex-wrap:wrap;
+}
+
+.class-summary-row{
+  display:grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  gap:10px;
+  align-items:end;
+}
+
+.class-summary-row .field{
+  min-width:0;
 }
 
 /* ===== Tables (Skills, Slots, etc.) ===== */
@@ -1033,6 +1394,42 @@ td input{
   table-layout:fixed;
 }
 
+#attacks-table .atk-sequence{
+  min-width:92px;
+}
+
+#comp-attacks-table .comp-atk-sequence{
+  min-width:92px;
+}
+
+#attacks-table{
+  min-width:640px;
+}
+
+#comp-attacks-table{
+  min-width:640px;
+}
+
+#attacks-table th,
+#attacks-table td{
+  padding:8px 10px;
+}
+
+#comp-attacks-table th,
+#comp-attacks-table td{
+  padding:8px 10px;
+}
+
+#attacks-table td .select,
+#attacks-table td input{
+  width:100%;
+}
+
+#comp-attacks-table td .select,
+#comp-attacks-table td input{
+  width:100%;
+}
+
 .equip-core-table th:nth-child(1){ width: 12%; }
 .equip-core-table th:nth-child(2){ width: 26%; }
 .equip-core-table th:nth-child(3),
@@ -1068,10 +1465,29 @@ td input{
 }
 
 .equip-weapon-inline{
-  display:grid;
-  grid-template-columns: minmax(220px, 1fr) 120px 140px;
+  display:flex;
+  flex-wrap:nowrap;
   gap:10px;
   align-items:end;
+}
+
+.equip-weapon-name-field{
+  flex:0 1 240px;
+  max-width:240px;
+  min-width:180px;
+}
+
+.equip-weapon-legendary-field{
+  flex:0 0 auto;
+  justify-content:flex-end;
+}
+
+.equip-weapon-bonus-pair{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+  align-items:end;
+  margin-top:10px;
 }
 
 .ring-pair{
@@ -1086,28 +1502,28 @@ td input{
 }
 
 .sword-graphic-card{
-  background: transparent;
+  background: var(--surface);
   --sword-line:#3f454d;
 }
 
 .sword-graphic-wrap{
   margin-top:12px;
-  border:2px dashed color-mix(in srgb, var(--line) 62%, var(--c-mitico) 38%);
+  border:2px dashed var(--line);
   border-radius:14px;
   padding:12px;
   display:flex;
   align-items:center;
   justify-content:center;
-  background: color-mix(in srgb, var(--surface) 88%, var(--c-mitico) 12%);
+  background: var(--surface);
 }
 
 .sword-mod-summary{
   margin-top:10px;
   padding:6px 10px;
-  border:1px solid color-mix(in srgb, var(--line) 62%, var(--c-mitico) 38%);
+  border:1px solid var(--line);
   border-radius:999px;
   display:inline-block;
-  background: color-mix(in srgb, var(--surface) 92%, var(--c-mitico) 8%);
+  background: var(--surface);
 }
 
 .legendary-toggle-row{
@@ -1127,23 +1543,54 @@ td input{
   accent-color:var(--c-mitico);
 }
 
+#equip-weapon-legendary{
+  accent-color:var(--c-equip);
+}
+
 .legendary-section{
   margin-top:12px;
-  border:1px solid color-mix(in srgb, var(--line) 68%, var(--c-mitico) 32%);
+  border:1px solid var(--line);
   border-radius:12px;
-  background: color-mix(in srgb, var(--surface) 94%, var(--c-mitico) 6%);
+  background: var(--surface);
   padding:8px 10px;
 }
 
 .legendary-section > summary{
   cursor:pointer;
-  font-weight:700;
-  color: color-mix(in srgb, var(--text) 82%, var(--c-mitico) 18%);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-family:var(--font-display);
+  text-transform:uppercase;
+  color: var(--text);
   user-select:none;
+  padding-bottom:6px;
+  border-bottom:3px solid var(--c-mitico);
+  list-style:none;
+}
+
+.legendary-section > summary::-webkit-details-marker{
+  display:none;
 }
 
 .legendary-section > summary::marker{
-  color: var(--c-mitico);
+  content:"";
+}
+
+.legendary-section > summary::after{
+  content:"▾";
+  font-size:12px;
+  line-height:1;
+  color: var(--text-muted);
+}
+
+.legendary-section:not([open]) > summary{
+  padding-bottom:0;
+  border-bottom:0;
+}
+
+.legendary-section:not([open]) > summary::after{
+  content:"▸";
 }
 
 .legendary-summary-wrap input.small{
@@ -1235,11 +1682,20 @@ td input{
 
   #attacks-table,
   #comp-attacks-table{
-    min-width:520px !important;
+    min-width:560px !important;
   }
 
   .equip-weapon-inline{
-    grid-template-columns: 1fr 110px 130px;
+    display:grid;
+    grid-template-columns: 1fr;
+  }
+
+  .equip-weapon-legendary-field{
+    justify-content:flex-start;
+  }
+
+  .equip-weapon-bonus-pair{
+    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -1254,7 +1710,7 @@ td input{
 
   #attacks-table,
   #comp-attacks-table{
-    min-width:460px !important;
+    min-width:500px !important;
   }
 
   .roll-btn{
@@ -1314,6 +1770,20 @@ td input{
 /* Riga 3: Note */
 #ac-components .ac-row.row-3{
   grid-template-columns: 1fr;
+}
+
+.ac-bonus-stack{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.ac-enchant-field{
+  margin:0;
+}
+
+.ac-enchant-field label{
+  margin-bottom:4px;
 }
 
 #attacks-table td input{
@@ -1471,6 +1941,7 @@ td input{
   border:0;
   background: var(--c-abilita);
   color: #fff;
+  font-family:var(--font-display);
   border-radius:999px;
   padding:8px 14px;
   font-size:12px;
@@ -1513,6 +1984,40 @@ td .roll-btn + .roll-btn{
   background: var(--c-talenti);
 }
 
+.talents-table{
+  min-width:720px;
+  table-layout:fixed;
+}
+
+.talents-table td:first-child{
+  text-align:center;
+  font-weight:700;
+}
+
+.talent-level-total{
+  font-weight:700;
+}
+
+.talent-level-class{
+  margin-top:3px;
+  font-size:10px;
+  line-height:1.15;
+  color: var(--text-muted);
+  white-space:normal;
+}
+
+.talents-table tr.talent-class-break td{
+  background: color-mix(in srgb, var(--c-talenti) 10%, transparent);
+}
+
+:root[data-theme="dark"] .talents-table tr.talent-class-break td{
+  background: color-mix(in srgb, var(--c-talenti) 16%, transparent);
+}
+
+.talents-table td input{
+  width:100%;
+}
+
 #page-equip .btn,
 #page-equip .roll-btn{
   background: var(--c-equip);
@@ -1548,7 +2053,7 @@ td .roll-btn + .roll-btn{
   border:2px solid var(--line);
   border-radius:12px;
   padding:8px;
-  background: color-mix(in srgb, var(--surface) 94%, var(--c-compagno) 6%);
+  background: var(--surface);
 }
 
 .comp-ability-field > label{
