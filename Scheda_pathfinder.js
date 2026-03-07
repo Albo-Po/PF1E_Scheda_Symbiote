@@ -1,4 +1,24 @@
 ﻿// scheda_pathfinder.js — refactor “snello e coerente”
+(() => {
+  const queueEarlyEvent = (bucket, payload) => {
+    if (!Array.isArray(window[bucket])) window[bucket] = [];
+    window[bucket].push(payload);
+  };
+
+  if (typeof window.logSymbioteEvent !== "function") {
+    window.logSymbioteEvent = (event) =>
+      queueEarlyEvent("__pf1e_pending_visibility_events", event);
+  }
+  if (typeof window.onStateChangeEvent !== "function") {
+    window.onStateChangeEvent = (event) =>
+      queueEarlyEvent("__pf1e_pending_state_events", event);
+  }
+  if (typeof window.handleRollResult !== "function") {
+    window.handleRollResult = (payload) =>
+      queueEarlyEvent("__pf1e_pending_roll_results", payload);
+  }
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      Helpers (UNA SOLA VOLTA)
@@ -277,6 +297,19 @@ document.addEventListener("DOMContentLoaded", () => {
   window.onStateChangeEvent = (event) => {
     void event;
   };
+
+  const pendingRollResults = Array.isArray(window.__pf1e_pending_roll_results)
+    ? window.__pf1e_pending_roll_results.splice(0)
+    : [];
+  pendingRollResults.forEach((payload) => {
+    Promise.resolve(window.handleRollResult(payload)).catch(() => {});
+  });
+  if (Array.isArray(window.__pf1e_pending_visibility_events)) {
+    window.__pf1e_pending_visibility_events.splice(0);
+  }
+  if (Array.isArray(window.__pf1e_pending_state_events)) {
+    window.__pf1e_pending_state_events.splice(0);
+  }
 
   /* =========================
      Tabs
