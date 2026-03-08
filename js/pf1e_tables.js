@@ -31,6 +31,7 @@
     Druido: "three_quarters",
     Chierico: "three_quarters",
     Inquisitore: "three_quarters",
+    Oracolo: "three_quarters",
     Mago: "half",
     Stregone: "half",
   };
@@ -71,6 +72,7 @@
     Ladro: 8,
     Mago: 6,
     Monaco: 8,
+    Oracolo: 8,
     Paladino: 10,
     Ranger: 10,
     Stregone: 6,
@@ -85,6 +87,7 @@
     Ladro: 8,
     Mago: 2,
     Monaco: 4,
+    Oracolo: 4,
     Paladino: 2,
     Ranger: 6,
     Stregone: 2,

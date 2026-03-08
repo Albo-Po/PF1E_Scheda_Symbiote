@@ -2016,6 +2016,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Ladro: ["acrobazia","artista della fuga","camuffare","diplomazia","disattivare congegni","furtività","intimidire","intrattenere","linguistica","nuotare","percezione","raggirare","rapidità di mano","scalare","intuizione","utilizzare congegni magici","valutare","conoscenze (dungeon)","conoscenze (locali)"],
     Mago: ["artigianato","linguistica","professione","sapienza magica","conoscenze (tutte)"],
     Monaco: ["acrobazia","artigianato","artista della fuga","intimidire","nuotare","percezione","professione","scalare","intuizione"],
+    Oracolo: ["artigianato","diplomazia","guarire","professione","sapienza magica","intuizione","conoscenze (storia)","conoscenze (religioni)"],
     Paladino: ["addestrare animali","artigianato","cavalcare","diplomazia","guarire","professione","sapienza magica","intuizione","conoscenze (nobiltà)","conoscenze (religioni)"],
     Ranger: ["addestrare animali","artigianato","cavalcare","furtività","guarire","intimidire","nuotare","percezione","professione","scalare","sopravvivenza","conoscenze (dungeon)","conoscenze (geografia)","conoscenze (natura)"],
     Stregone: ["artigianato","conoscenze (arcane)","professione","sapienza magica","utilizzare congegni magici"],

@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Cormorant+Garamond:wght@400;600;700&family=Crimson+Text:wght@400;600;700&family=IM+Fell+English+SC&family=Space+Grotesk:wght@400;500;700&family=Uncial+Antiqua&display=swap" rel="stylesheet">
 
   <style>
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Lora:wght@400;500;600;700&display=swap");
+
 /* =========================================================
    Pathfinder 1E Sheet — stile.css (COMPLETO)
    ========================================================= */
@@ -579,7 +581,7 @@ body{
   border:1px solid color-mix(in srgb, var(--line) 70%, var(--c-incantesimi) 30%);
   border-radius:10px;
   padding:8px;
-  background: color-mix(in srgb, var(--surface) 96%, var(--c-incantesimi) 4%);
+  background: var(--surface);
   display:grid;
   gap:8px;
 }
@@ -611,7 +613,7 @@ body{
   gap:8px;
   flex:0 1 auto;
   justify-content:flex-start;
-  flex-wrap:nowrap;
+  flex-wrap:wrap;
   max-width:100%;
 }
 
@@ -670,7 +672,15 @@ body{
   border:1px dashed color-mix(in srgb, var(--line) 65%, var(--c-incantesimi) 35%);
   border-radius:8px;
   padding:8px;
-  background: color-mix(in srgb, var(--surface) 93%, var(--c-incantesimi) 7%);
+  background: var(--surface);
+}
+
+.spell-entry.spell-healing-active .spell-offensive-group:first-child{
+  display:none;
+}
+
+.spell-entry.spell-healing-active .spell-atk-roll-btn{
+  display:none;
 }
 
 .spell-offensive-row{
@@ -760,7 +770,7 @@ body{
   border:2px solid var(--line);
   border-radius:10px;
   padding:8px 10px;
-  background: color-mix(in srgb, var(--surface) 94%, var(--c-incantesimi) 6%);
+  background: var(--surface);
 }
 
 .spell-level-head{
@@ -1904,6 +1914,24 @@ td input{
   accent-color: var(--c-combattimento);
 }
 
+.mythic-feat-list{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:8px 12px;
+}
+
+.mythic-feat-item{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+
+.mythic-feat-item input[type="checkbox"]{
+  width:18px;
+  height:18px;
+  accent-color: var(--c-note);
+}
+
 .atk-dmg-total{
   min-width:104px;
   max-width:130px;
@@ -2271,6 +2299,7 @@ td .roll-btn + .roll-btn{
                   <option value="Ladro">Ladro</option>
                   <option value="Mago">Mago</option>
                   <option value="Monaco">Monaco</option>
+                  <option value="Oracolo">Oracolo</option>
                   <option value="Paladino">Paladino</option>
                   <option value="Ranger">Ranger</option>
                   <option value="Stregone">Stregone</option>
@@ -2293,6 +2322,7 @@ td .roll-btn + .roll-btn{
                   <option value="Ladro">Ladro</option>
                   <option value="Mago">Mago</option>
                   <option value="Monaco">Monaco</option>
+                  <option value="Oracolo">Oracolo</option>
                   <option value="Paladino">Paladino</option>
                   <option value="Ranger">Ranger</option>
                   <option value="Stregone">Stregone</option>
@@ -2315,6 +2345,7 @@ td .roll-btn + .roll-btn{
                   <option value="Ladro">Ladro</option>
                   <option value="Mago">Mago</option>
                   <option value="Monaco">Monaco</option>
+                  <option value="Oracolo">Oracolo</option>
                   <option value="Paladino">Paladino</option>
                   <option value="Ranger">Ranger</option>
                   <option value="Stregone">Stregone</option>
@@ -2701,18 +2732,20 @@ td .roll-btn + .roll-btn{
   </div>
 
   <div class="table-wrap" style="margin-top:10px;">
-    <table aria-label="Tabella Attacchi" id="attacks-table" style="min-width:640px;">
+    <table aria-label="Tabella Attacchi" id="attacks-table" style="min-width:760px;">
       <thead>
         <tr>
-          <th style="width:28%;">Tipo</th>
-          <th style="width:22%;">BAB Att.</th>
-          <th style="width:18%;">Bonus Mag.</th>
-          <th style="width:14%;">Varie</th>
-          <th style="width:18%;">Tot</th>
+          <th style="width:24%;">Nome Attacco</th>
+          <th style="width:24%;">Tipo</th>
+          <th style="width:18%;">BAB Att.</th>
+          <th style="width:14%;">Bonus Mag.</th>
+          <th style="width:10%;">Varie</th>
+          <th style="width:10%;">Tot</th>
         </tr>
       </thead>
       <tbody id="attacks-tbody">
         <tr class="attack-row">
+          <td><input class="atk-name" type="text" placeholder="Es. Arco lungo +1" /></td>
           <td>
             <select class="select atk-type">
               <option value="melee" selected>Mischia (FOR)</option>
@@ -2738,7 +2771,7 @@ td .roll-btn + .roll-btn{
           <td><input class="small atk-total" type="text" value="+0" readonly /></td>
         </tr>
         <tr class="attack-row-dmg">
-          <td colspan="5">
+          <td colspan="6">
             <div class="attack-dmg-line">
               <div class="attack-main">
                 <div class="attack-groups">
@@ -2787,6 +2820,18 @@ td .roll-btn + .roll-btn{
                   <label class="attack-flag atk-melee-only">
                     <input class="atk-furious-focus" type="checkbox" />
                     Furia Focalizzata
+                  </label>
+                  <label class="attack-flag atk-ranged-only">
+                    <input class="atk-deadly-aim" type="checkbox" />
+                    Mira Letale
+                  </label>
+                  <label class="attack-flag atk-ranged-only">
+                    <input class="atk-rapid-shot" type="checkbox" />
+                    Tiro Rapido
+                  </label>
+                  <label class="attack-flag atk-ranged-only">
+                    <input class="atk-manyshot" type="checkbox" />
+                    Tiro Multiplo
                   </label>
                 </div>
               </div>
@@ -2912,7 +2957,8 @@ td .roll-btn + .roll-btn{
           <div class="fields" style="margin-top:10px;">
             <div class="field span-4"><label>LI (Livello Incantatore)</label><input id="spellcaster-level" class="small" type="number" min="0" step="1" value="0" /></div>
             <div class="field span-4"><label>Concentrazione</label><input class="small" type="text" value="+0" /></div>
-            <div class="field span-4"><label>Bonus Prove RM</label><input class="small" type="text" value="+0" /></div>
+            <div class="field span-4"><label>Bonus Prove RM (Base)</label><input id="spell-sr-bonus-base" class="small" type="number" step="1" value="0" /></div>
+            <div class="field span-4"><label>Bonus Prove RM (Tot)</label><input id="spell-sr-bonus-total" class="small" type="text" value="+0" readonly /></div>
             <div class="field span-4"><label>Incantesimi Noti</label><input class="small" type="number" min="0" step="1" value="0" /></div>
             <div class="field span-4"><label>Incantesimi Preparati</label><input class="small" type="number" min="0" step="1" value="0" /></div>
           </div>
@@ -3201,10 +3247,11 @@ td .roll-btn + .roll-btn{
                       <th>Categoria Mitica</th>
                       <th>Aumento Caratteristica</th>
                       <th>Impulso Mitico</th>
+                      <th>Talento Mitico</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr><td>1</td><td>—</td><td>1d6</td></tr>
+                    <tr><td>1</td><td>—</td><td>1d6</td><td><input type="text" placeholder="Talento mitico (cat. 1)" /></td></tr>
                     <tr>
                       <td>2</td>
                       <td>
@@ -3219,8 +3266,9 @@ td .roll-btn + .roll-btn{
                         </select>
                       </td>
                       <td>—</td>
+                      <td><input type="text" placeholder="—" readonly /></td>
                     </tr>
-                    <tr><td>3</td><td>—</td><td>1d8</td></tr>
+                    <tr><td>3</td><td>—</td><td>1d8</td><td><input type="text" placeholder="Talento mitico (cat. 3)" /></td></tr>
                     <tr>
                       <td>4</td>
                       <td>
@@ -3235,8 +3283,9 @@ td .roll-btn + .roll-btn{
                         </select>
                       </td>
                       <td>—</td>
+                      <td><input type="text" placeholder="—" readonly /></td>
                     </tr>
-                    <tr><td>5</td><td>—</td><td>—</td></tr>
+                    <tr><td>5</td><td>—</td><td>—</td><td><input type="text" placeholder="Talento mitico (cat. 5)" /></td></tr>
                     <tr>
                       <td>6</td>
                       <td>
@@ -3251,8 +3300,9 @@ td .roll-btn + .roll-btn{
                         </select>
                       </td>
                       <td>1d10</td>
+                      <td><input type="text" placeholder="—" readonly /></td>
                     </tr>
-                    <tr><td>7</td><td>—</td><td>—</td></tr>
+                    <tr><td>7</td><td>—</td><td>—</td><td><input type="text" placeholder="Talento mitico (cat. 7)" /></td></tr>
                     <tr>
                       <td>8</td>
                       <td>
@@ -3267,8 +3317,9 @@ td .roll-btn + .roll-btn{
                         </select>
                       </td>
                       <td>—</td>
+                      <td><input type="text" placeholder="—" readonly /></td>
                     </tr>
-                    <tr><td>9</td><td>—</td><td>1d12</td></tr>
+                    <tr><td>9</td><td>—</td><td>1d12</td><td><input type="text" placeholder="Talento mitico (cat. 9)" /></td></tr>
                     <tr>
                       <td>10</td>
                       <td>
@@ -3283,14 +3334,41 @@ td .roll-btn + .roll-btn{
                         </select>
                       </td>
                       <td>—</td>
+                      <td><input type="text" placeholder="—" readonly /></td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </div>
 
-            <div class="field span-12"><label>Capacità Mitiche</label><textarea placeholder="Capacità base e di percorso..."></textarea></div>
-            <div class="field span-12"><label>Cimenti</label><textarea placeholder="Cimenti completati..."></textarea></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Progressione Mitica</h2>
+          <div class="table-wrap">
+            <table aria-label="Tabella capacità di percorso mitico">
+              <thead>
+                <tr>
+                  <th style="width:12%;">Categoria</th>
+                  <th style="width:38%;">Capacità di Percorso</th>
+                  <th style="width:32%;">Capacità Percorso (1/10)</th>
+                  <th style="width:18%;">Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td><input type="text" placeholder="Capacità di percorso (cat. 1)" /></td><td><input type="text" placeholder="Capacità iniziale del percorso" /></td><td><input type="text" placeholder="Note" /></td></tr>
+                <tr><td>2</td><td><input type="text" placeholder="Capacità di percorso (cat. 2)" /></td><td><input type="text" placeholder="—" readonly /></td><td><input type="text" placeholder="Note" /></td></tr>
+                <tr><td>3</td><td><input type="text" placeholder="Capacità di percorso (cat. 3)" /></td><td><input type="text" placeholder="—" readonly /></td><td><input type="text" placeholder="Note" /></td></tr>
+                <tr><td>4</td><td><input type="text" placeholder="Capacità di percorso (cat. 4)" /></td><td><input type="text" placeholder="—" readonly /></td><td><input type="text" placeholder="Note" /></td></tr>
+                <tr><td>5</td><td><input type="text" placeholder="Capacità di percorso (cat. 5)" /></td><td><input type="text" placeholder="—" readonly /></td><td><input type="text" placeholder="Note" /></td></tr>
+                <tr><td>6</td><td><input type="text" placeholder="Capacità di percorso (cat. 6)" /></td><td><input type="text" placeholder="—" readonly /></td><td><input type="text" placeholder="Note" /></td></tr>
+                <tr><td>7</td><td><input type="text" placeholder="Capacità di percorso (cat. 7)" /></td><td><input type="text" placeholder="—" readonly /></td><td><input type="text" placeholder="Note" /></td></tr>
+                <tr><td>8</td><td><input type="text" placeholder="Capacità di percorso (cat. 8)" /></td><td><input type="text" placeholder="—" readonly /></td><td><input type="text" placeholder="Note" /></td></tr>
+                <tr><td>9</td><td><input type="text" placeholder="Capacità di percorso (cat. 9)" /></td><td><input type="text" placeholder="—" readonly /></td><td><input type="text" placeholder="Note" /></td></tr>
+                <tr><td>10</td><td><input type="text" placeholder="Capacità di percorso (cat. 10)" /></td><td><input type="text" placeholder="Capacità finale del percorso" /></td><td><input type="text" placeholder="Note" /></td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -3726,11 +3804,26 @@ td .roll-btn + .roll-btn{
             </div>
           </div>
         </div>
+        <div class="card">
+          <h2>Talenti Mitici (Toggle)</h2>
+          <div class="mythic-feat-list">
+            <label class="mythic-feat-item"><input id="mythic-feat-power-attack" type="checkbox" />Power Attack (Mythic)</label>
+            <label class="mythic-feat-item"><input id="mythic-feat-furious-focus" type="checkbox" />Furia Focalizzata (Mitico)</label>
+            <label class="mythic-feat-item"><input id="mythic-feat-spell-focus" type="checkbox" />Spell Focus (Mythic)</label>
+            <label class="mythic-feat-item"><input id="mythic-feat-spell-penetration" type="checkbox" />Spell Penetration (Mythic)</label>
+            <label class="mythic-feat-item"><input id="mythic-feat-deadly-aim" type="checkbox" />Mira Letale (Mitico)</label>
+            <label class="mythic-feat-item"><input id="mythic-feat-rapid-shot" type="checkbox" />Rapid Shot (Mythic)</label>
+            <label class="mythic-feat-item"><input id="mythic-feat-manyshot" type="checkbox" />Manyshot (Mythic)</label>
+            <label class="mythic-feat-item"><input id="mythic-feat-improved-critical" type="checkbox" />Improved Critical (Mythic)</label>
+            <label class="mythic-feat-item"><input id="mythic-feat-weapon-focus" type="checkbox" />Weapon Focus (Mythic)</label>
+          </div>
+        </div>
       </div>
     </section>
 
   </main>
-<script>
+
+  <script>
 // pf1e_tables.js
 // Tabelle condivise (caricate prima dello script principale).
 (function () {
@@ -3764,6 +3857,7 @@ td .roll-btn + .roll-btn{
     Druido: "three_quarters",
     Chierico: "three_quarters",
     Inquisitore: "three_quarters",
+    Oracolo: "three_quarters",
     Mago: "half",
     Stregone: "half",
   };
@@ -3804,6 +3898,7 @@ td .roll-btn + .roll-btn{
     Ladro: 8,
     Mago: 6,
     Monaco: 8,
+    Oracolo: 8,
     Paladino: 10,
     Ranger: 10,
     Stregone: 6,
@@ -3818,6 +3913,7 @@ td .roll-btn + .roll-btn{
     Ladro: 8,
     Mago: 2,
     Monaco: 4,
+    Oracolo: 4,
     Paladino: 2,
     Ranger: 6,
     Stregone: 2,
@@ -3971,7 +4067,7 @@ td .roll-btn + .roll-btn{
 })();
 
 </script>
-<script>
+  <script>
 // pf1e_spells.js
 // Modulo placeholder per futura separazione logica incantesimi.
 (function () {
@@ -3982,7 +4078,7 @@ td .roll-btn + .roll-btn{
 
 
 </script>
-<script>
+  <script>
 // pf1e_equipment.js
 // Modulo placeholder per futura separazione logica equipaggiamento.
 (function () {
@@ -3993,7 +4089,7 @@ td .roll-btn + .roll-btn{
 
 
 </script>
-<script>
+  <script>
 // scheda_pathfinder.js — refactor “snello e coerente”
 (() => {
   const queueEarlyEvent = (bucket, payload) => {
@@ -4538,7 +4634,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function applySavedValues(root = document) {
-    $(".page input, .page textarea, .page select", root).forEach((el) => {
+    $$(".page input, .page textarea, .page select", root).forEach((el) => {
       if (el.type === "button" || el.type === "submit") return;
       if (el.id === "theme-toggle") return;
       const k = keyFor(el);
@@ -4550,7 +4646,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function wireAutosave(root = document) {
-    $(".page input, .page textarea, .page select", root).forEach((el) => {
+    $$(".page input, .page textarea, .page select", root).forEach((el) => {
       if (el.type === "button" || el.type === "submit") return;
       if (el.id === "theme-toggle") return;
 
@@ -4649,7 +4745,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateAllAbilityMods() {
-    $(".stat[data-ability]").forEach(updateAbilityBlock);
+    $$(".stat[data-ability]").forEach(updateAbilityBlock);
   }
 
   function updateCompAbilityField(fieldEl) {
@@ -4674,7 +4770,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateAllCompAbilityMods() {
-    $(".comp-ability-field[data-ability]").forEach(updateCompAbilityField);
+    $$(".comp-ability-field[data-ability]").forEach(updateCompAbilityField);
     syncCompAttackModsFromAbilities();
   }
 
@@ -4704,7 +4800,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (tier <= 0) return 0;
 
     let bonus = 0;
-    $(".mythic-ability-pick").forEach((sel) => {
+    $$(".mythic-ability-pick").forEach((sel) => {
       const pickTier = num(sel.dataset.tier);
       if (!pickTier || pickTier > tier) return;
       if (String(sel.value || "").trim() === code) bonus += 2;
@@ -4715,7 +4811,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function applyMythicAbilityBonusToScores() {
     let changed = false;
 
-    $(".stat[data-ability]").forEach((statEl) => {
+    $$(".stat[data-ability]").forEach((statEl) => {
       const code = String(statEl.dataset.ability || "");
       const scoreEl = $(".ability-score", statEl);
       if (!scoreEl) return;
@@ -4757,7 +4853,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function syncAllAbilityBaseFromVisibleScores() {
-    $(".stat[data-ability]").forEach((statEl) => {
+    $$(".stat[data-ability]").forEach((statEl) => {
       const scoreEl = $(".ability-score", statEl);
       if (!scoreEl) return;
       const code = String(statEl.dataset.ability || "");
@@ -4893,7 +4989,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const hasClass = className.length > 0;
     const maxLevel = getMaxCastableSpellLevel();
 
-    $(".spell-level-block").forEach((block, idx) => {
+    $$(".spell-level-block").forEach((block, idx) => {
       const lvl = idx;
       block.dataset.level = String(lvl);
       const visible = !hasClass || lvl <= maxLevel;
@@ -4901,7 +4997,7 @@ document.addEventListener("DOMContentLoaded", () => {
       block.setAttribute("aria-hidden", String(!visible));
     });
 
-    $("#spell-slots-body .spell-slot-row").forEach((row) => {
+    $$("#spell-slots-body .spell-slot-row").forEach((row) => {
       const lvl = num(row.dataset.level);
       const visible = !hasClass || lvl <= maxLevel;
       row.hidden = !visible;
@@ -4968,6 +5064,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <input class="spell-offensive" data-key="spell:${level}:${index}:offensive" type="checkbox" />
             Offensivo
           </label>
+          <label class="spell-offensive-toggle" title="Usa formula di cura automatica in base al nome incantesimo e LI">
+            <input class="spell-healing" data-key="spell:${level}:${index}:healing" type="checkbox" />
+            Cura
+          </label>
         </div>
       </div>
 
@@ -5029,7 +5129,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function moveSpellLevelActionsInline() {
-    $(".spell-level-block").forEach((block) => {
+    $$(".spell-level-block").forEach((block) => {
       const head = block.querySelector(".spell-level-head");
       const actions = block.querySelector(".spell-level-actions");
       if (!head || !actions || head.contains(actions)) return;
@@ -5037,17 +5137,42 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function normalizeSpellName(name) {
+    return String(name || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function buildHealingFormulaFromSpellName(spellName, casterLevel) {
+    const n = normalizeSpellName(spellName);
+    const li = Math.max(0, Math.trunc(num(casterLevel)));
+    if (!n) return null;
+    if (n.includes("cura ferite minori")) return "1";
+    if (n.includes("cura ferite leggere")) return `1d8+${Math.min(li, 5)}`;
+    if (n.includes("cura ferite moderate")) return `2d8+${Math.min(li, 10)}`;
+    if (n.includes("cura ferite gravi")) return `3d8+${Math.min(li, 15)}`;
+    if (n.includes("cura ferite critiche")) return `4d8+${Math.min(li, 20)}`;
+    if (n.includes("guarigione")) return String(Math.min(li * 10, 150));
+    return null;
+  }
+
   function recalcSpellRow(row, attackVars = buildAttackBaseVariables()) {
     if (!row) return;
     const offensiveEl = row.querySelector(".spell-offensive");
     const offensivePanel = row.querySelector(".spell-offensive-panel");
     const offensive = !!offensiveEl?.checked;
+    const healingEnabled = !!row.querySelector(".spell-healing")?.checked;
+    const panelActive = offensive || healingEnabled;
+    row.classList.toggle("spell-healing-active", healingEnabled);
     if (offensivePanel) {
-      offensivePanel.hidden = !offensive;
-      offensivePanel.setAttribute("aria-hidden", String(!offensive));
+      offensivePanel.hidden = !panelActive;
+      offensivePanel.setAttribute("aria-hidden", String(!panelActive));
     }
 
-    if (offensive) {
+    if (panelActive) {
       const atkType = row.querySelector(".spell-atk-type")?.value || "ranged";
       const rowMisc = num(row.querySelector(".spell-atk-misc")?.value);
       const base = atkType === "melee" ? attackVars.melee.total : attackVars.ranged.total;
@@ -5057,8 +5182,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const diceCount = row.querySelector(".spell-dice-count")?.value;
       const dieSize = row.querySelector(".spell-die")?.value;
-      const dmgFormula = formatDamageFormula(diceCount, dieSize, 0);
+      const spellName = row.querySelector(".spell-name")?.value || "";
+      const li = num(document.getElementById("spellcaster-level")?.value);
+      const healingFormula = healingEnabled ? buildHealingFormulaFromSpellName(spellName, li) : null;
+      const dmgFormula = healingFormula || formatDamageFormula(diceCount, dieSize, 0);
       row.dataset.dmgFormula = dmgFormula;
+      row.dataset.healingActive = String(!!healingFormula);
     }
 
     const rangeType = row.querySelector(".spell-range-type")?.value || "close";
@@ -5072,7 +5201,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function recalcAllSpellRows() {
     const attackVars = buildAttackBaseVariables();
-    $(".spell-entry").forEach((row) => recalcSpellRow(row, attackVars));
+    $$(".spell-entry").forEach((row) => recalcSpellRow(row, attackVars));
   }
 
   function rebuildSpellRows() {
@@ -5110,11 +5239,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const li = num(document.getElementById("spellcaster-level")?.value);
     const mod = parseSignedInt(document.getElementById("spellcasting-ability-mod")?.value);
     const spellLevel = num(row.dataset.level);
-    if (cdEl) cdEl.value = String(10 + li + mod + spellLevel);
+    const mythic = getMythicCombatFeatEffects();
+    const spellFocusBonus = mythic.spellFocus ? 1 : 0;
+    if (cdEl) cdEl.value = String(10 + li + mod + spellLevel + spellFocusBonus);
+  }
+
+  function recalcSpellPenetrationBonus() {
+    const baseEl = document.getElementById("spell-sr-bonus-base");
+    const totalEl = document.getElementById("spell-sr-bonus-total");
+    if (!baseEl || !totalEl) return;
+    const mythic = getMythicCombatFeatEffects();
+    const base = Math.trunc(num(baseEl.value));
+    const total = base + (mythic.spellPenetration ? 2 : 0);
+    totalEl.value = fmtSigned(total);
   }
 
   function recalcAllSpellSlots() {
-    $("#spell-slots-body .spell-slot-row").forEach(recalcSpellSlotRow);
+    $$("#spell-slots-body .spell-slot-row").forEach(recalcSpellSlotRow);
   }
 
   /* =========================
@@ -5445,7 +5586,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function refreshAttackSequenceSelectors() {
     const options = buildAttackSequenceOptions();
-    $(".atk-sequence", attacksTbody || document).forEach((sel) => {
+    $$(".atk-sequence", attacksTbody || document).forEach((sel) => {
       const current = String(sel.value || "0");
       sel.innerHTML = "";
       options.forEach((opt) => {
@@ -5493,10 +5634,24 @@ document.addEventListener("DOMContentLoaded", () => {
     return 1 + Math.floor((bab - 1) / 4);
   }
 
+  function getMythicCombatFeatEffects() {
+    return {
+      powerAttack: !!document.getElementById("mythic-feat-power-attack")?.checked,
+      furiousFocus: !!document.getElementById("mythic-feat-furious-focus")?.checked,
+      spellFocus: !!document.getElementById("mythic-feat-spell-focus")?.checked,
+      spellPenetration: !!document.getElementById("mythic-feat-spell-penetration")?.checked,
+      deadlyAim: !!document.getElementById("mythic-feat-deadly-aim")?.checked,
+      rapidShot: !!document.getElementById("mythic-feat-rapid-shot")?.checked,
+      manyshot: !!document.getElementById("mythic-feat-manyshot")?.checked,
+      improvedCritical: !!document.getElementById("mythic-feat-improved-critical")?.checked,
+      weaponFocus: !!document.getElementById("mythic-feat-weapon-focus")?.checked,
+    };
+  }
+
   function formatCritFormula(rangeStart, mult) {
     const start = Math.max(2, Math.min(20, Math.trunc(num(rangeStart))));
     const critRange = start === 20 ? "20" : `${start}-20`;
-    const critMult = Math.max(2, Math.min(4, Math.trunc(num(mult))));
+    const critMult = Math.max(2, Math.min(5, Math.trunc(num(mult))));
     return `${critRange}/x${critMult}`;
   }
 
@@ -5514,42 +5669,73 @@ document.addEventListener("DOMContentLoaded", () => {
     const dieSize = dmgRow.querySelector(".atk-die")?.value;
     const type = tr.querySelector(".atk-type")?.value || "melee";
     const isMelee = type === "melee";
+    const isRanged = type === "ranged";
+    const mythic = getMythicCombatFeatEffects();
     const meleeOnly = Array.from(dmgRow.querySelectorAll(".atk-melee-only"));
+    const rangedOnly = Array.from(dmgRow.querySelectorAll(".atk-ranged-only"));
     meleeOnly.forEach((el) => {
       el.hidden = !isMelee;
       el.setAttribute("aria-hidden", String(!isMelee));
+    });
+    rangedOnly.forEach((el) => {
+      el.hidden = !isRanged;
+      el.setAttribute("aria-hidden", String(!isRanged));
     });
 
     const twoHandsEl = dmgRow.querySelector(".atk-twohands");
     const powerAttackEl = dmgRow.querySelector(".atk-power-attack");
     const furiousFocusEl = dmgRow.querySelector(".atk-furious-focus");
+    const deadlyAimEl = dmgRow.querySelector(".atk-deadly-aim");
+    const rapidShotEl = dmgRow.querySelector(".atk-rapid-shot");
+    const manyshotEl = dmgRow.querySelector(".atk-manyshot");
 
     const twoHands = isMelee && !!twoHandsEl?.checked;
     const powerAttack = isMelee && !!powerAttackEl?.checked;
     const furiousFocus = isMelee && !!furiousFocusEl?.checked;
+    const deadlyAim = isRanged && !!deadlyAimEl?.checked;
+    const rapidShot = isRanged && !!rapidShotEl?.checked;
+    const sequenceIndex = Math.max(0, Math.trunc(num(tr.querySelector(".atk-sequence")?.value)));
+    const manyshotActive = isRanged && !!manyshotEl?.checked && sequenceIndex === 0;
     const magicBonus = clamp(Math.trunc(num(tr.querySelector(".atk-magic-bonus")?.value)), 0, 5);
 
     const strMod = getAbilityModByCode("FOR");
     const strToDamage = isMelee ? (twoHands ? Math.trunc(strMod * 1.5) : strMod) : 0;
     const bab = num(document.getElementById("atk-bab")?.value);
     const paStep = computePowerAttackStep(bab);
-    const paDamage = powerAttack ? paStep * (twoHands ? 3 : 2) : 0;
-    const attackPenaltyRaw = powerAttack ? paStep : 0;
-    const attackPenalty = furiousFocus ? 0 : attackPenaltyRaw;
+    const paBaseDamage = powerAttack ? paStep * (twoHands ? 3 : 2) : 0;
+    const paMythicExtra = powerAttack && mythic.powerAttack ? paStep : 0;
+    const paDamage = paBaseDamage + paMythicExtra;
+    const paPenaltyRaw = powerAttack ? paStep : 0;
+    const paPenalty = furiousFocus || mythic.furiousFocus ? 0 : paPenaltyRaw;
 
-    const dmgBonus = strToDamage + paDamage + magicBonus;
+    const daStep = computePowerAttackStep(bab);
+    const daBaseDamage = deadlyAim ? daStep * 2 : 0;
+    const daMythicExtra = deadlyAim && mythic.deadlyAim ? daStep : 0;
+    const daDamage = daBaseDamage + daMythicExtra;
+    const daPenalty = deadlyAim ? daStep : 0;
+
+    const rapidShotPenalty = rapidShot && !mythic.rapidShot ? 2 : 0;
+    const attackPenalty = paPenalty + daPenalty + rapidShotPenalty;
+
+    const manyshotArrows = manyshotActive ? (mythic.manyshot ? 3 : 2) : 1;
+    const dmgBonus = strToDamage + paDamage + daDamage + magicBonus;
     const critRange = dmgRow.querySelector(".atk-crit-range")?.value;
     const critMult = dmgRow.querySelector(".atk-crit-mult")?.value;
 
-    const dmgFormula = formatDamageFormula(diceCount, dieSize, dmgBonus);
+    const dmgFormula = formatDamageFormula(num(diceCount) * manyshotArrows, dieSize, dmgBonus * manyshotArrows);
     tr.dataset.dmgFormula = dmgFormula;
+    tr.dataset.rapidShotActive = String(rapidShot);
+    tr.dataset.manyshotArrows = String(manyshotArrows);
 
     const dmgTotalOut = dmgRow.querySelector(".atk-dmg-total");
     if (dmgTotalOut) dmgTotalOut.value = dmgFormula;
 
     const critOut = dmgRow.querySelector(".atk-crit");
-    if (critOut) critOut.value = formatCritFormula(critRange, critMult);
-    return { attackPenalty };
+    const critMultAdjusted = mythic.improvedCritical
+      ? Math.max(2, Math.min(5, Math.trunc(num(critMult)) + 1))
+      : critMult;
+    if (critOut) critOut.value = formatCritFormula(critRange, critMultAdjusted);
+    return { attackPenalty, rapidShot, manyshotArrows };
   }
 
   function getCompAttackDamageRow(hitRow) {
@@ -5589,7 +5775,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const rowMisc = num(tr.querySelector(".atk-row-misc")?.value);
     const base = type === "ranged" ? attackVars.ranged.total : attackVars.melee.total;
     const iterativePenalty = sequenceIndex * 5;
-    const total = base + magicBonus + rowMisc - num(derived?.attackPenalty) - iterativePenalty;
+    const mythic = getMythicCombatFeatEffects();
+    const mythicWeaponFocusBonus = mythic.weaponFocus ? 1 : 0;
+    const total = base + magicBonus + rowMisc + mythicWeaponFocusBonus - num(derived?.attackPenalty) - iterativePenalty;
     const out = tr.querySelector(".atk-total");
     if (out) out.value = fmtSigned(total);
   }
@@ -5628,6 +5816,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const hitRow = document.createElement("tr");
     hitRow.className = "attack-row attack-row-extra";
     hitRow.innerHTML = `
+      <td><input class="atk-name" type="text" placeholder="Es. Arco lungo +1" /></td>
       <td>
         <select class="select atk-type">
           <option value="melee" selected>Mischia (FOR)</option>
@@ -5656,7 +5845,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const dmgRow = document.createElement("tr");
     dmgRow.className = "attack-row-dmg attack-row-dmg-extra";
     dmgRow.innerHTML = `
-      <td colspan="5">
+      <td colspan="6">
         <div class="attack-dmg-line">
           <div class="attack-main">
             <div class="attack-groups">
@@ -5705,6 +5894,18 @@ document.addEventListener("DOMContentLoaded", () => {
               <label class="attack-flag atk-melee-only">
                 <input class="atk-furious-focus" type="checkbox" />
                 Furia Focalizzata
+              </label>
+              <label class="attack-flag atk-ranged-only">
+                <input class="atk-deadly-aim" type="checkbox" />
+                Mira Letale
+              </label>
+              <label class="attack-flag atk-ranged-only">
+                <input class="atk-rapid-shot" type="checkbox" />
+                Tiro Rapido
+              </label>
+              <label class="attack-flag atk-ranged-only">
+                <input class="atk-manyshot" type="checkbox" />
+                Tiro Multiplo
               </label>
             </div>
           </div>
@@ -5809,7 +6010,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function refreshCompAttackSequenceSelectors() {
     const options = buildCompAttackSequenceOptions();
-    $(".comp-atk-sequence", compAttacksTbody || document).forEach((sel) => {
+    $$(".comp-atk-sequence", compAttacksTbody || document).forEach((sel) => {
       const current = String(sel.value || "0");
       sel.innerHTML = "";
       options.forEach((opt) => {
@@ -6012,6 +6213,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Ladro: ["acrobazia","artista della fuga","camuffare","diplomazia","disattivare congegni","furtività","intimidire","intrattenere","linguistica","nuotare","percezione","raggirare","rapidità di mano","scalare","intuizione","utilizzare congegni magici","valutare","conoscenze (dungeon)","conoscenze (locali)"],
     Mago: ["artigianato","linguistica","professione","sapienza magica","conoscenze (tutte)"],
     Monaco: ["acrobazia","artigianato","artista della fuga","intimidire","nuotare","percezione","professione","scalare","intuizione"],
+    Oracolo: ["artigianato","diplomazia","guarire","professione","sapienza magica","intuizione","conoscenze (storia)","conoscenze (religioni)"],
     Paladino: ["addestrare animali","artigianato","cavalcare","diplomazia","guarire","professione","sapienza magica","intuizione","conoscenze (nobiltà)","conoscenze (religioni)"],
     Ranger: ["addestrare animali","artigianato","cavalcare","furtività","guarire","intimidire","nuotare","percezione","professione","scalare","sopravvivenza","conoscenze (dungeon)","conoscenze (geografia)","conoscenze (natura)"],
     Stregone: ["artigianato","conoscenze (arcane)","professione","sapienza magica","utilizzare congegni magici"],
@@ -6079,7 +6281,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function initPrestigeClassSelects() {
-    $(".prestige-class-select").forEach((sel) => {
+    $$(".prestige-class-select").forEach((sel) => {
       const saved = Object.prototype.hasOwnProperty.call(state, keyFor(sel)) ? state[keyFor(sel)] : sel.value;
       const current = String(saved || "").trim();
       sel.innerHTML = '<option value="" selected>— Seleziona CdP —</option>';
@@ -6166,7 +6368,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   function getClassEntries() {
-    return $('.class-entry-row[data-class-slot="1"], .class-entry-row[data-class-slot="2"], .class-entry-row[data-class-slot="3"]')
+    return $$('.class-entry-row[data-class-slot="1"], .class-entry-row[data-class-slot="2"], .class-entry-row[data-class-slot="3"]')
       .map((row) => {
         const className = String(row.querySelector(".class-row-select")?.value || "").trim();
         const level = Math.max(0, Math.trunc(num(row.querySelector(".class-row-level")?.value)));
@@ -6231,7 +6433,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getCardClassLevelInputs() {
-    return $(".class-entry-row .class-row-level");
+    return $$(".class-entry-row .class-row-level");
   }
 
   function resolveCardLevelInput(inputEl) {
@@ -6604,7 +6806,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function applyAutoClassSkills() {
     const skillSources = getSelectedSkillSources();
     if (!skillSources.length) {
-      $("#skills-tbody tr.skill-row .skill-cs").forEach((el) => {
+      $$("#skills-tbody tr.skill-row .skill-cs").forEach((el) => {
         el.checked = false;
       });
       recalcAllSkills();
@@ -6613,7 +6815,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const csSet = buildClassSkillSet(skillSources);
 
-    $("#skills-tbody tr.skill-row").forEach((tr) => {
+    $$("#skills-tbody tr.skill-row").forEach((tr) => {
       const nameEl = tr.querySelector(".skill-name");
       const csEl = tr.querySelector(".skill-cs");
       if (!nameEl || !csEl) return;
@@ -6694,7 +6896,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function recalcAllSkills() {
-    $("#skills-tbody tr.skill-row").forEach(recalcSkillRow);
+    $$("#skills-tbody tr.skill-row").forEach(recalcSkillRow);
     updateSkillPointsTotal();
     updateSkillRanksSpent();
   }
@@ -6704,7 +6906,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const onlyCS = !!document.getElementById("filter-class")?.checked;
     const onlyTrained = !!document.getElementById("filter-trained")?.checked;
 
-    $("#skills-tbody tr.skill-row").forEach((tr) => {
+    $$("#skills-tbody tr.skill-row").forEach((tr) => {
       const name = (tr.querySelector(".skill-name")?.value || "").toLowerCase();
       const isCS = !!tr.querySelector(".skill-cs")?.checked;
       const ranks = num(tr.querySelector(".skill-ranks")?.value);
@@ -6907,6 +7109,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const tot = parseSignedInt(tr.querySelector(cfg.totalSelector)?.value);
     const name = getAttackRollLabel(tr, cfg);
     rollViaTaleSpire(tot, name);
+    if (cfg.hitRowClass === "attack-row") {
+      const isRanged = tr.querySelector(".atk-type")?.value === "ranged";
+      const rapidShot = tr.dataset.rapidShotActive === "true";
+      const sequenceIndex = Math.max(0, Math.trunc(num(tr.querySelector(".atk-sequence")?.value)));
+      if (isRanged && rapidShot && sequenceIndex === 0) {
+        rollViaTaleSpire(tot, `${name} (Tiro Rapido)`);
+      }
+    }
     return true;
   }
 
@@ -6916,7 +7126,12 @@ document.addEventListener("DOMContentLoaded", () => {
     cfg.recalcRow(tr);
     const formula = tr.dataset.dmgFormula || cfg.fallbackFormula || "1d6";
     const name = getAttackRollLabel(tr, cfg);
-    rollFormulaViaTaleSpire(formula, `${name} - Danni`);
+    let suffix = "Danni";
+    if (cfg.hitRowClass === "attack-row") {
+      const manyshotArrows = Math.max(1, Math.trunc(num(tr.dataset.manyshotArrows)));
+      if (manyshotArrows > 1) suffix = `Danni (Tiro Multiplo x${manyshotArrows})`;
+    }
+    rollFormulaViaTaleSpire(formula, `${name} - ${suffix}`);
     return true;
   }
 
@@ -6991,7 +7206,9 @@ document.addEventListener("DOMContentLoaded", () => {
       recalcSpellRow(row);
       const formula = row.dataset.dmgFormula || "1d6";
       const name = row.querySelector(".spell-name")?.value?.trim() || "Incantesimo";
-      rollFormulaViaTaleSpire(formula, `${name} - Danni`);
+      const isHealing = row.dataset.healingActive === "true";
+      const suffix = isHealing ? "Cura" : "Danni";
+      rollFormulaViaTaleSpire(formula, `${name} - ${suffix}`);
       return;
     }
 
@@ -7118,12 +7335,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // incantesimi (caratteristica chiave + mod)
     updateSpellcastingClassFields();
     updateSpellLevelsVisibility();
+    recalcSpellPenetrationBonus();
     recalcAllSpellSlots();
     recalcAllSpellRows();
   }
 
   function initCollapsibleCards() {
-    $(".page .card").forEach((card) => {
+    $$(".page .card").forEach((card) => {
       if (card.classList.contains("card-collapsible")) return;
       const head =
         (card.firstElementChild && card.firstElementChild.tagName === "H2"
@@ -7546,11 +7764,29 @@ document.addEventListener("DOMContentLoaded", () => {
     el.addEventListener("change", recalcHitPoints);
   });
 
-  $(".class-entry-row .class-row-select, .class-entry-row .class-row-level").forEach((el) => {
+  function syncClassLevelDefaultFromSelect(selectEl) {
+    if (!selectEl || !selectEl.classList?.contains("class-row-select")) return null;
+    const row = selectEl.closest(".class-entry-row");
+    const levelEl = row?.querySelector(".class-row-level");
+    if (!levelEl) return null;
+    const hasClass = String(selectEl.value || "").trim() !== "";
+    const currentLevel = Math.max(0, Math.trunc(num(levelEl.value)));
+    if (hasClass && currentLevel === 0) levelEl.value = "1";
+    if (!hasClass && currentLevel !== 0) levelEl.value = "0";
+    return levelEl;
+  }
+
+  $$(".class-entry-row .class-row-select, .class-entry-row .class-row-level").forEach((el) => {
     el.addEventListener("input", () => {
       if (el.classList.contains("class-row-level")) {
         enforceCharacterLevelCap(el);
         refreshClassLevelCaps();
+      } else if (el.classList.contains("class-row-select")) {
+        const levelEl = syncClassLevelDefaultFromSelect(el);
+        if (levelEl) {
+          enforceCharacterLevelCap(levelEl);
+          refreshClassLevelCaps();
+        }
       }
       syncClassSummaryFields();
       applyAutoClassSkills();
@@ -7561,6 +7797,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (el.classList.contains("class-row-level")) {
         enforceCharacterLevelCap(el);
         refreshClassLevelCaps();
+      } else if (el.classList.contains("class-row-select")) {
+        const levelEl = syncClassLevelDefaultFromSelect(el);
+        if (levelEl) {
+          enforceCharacterLevelCap(levelEl);
+          refreshClassLevelCaps();
+        }
       }
       syncClassSummaryFields();
       applyAutoClassSkills();
@@ -7639,6 +7881,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "atk-crit-mult",
         "atk-twohands",
         "atk-power-attack",
+        "atk-deadly-aim",
+        "atk-rapid-shot",
+        "atk-manyshot",
         "atk-furious-focus",
       ])
     ) {
@@ -7681,7 +7926,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!row) return;
     if (
       targetHasAnyClass(e.target, [
+        "spell-name",
         "spell-offensive",
+        "spell-healing",
         "spell-atk-type",
         "spell-atk-misc",
         "spell-dice-count",
@@ -7705,6 +7952,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "atk-crit-mult",
         "atk-twohands",
         "atk-power-attack",
+        "atk-deadly-aim",
+        "atk-rapid-shot",
+        "atk-manyshot",
         "atk-furious-focus",
       ])
     ) {
@@ -7732,7 +7982,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!row) return;
     if (
       targetHasAnyClass(e.target, [
+        "spell-name",
         "spell-offensive",
+        "spell-healing",
         "spell-atk-type",
         "spell-die",
         "spell-range-type",
@@ -7740,6 +7992,30 @@ document.addEventListener("DOMContentLoaded", () => {
     ) {
       recalcSpellRow(row);
     }
+  });
+
+  [
+    "mythic-feat-power-attack",
+    "mythic-feat-furious-focus",
+    "mythic-feat-spell-focus",
+    "mythic-feat-spell-penetration",
+    "mythic-feat-deadly-aim",
+    "mythic-feat-rapid-shot",
+    "mythic-feat-manyshot",
+    "mythic-feat-improved-critical",
+    "mythic-feat-weapon-focus",
+    "spell-sr-bonus-base",
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      recalcSpellPenetrationBonus();
+      recalcDerived();
+    });
+    el.addEventListener("change", () => {
+      recalcSpellPenetrationBonus();
+      recalcDerived();
+    });
   });
 
   /* =========================
@@ -7763,7 +8039,7 @@ document.addEventListener("DOMContentLoaded", () => {
       saveState(state);
 
       // 3) Ripristina default HTML su tutti i controlli.
-      $(".page input, .page textarea, .page select").forEach((el) => {
+      $$(".page input, .page textarea, .page select").forEach((el) => {
         if (el.type === "button" || el.type === "submit") return;
         if (el.id === "theme-toggle") return;
 
@@ -7794,7 +8070,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (enableCompanionTab) enableCompanionTab.checked = false;
       if (enableCdpSection) enableCdpSection.checked = false;
 
-      $(".ability-score").forEach((el) => {
+      $$(".ability-score").forEach((el) => {
         el.value = "10";
         el.dataset.baseScore = "10";
       });
@@ -7871,12 +8147,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 </script>
-
 </body>
 </html>
 
 <!-- Francesco Culo è stato qui ma ci ha aiutati a risolvere dei problemi -->
-
 
 
 
