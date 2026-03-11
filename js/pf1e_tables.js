@@ -93,6 +93,97 @@
     Stregone: 2,
   };
 
+  const CLASS_FEATURES_BY_LEVEL = {
+    Paladino: {
+      1: "Aura del Bene; Individuazione del Male; Punire il Male 1/g",
+      2: "Grazia Divina; Imposizione delle Mani",
+      3: "Aura di Coraggio; Divina Salute; Merce",
+      4: "Punire il Male 2/g; Incanalare Energia; Incantesimi",
+      5: "Vincolo Divino",
+      6: "Merce; Punire il Male 3/g",
+      7: "-",
+      8: "Aura di Risolutezza; Punire il Male 4/g",
+      9: "Merce",
+      10: "Punire il Male 5/g",
+      11: "Aura di Giustizia",
+      12: "Merce; Punire il Male 6/g",
+      13: "Aura di Fede",
+      14: "Punire il Male 7/g",
+      15: "Merce",
+      16: "Aura di Rettitudine; Punire il Male 8/g",
+      17: "-",
+      18: "Merce; Punire il Male 9/g",
+      19: "-",
+      20: "Campione Sacro; Punire il Male 10/g",
+    },
+    Oracolo: {
+      1: "Incantesimi/Trucchetti; Maledizione; Mistero; Rivelazione",
+      2: "Incantesimo di Mistero",
+      3: "Rivelazione",
+      4: "Incantesimo di Mistero",
+      5: "-",
+      6: "Incantesimo di Mistero",
+      7: "Rivelazione",
+      8: "Incantesimo di Mistero",
+      9: "-",
+      10: "Incantesimo di Mistero",
+      11: "Rivelazione",
+      12: "Incantesimo di Mistero",
+      13: "-",
+      14: "Incantesimo di Mistero",
+      15: "Rivelazione",
+      16: "Incantesimo di Mistero",
+      17: "-",
+      18: "Incantesimo di Mistero",
+      19: "Rivelazione",
+      20: "Rivelazione Finale",
+    },
+    Stregone: {
+      1: "Lignaggio; Potere del Lignaggio",
+      2: "Potere del Lignaggio",
+      3: "Incantesimo del Lignaggio",
+      4: "Potere del Lignaggio",
+      5: "Incantesimo del Lignaggio",
+      6: "-",
+      7: "Talento di Lignaggio",
+      8: "Potere del Lignaggio",
+      9: "Incantesimo del Lignaggio",
+      10: "Potere del Lignaggio",
+      11: "Incantesimo del Lignaggio",
+      12: "-",
+      13: "Talento di Lignaggio; Incantesimo del Lignaggio",
+      14: "Potere del Lignaggio",
+      15: "Potere del Lignaggio; Incantesimo del Lignaggio",
+      16: "-",
+      17: "Potere del Lignaggio; Incantesimo del Lignaggio",
+      18: "Potere del Lignaggio",
+      19: "Talento di Lignaggio; Incantesimo del Lignaggio",
+      20: "Apoteosi del Lignaggio",
+    },
+    Ranger: {
+      1: "Nemico Prescelto +2; Tracciare; Empatia Selvatica",
+      2: "Talento di Stile di Combattimento",
+      3: "Tempra Fisica",
+      4: "Compagno Animale; Incantesimi",
+      5: "Nemico Prescelto +4/+2",
+      6: "Talento di Stile di Combattimento",
+      7: "Maestria nei Boschi",
+      8: "Passo nel Bosco",
+      9: "Tempra Fisica Migliorata",
+      10: "Nemico Prescelto +6/+2; Talento di Stile di Combattimento",
+      11: "Preda",
+      12: "Talento di Stile di Combattimento",
+      13: "Camuffamento",
+      14: "Nemico Prescelto +8/+4/+2; Tempra Fisica Superiore",
+      15: "Talento di Stile di Combattimento",
+      16: "-",
+      17: "Occultamento",
+      18: "Nemico Prescelto +10/+6/+2; Talento di Stile di Combattimento",
+      19: "Maestria Evasiva",
+      20: "Maestro Cacciatore",
+    },
+  };
+
   function getHitDieByClass(className) {
     const cls = String(className || "").trim();
     return CLASS_HIT_DICE[cls] || null;
@@ -107,6 +198,11 @@
   function getSkillPointsByClass(className) {
     const cls = String(className || "").trim();
     return CLASS_SKILL_POINTS[cls] || null;
+  }
+
+  function getClassFeaturesByClass(className) {
+    const cls = String(className || "").trim();
+    return CLASS_FEATURES_BY_LEVEL[cls] || null;
   }
 
   const SPELL_PROGRESSION_THRESHOLDS = {
@@ -177,6 +273,11 @@
   window.PF1EData.tables.skills = {
     pointsByClass: CLASS_SKILL_POINTS,
     getPointsByClass: getSkillPointsByClass,
+  };
+
+  window.PF1EData.tables.classFeatures = {
+    byClass: CLASS_FEATURES_BY_LEVEL,
+    getByClass: getClassFeaturesByClass,
   };
 
   window.PF1EData.tables.spells = {

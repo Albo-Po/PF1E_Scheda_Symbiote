@@ -440,6 +440,7 @@ body{
 
 /* Colori per sezione (tab attiva) */
 #tab-identita[aria-selected="true"]{ background:var(--c-identita); }
+#tab-classe[aria-selected="true"]{ background:var(--c-identita); }
 #tab-combattimento[aria-selected="true"]{ background:var(--c-combattimento); }
 #tab-abilita[aria-selected="true"]{ background:var(--c-abilita); }
 #tab-incantesimi[aria-selected="true"]{ background:var(--c-incantesimi); }
@@ -484,6 +485,18 @@ body{
   font-weight:600;
   transition: all .2s ease;
   box-shadow: 0 4px 10px rgba(0,0,0,.1);
+  position:relative;
+  z-index:0;
+}
+
+.btn::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border:2px solid rgba(0,0,0,.22);
+  border-radius:inherit;
+  pointer-events:none;
+  z-index:-1;
 }
 
 .btn:hover{
@@ -640,8 +653,8 @@ body{
   background: var(--c-incantesimi);
   color:#fff;
   border-radius:999px;
-  padding:7px 12px;
-  font-size:11px;
+  padding:5px 10px;
+  font-size:10px;
   letter-spacing:.35px;
   text-transform:uppercase;
   cursor:pointer;
@@ -829,8 +842,25 @@ body{
 
   .spell-entry-controls{
     width:100%;
+    min-width:0;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    padding-top:8px;
+  }
+
+  .spell-entry-toggle{
+    flex:1 1 100%;
+    width:100%;
+    justify-content:center;
+  }
+
+  .spell-offensive-toggle{
+    flex:1 1 140px;
+    min-width:120px;
+    white-space:normal;
     justify-content:flex-start;
-    gap:10px;
   }
 
   .spell-level-head{
@@ -865,6 +895,12 @@ body{
     width:auto;
     min-width:76px;
     flex:0 0 auto;
+  }
+}
+
+@media (max-width: 420px){
+  .spell-offensive-toggle{
+    flex:1 1 100%;
   }
 }
 
@@ -914,6 +950,86 @@ body{
   }
 }
 
+/* ===== Spell entry layout redesign (all resolutions) ===== */
+.spell-entry{
+  padding:10px;
+  gap:10px;
+}
+
+.spell-entry-head{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto;
+  gap:10px;
+  align-items:start;
+}
+
+.spell-entry-title{
+  width:100%;
+}
+
+.spell-entry .spell-name{
+  width:100%;
+}
+
+.spell-entry-controls{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  max-width:100%;
+}
+
+.spell-entry-toggle{
+  min-height:28px;
+}
+
+.spell-offensive-toggle{
+  min-height:28px;
+  padding:4px 8px;
+  border:1px solid color-mix(in srgb, var(--line) 70%, var(--c-incantesimi) 30%);
+  border-radius:999px;
+  background: color-mix(in srgb, var(--surface) 88%, var(--c-incantesimi) 12%);
+}
+
+@media (max-width: 900px){
+  .spell-entry-head{
+    grid-template-columns:1fr;
+  }
+
+  .spell-entry-controls{
+    justify-content:flex-start;
+    width:100%;
+    padding-top:8px;
+  }
+}
+
+@media (max-width: 640px){
+  .spell-entry-controls{
+    display:grid;
+    grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
+    gap:8px;
+  }
+
+  .spell-entry-toggle{
+    grid-column:1 / -1;
+    width:100%;
+    justify-content:center;
+  }
+
+  .spell-offensive-toggle{
+    min-width:0;
+    width:100%;
+    white-space:normal;
+  }
+}
+
+@media (max-width: 420px){
+  .spell-entry-controls{
+    grid-template-columns:1fr;
+  }
+}
+
 .spell-level-label::before{
   content:"▾ ";
   font-weight:900;
@@ -957,10 +1073,26 @@ body{
 .grid{ display:grid; gap:var(--gap); }
 
 .card{
-  border:2px solid var(--line);
   border-radius: var(--radius);
   padding:12px;
   background: transparent;
+  position:relative;
+  z-index:0;
+}
+
+.card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border:2px solid var(--line);
+  border-radius: inherit;
+  pointer-events:none;
+  z-index:-1;
+}
+
+.card > *{
+  position:relative;
+  z-index:1;
 }
 
 :root[data-theme="dark"] .card{
@@ -1017,6 +1149,7 @@ body{
 }
 
 #page-identita .card h2{ border-bottom-color: var(--c-identita); }
+#page-classe .card h2{ border-bottom-color: var(--c-identita); }
 #page-mitico .card{ background: var(--surface); }
 #page-mitico .card h2{ border-bottom-color: var(--c-mitico); }
 #page-abilita .card h2{ border-bottom-color: var(--c-abilita); }
@@ -1129,6 +1262,22 @@ input:focus, textarea:focus, .select:focus{
 .stat .row .ability-score,
 .stat .row .ability-mod{
   text-align:center;
+}
+
+.ability-boost-section{
+  margin-top:12px;
+  border:2px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+  background:var(--surface);
+}
+
+.ability-boost-title{
+  margin:0 0 10px 0;
+  font-size:16px;
+  font-weight:800;
+  letter-spacing:.2px;
+  color:var(--text);
 }
 
 /* ===== Combat helpers ===== */
@@ -1358,6 +1507,18 @@ input:focus, textarea:focus, .select:focus{
   overflow-x:auto;
   -webkit-overflow-scrolling: touch;
   border-radius:10px;
+  position:relative;
+  z-index:0;
+}
+
+.table-wrap::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border:2px solid var(--line);
+  border-radius:inherit;
+  pointer-events:none;
+  z-index:-1;
 }
 
 table{
@@ -1365,6 +1526,67 @@ table{
   border-collapse:collapse;
   font-size:12.5px;
   min-width: 560px; /* default (skills) */
+}
+
+#skills-table{
+  min-width:0 !important;
+  table-layout:fixed;
+}
+
+#skills-table th{
+  white-space:normal;
+  line-height:1.2;
+}
+
+#skills-table .roll-btn{
+  min-width:44px;
+  padding:6px 8px;
+}
+
+#page-classe .table-wrap{
+  overflow-x:auto;
+}
+
+#page-classe table{
+  min-width:0;
+  width:100%;
+  table-layout:fixed;
+}
+
+#class-features-summary-table th:nth-child(1),
+#class-features-summary-table td:nth-child(1){
+  width:72px;
+  text-align:center;
+}
+
+#class-features-detail-table th:nth-child(1),
+#class-features-detail-table td:nth-child(1){
+  width:72px;
+  text-align:center;
+}
+
+#class-features-detail-table th:nth-child(2),
+#class-features-detail-table td:nth-child(2){
+  width:24%;
+}
+
+#class-features-detail-table th:nth-child(4),
+#class-features-detail-table td:nth-child(4){
+  width:28%;
+}
+
+#class-features-summary-table th,
+#class-features-summary-table td,
+#class-features-detail-table th,
+#class-features-detail-table td{
+  white-space:normal;
+  word-break:break-word;
+  vertical-align:top;
+  line-height:1.25;
+}
+
+#class-features-detail-table .select{
+  min-width:140px;
 }
 
 th, td{
@@ -1981,7 +2203,7 @@ td input{
   font-family:var(--font-display);
   border-radius:999px;
   padding:8px 14px;
-  font-size:12px;
+  font-size:11px;
   font-weight:600;
   letter-spacing:.4px;
   text-transform:uppercase;
@@ -1990,6 +2212,18 @@ td input{
   min-width:52px;
   box-shadow: 0 4px 10px rgba(0,0,0,.1);
   transition: all .2s ease;
+  position:relative;
+  z-index:0;
+}
+
+.roll-btn::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border:2px solid rgba(0,0,0,.22);
+  border-radius:inherit;
+  pointer-events:none;
+  z-index:-1;
 }
 .roll-btn:hover{
   filter: brightness(1.05);
@@ -2194,6 +2428,7 @@ td .roll-btn + .roll-btn{
     <!-- TABS -->
     <nav class="tabs" role="tablist" aria-label="Pagine scheda personaggio">
       <button type="button" class="tab" role="tab" aria-selected="true"  aria-controls="page-identita"      id="tab-identita"      data-target="page-identita">Personaggio</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-classe"        id="tab-classe"        data-target="page-classe">Classe</button>
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-mitico"        id="tab-mitico"        data-target="page-mitico"> Rango Mitico</button>
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-abilita"       id="tab-abilita"       data-target="page-abilita">Abilità</button>
       <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-talenti"       id="tab-talenti"       data-target="page-talenti">Talenti</button>
@@ -2442,6 +2677,152 @@ td .roll-btn + .roll-btn{
             </div>
           </div>
 
+          <section class="ability-boost-section" aria-label="Aumento di caratteristica">
+            <h3 class="ability-boost-title">Aumento di caratteristica</h3>
+            <div class="fields">
+              <div class="field span-4">
+                <label>4° livello</label>
+                <select class="select level-ability-boost-select" id="level-ability-boost-4" data-level-threshold="4">
+                  <option value="" selected>— Nessuno —</option>
+                  <option value="FOR">FOR</option>
+                  <option value="DES">DES</option>
+                  <option value="COS">COS</option>
+                  <option value="INT">INT</option>
+                  <option value="SAG">SAG</option>
+                  <option value="CAR">CAR</option>
+                </select>
+              </div>
+              <div class="field span-4">
+                <label>8° livello</label>
+                <select class="select level-ability-boost-select" id="level-ability-boost-8" data-level-threshold="8">
+                  <option value="" selected>— Nessuno —</option>
+                  <option value="FOR">FOR</option>
+                  <option value="DES">DES</option>
+                  <option value="COS">COS</option>
+                  <option value="INT">INT</option>
+                  <option value="SAG">SAG</option>
+                  <option value="CAR">CAR</option>
+                </select>
+              </div>
+              <div class="field span-4">
+                <label>12° livello</label>
+                <select class="select level-ability-boost-select" id="level-ability-boost-12" data-level-threshold="12">
+                  <option value="" selected>— Nessuno —</option>
+                  <option value="FOR">FOR</option>
+                  <option value="DES">DES</option>
+                  <option value="COS">COS</option>
+                  <option value="INT">INT</option>
+                  <option value="SAG">SAG</option>
+                  <option value="CAR">CAR</option>
+                </select>
+              </div>
+              <div class="field span-6">
+                <label>16° livello</label>
+                <select class="select level-ability-boost-select" id="level-ability-boost-16" data-level-threshold="16">
+                  <option value="" selected>— Nessuno —</option>
+                  <option value="FOR">FOR</option>
+                  <option value="DES">DES</option>
+                  <option value="COS">COS</option>
+                  <option value="INT">INT</option>
+                  <option value="SAG">SAG</option>
+                  <option value="CAR">CAR</option>
+                </select>
+              </div>
+              <div class="field span-6">
+                <label>20° livello</label>
+                <select class="select level-ability-boost-select" id="level-ability-boost-20" data-level-threshold="20">
+                  <option value="" selected>— Nessuno —</option>
+                  <option value="FOR">FOR</option>
+                  <option value="DES">DES</option>
+                  <option value="COS">COS</option>
+                  <option value="INT">INT</option>
+                  <option value="SAG">SAG</option>
+                  <option value="CAR">CAR</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-classe" role="tabpanel" aria-labelledby="tab-classe">
+      <div class="grid">
+        <div class="card">
+          <h2>Capacità di Classe</h2>
+          <div class="fields">
+            <div class="field span-6">
+              <label>Classe</label>
+              <select id="class-features-class" class="select">
+                <option value="Paladino">Paladino</option>
+                <option value="Oracolo">Oracolo</option>
+                <option value="Stregone">Stregone</option>
+                <option value="Ranger">Ranger</option>
+              </select>
+            </div>
+            <div class="field span-3">
+              <label>Livello Classe</label>
+              <input id="class-features-level" class="small" type="number" min="0" max="20" step="1" value="0" readonly />
+              <div class="hint">Auto dal livello personaggio</div>
+            </div>
+            <div class="field span-3">
+              <label>Punti Abilità/Liv</label>
+              <input id="class-features-skill-points" class="small" type="text" value="—" readonly />
+            </div>
+            <div class="field span-4">
+              <label>BAB</label>
+              <input id="class-features-bab" class="small" type="text" value="—" readonly />
+            </div>
+            <div class="field span-4">
+              <label>DV</label>
+              <input id="class-features-hit-die" class="small" type="text" value="—" readonly />
+            </div>
+            <div class="field span-4">
+              <label>TS Fort / Rif / Vol</label>
+              <input id="class-features-save-progression" class="small" type="text" value="—" readonly />
+            </div>
+            <div class="field span-12">
+              <label>Capacità al livello attuale</label>
+              <textarea id="class-features-current" readonly placeholder="—"></textarea>
+            </div>
+            <div class="field span-12">
+              <label>Abilità di Classe</label>
+              <textarea id="class-features-class-skills" readonly placeholder="—"></textarea>
+            </div>
+            <div class="field span-12">
+              <div class="table-wrap">
+                <table id="class-features-summary-table" aria-label="Progressione capacità classe">
+                  <thead>
+                    <tr>
+                      <th>Livello</th>
+                      <th>Capacità acquisite</th>
+                    </tr>
+                  </thead>
+                  <tbody id="class-features-summary-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="field span-12">
+              <div class="table-wrap">
+                <table id="class-features-detail-table" aria-label="Dettaglio capacità classe">
+                  <thead>
+                    <tr>
+                      <th>Livello</th>
+                      <th>Capacità</th>
+                      <th>Dettaglio</th>
+                      <th>Scelta</th>
+                    </tr>
+                  </thead>
+                  <tbody id="class-features-detail-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="field span-12">
+              <label>Note Classe</label>
+              <textarea id="class-features-notes" placeholder="Appunti sulle capacità di classe..."></textarea>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -2534,6 +2915,30 @@ td .roll-btn + .roll-btn{
         <div class="actions" style="margin-top:0; margin-bottom:0;">
           <button type="button" class="btn init-roll-btn" title="Tira 1d20 + Iniziativa">Tira Iniziativa</button>
           <button type="button" class="btn cmb-roll-btn" title="Tira 1d20 + BMC">Tira BMC</button>
+        </div>
+      </div>
+
+      <div class="fields" style="margin-top:12px;">
+        <div class="field span-4">
+          <label>Tempra</label>
+          <div class="save-roll-inline">
+            <input id="save-fort" class="small save-roll-value" type="text" value="+0" />
+            <button type="button" class="roll-btn save-roll-btn" data-target="save-fort" data-label="Tempra" title="Tira 1d20 + Tempra">Tiro</button>
+          </div>
+        </div>
+        <div class="field span-4">
+          <label>Riflessi</label>
+          <div class="save-roll-inline">
+            <input id="save-ref" class="small save-roll-value" type="text" value="+0" />
+            <button type="button" class="roll-btn save-roll-btn" data-target="save-ref" data-label="Riflessi" title="Tira 1d20 + Riflessi">Tiro</button>
+          </div>
+        </div>
+        <div class="field span-4">
+          <label>Volontà</label>
+          <div class="save-roll-inline">
+            <input id="save-will" class="small save-roll-value" type="text" value="+0" />
+            <button type="button" class="roll-btn save-roll-btn" data-target="save-will" data-label="Volontà" title="Tira 1d20 + Volontà">Tiro</button>
+          </div>
         </div>
       </div>
       </div>
@@ -2889,13 +3294,13 @@ td .roll-btn + .roll-btn{
             <div class="field span-3 skills-filters-col">
               <label class="skills-filter-label">
                 <input id="filter-class" type="checkbox" />
-                <strong>Mostra solo class skill (CS)</strong>
+                <strong>Mostra abilità di classe</strong>
               </label>
             </div>
             <div class="field span-6 skills-filters-col skills-trained-filter-col">
               <label class="skills-filter-label">
                 <input id="filter-trained" type="checkbox" />
-                <strong>Mostra solo abilità con gradi &gt; 0</strong>
+                <strong>Mostra abilità con gradi &gt; 0</strong>
               </label>
             </div>
             <div class="field span-3">
@@ -2907,12 +3312,12 @@ td .roll-btn + .roll-btn{
   <thead>
     <tr>
       <th style="width:6%;">CS</th>
-      <th style="width:34%;">Abilità</th>
-      <th style="width:12%;">Car</th>
+      <th style="width:28%;">Abilità</th>
+      <th style="width:9%;">Car</th>
       <th style="width:8%;">ACP</th>
       <th style="width:10%;">Gradi</th>
       <th style="width:12%;">Varie</th>
-      <th style="width:10%;">Tot</th>
+      <th style="width:8%;">Tot</th>
       <th style="width:8%;">Tiro</th>
     </tr>
   </thead>
@@ -4174,8 +4579,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const d20 = () => Math.floor(Math.random() * 20) + 1;
   const pendingTsRolls = [];
+  const SHOW_ROLL_TOAST = false;
 
   function toast(msg) {
+    if (!SHOW_ROLL_TOAST) return;
     let el = document.getElementById("toast");
     if (!el) {
       el = document.createElement("div");
@@ -4808,6 +5215,34 @@ document.addEventListener("DOMContentLoaded", () => {
     return bonus;
   }
 
+  const LEVEL_ABILITY_BOOST_THRESHOLDS = [4, 8, 12, 16, 20];
+
+  function getCharacterLevelTotal() {
+    return Math.max(0, Math.trunc(num(document.getElementById("pc-level-total")?.value)));
+  }
+
+  function getLevelAbilityBoostFor(code) {
+    const abilityCode = String(code || "").trim();
+    if (!abilityCode) return 0;
+
+    let bonus = 0;
+    LEVEL_ABILITY_BOOST_THRESHOLDS.forEach((threshold) => {
+      const pickEl = document.getElementById(`level-ability-boost-${threshold}`);
+      if (String(pickEl?.value || "").trim() === abilityCode) bonus += 1;
+    });
+    return bonus;
+  }
+
+  function updateLevelAbilityBoostAvailability() {
+    LEVEL_ABILITY_BOOST_THRESHOLDS.forEach((threshold) => {
+      const pickEl = document.getElementById(`level-ability-boost-${threshold}`);
+      if (!pickEl) return;
+      pickEl.disabled = false;
+      pickEl.setAttribute("aria-disabled", "false");
+      pickEl.title = "";
+    });
+  }
+
   function applyMythicAbilityBonusToScores() {
     let changed = false;
 
@@ -4818,16 +5253,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const mythicBonus = getMythicAbilityBonusFor(code);
       const sizeScoreBonus = getSizeAbilityScoreBonus(code);
+      const levelScoreBonus = getLevelAbilityBoostFor(code);
       const min = num(scoreEl.min || 1);
       const max = num(scoreEl.max || 50);
 
       if (scoreEl.dataset.baseScore === undefined) {
         const currentVisible = num(scoreEl.value);
-        scoreEl.dataset.baseScore = String(currentVisible - mythicBonus - sizeScoreBonus);
+        scoreEl.dataset.baseScore = String(currentVisible - mythicBonus - sizeScoreBonus - levelScoreBonus);
       }
 
       const base = num(scoreEl.dataset.baseScore);
-      const total = clamp(base + mythicBonus + sizeScoreBonus, min, max);
+      const total = clamp(base + mythicBonus + sizeScoreBonus + levelScoreBonus, min, max);
       const nextValue = String(total);
 
       if (scoreEl.value !== nextValue) {
@@ -4849,7 +5285,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const code = String(statEl.dataset.ability || "");
     const mythicBonus = getMythicAbilityBonusFor(code);
     const sizeScoreBonus = getSizeAbilityScoreBonus(code);
-    scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus);
+    const levelScoreBonus = getLevelAbilityBoostFor(code);
+    scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus - levelScoreBonus);
   }
 
   function syncAllAbilityBaseFromVisibleScores() {
@@ -4859,7 +5296,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const code = String(statEl.dataset.ability || "");
       const mythicBonus = getMythicAbilityBonusFor(code);
       const sizeScoreBonus = getSizeAbilityScoreBonus(code);
-      scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus);
+      const levelScoreBonus = getLevelAbilityBoostFor(code);
+      scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus - levelScoreBonus);
     });
   }
 
@@ -4902,11 +5340,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const code = String(stat?.dataset?.ability || "");
         const mythicBonus = getMythicAbilityBonusFor(code);
         const sizeScoreBonus = getSizeAbilityScoreBonus(code);
+        const levelScoreBonus = getLevelAbilityBoostFor(code);
         const desired = scoreFromPfMod(num(t.value));
         const min = num(scoreEl.min || 1);
         const max = num(scoreEl.max || 50);
         const total = clamp(desired, min, max);
-        scoreEl.dataset.baseScore = String(total - mythicBonus - sizeScoreBonus);
+        scoreEl.dataset.baseScore = String(total - mythicBonus - sizeScoreBonus - levelScoreBonus);
         scoreEl.value = String(total);
         updateAbilityBlock(stat);
       }
@@ -4933,6 +5372,15 @@ document.addEventListener("DOMContentLoaded", () => {
       recalcAllCompAttacks();
       return;
     }
+  });
+
+  $$(".level-ability-boost-select").forEach((el) => {
+    const onLevelBoostChange = () => {
+      applyMythicAbilityBonusToScores();
+      recalcDerived();
+    };
+    el.addEventListener("input", onLevelBoostChange);
+    el.addEventListener("change", onLevelBoostChange);
   });
 
   function getAbilityModByCode(code) {
@@ -6257,8 +6705,327 @@ document.addEventListener("DOMContentLoaded", () => {
     Shadowdancer: { bab: "three_quarters", hitDie: 8, skillPoints: 4, saves: { fort: "poor", ref: "good", will: "poor" }, classSkills: "Acrobazia, Artista della Fuga, Furtività, Percezione, Rapidità di Mano, Sapienza Magica", featuresByLevel: {} },
   };
 
+  const BASE_CLASS_FEATURES_DATA = {
+    Paladino: {
+      featuresByLevel: {
+        1: "Aura del Bene; Individuazione del Male; Punire il Male 1/g",
+        2: "Grazia Divina; Imposizione delle Mani",
+        3: "Aura di Coraggio; Divina Salute; Mercé",
+        4: "Punire il Male 2/g; Incanalare Energia; Incantesimi",
+        5: "Vincolo Divino",
+        6: "Mercé; Punire il Male 3/g",
+        7: "—",
+        8: "Aura di Risolutezza; Punire il Male 4/g",
+        9: "Mercé",
+        10: "Punire il Male 5/g",
+        11: "Aura di Giustizia",
+        12: "Mercé; Punire il Male 6/g",
+        13: "Aura di Fede",
+        14: "Punire il Male 7/g",
+        15: "Mercé",
+        16: "Aura di Rettitudine; Punire il Male 8/g",
+        17: "—",
+        18: "Mercé; Punire il Male 9/g",
+        19: "—",
+        20: "Campione Sacro; Punire il Male 10/g",
+      },
+    },
+    Oracolo: {
+      featuresByLevel: {
+        1: "Incantesimi/Trucchetti; Maledizione; Mistero; Rivelazione",
+        2: "Incantesimo di Mistero",
+        3: "Rivelazione",
+        4: "Incantesimo di Mistero",
+        5: "—",
+        6: "Incantesimo di Mistero",
+        7: "Rivelazione",
+        8: "Incantesimo di Mistero",
+        9: "—",
+        10: "Incantesimo di Mistero",
+        11: "Rivelazione",
+        12: "Incantesimo di Mistero",
+        13: "—",
+        14: "Incantesimo di Mistero",
+        15: "Rivelazione",
+        16: "Incantesimo di Mistero",
+        17: "—",
+        18: "Incantesimo di Mistero",
+        19: "Rivelazione",
+        20: "Rivelazione Finale",
+      },
+    },
+    Stregone: {
+      featuresByLevel: {
+        1: "Lignaggio; Potere del Lignaggio",
+        2: "Potere del Lignaggio",
+        3: "Incantesimo del Lignaggio",
+        4: "Potere del Lignaggio",
+        5: "Incantesimo del Lignaggio",
+        6: "—",
+        7: "Talento di Lignaggio",
+        8: "Potere del Lignaggio",
+        9: "Incantesimo del Lignaggio",
+        10: "Potere del Lignaggio",
+        11: "Incantesimo del Lignaggio",
+        12: "—",
+        13: "Talento di Lignaggio; Incantesimo del Lignaggio",
+        14: "Potere del Lignaggio",
+        15: "Potere del Lignaggio; Incantesimo del Lignaggio",
+        16: "—",
+        17: "Potere del Lignaggio; Incantesimo del Lignaggio",
+        18: "Potere del Lignaggio",
+        19: "Talento di Lignaggio; Incantesimo del Lignaggio",
+        20: "Apoteosi del Lignaggio",
+      },
+    },
+    Ranger: {
+      featuresByLevel: {
+        1: "Nemico Prescelto +2; Tracciare; Empatia Selvatica",
+        2: "Talento di Stile di Combattimento",
+        3: "Tempra Fisica",
+        4: "Compagno Animale; Incantesimi",
+        5: "Nemico Prescelto +4/+2",
+        6: "Talento di Stile di Combattimento",
+        7: "Maestria nei Boschi",
+        8: "Passo nel Bosco",
+        9: "Tempra Fisica Migliorata",
+        10: "Nemico Prescelto +6/+2; Talento di Stile di Combattimento",
+        11: "Preda",
+        12: "Talento di Stile di Combattimento",
+        13: "Camuffamento",
+        14: "Nemico Prescelto +8/+4/+2; Tempra Fisica Superiore",
+        15: "Talento di Stile di Combattimento",
+        16: "—",
+        17: "Occultamento",
+        18: "Nemico Prescelto +10/+6/+2; Talento di Stile di Combattimento",
+        19: "Maestria Evasiva",
+        20: "Maestro Cacciatore",
+      },
+    },
+  };
+
+  const BASE_CLASS_SAVE_PROGRESSION = {
+    Paladino: { fort: "good", ref: "poor", will: "good" },
+    Oracolo: { fort: "poor", ref: "poor", will: "good" },
+    Stregone: { fort: "poor", ref: "poor", will: "good" },
+    Ranger: { fort: "good", ref: "good", will: "poor" },
+  };
+
+  const BASE_CLASS_FEATURE_DETAIL_TEXT = {
+    "Aura del Bene": "L'aura è pari al livello da paladino e conta come allineamento buono per gli effetti.",
+    "Individuazione del Male": "Come capacità magica a volontà, equivalente all'incantesimo.",
+    "Punire il Male 1/g": "Aggiunge CAR al tiro per colpire e livello ai danni contro bersaglio malvagio; bonus CA contro il bersaglio.",
+    "Punire il Male 2/g": "Uso aggiuntivo giornaliero di Punire il Male.",
+    "Punire il Male 3/g": "Uso aggiuntivo giornaliero di Punire il Male.",
+    "Punire il Male 4/g": "Uso aggiuntivo giornaliero di Punire il Male.",
+    "Punire il Male 5/g": "Uso aggiuntivo giornaliero di Punire il Male.",
+    "Punire il Male 6/g": "Uso aggiuntivo giornaliero di Punire il Male.",
+    "Punire il Male 7/g": "Uso aggiuntivo giornaliero di Punire il Male.",
+    "Punire il Male 8/g": "Uso aggiuntivo giornaliero di Punire il Male.",
+    "Punire il Male 9/g": "Uso aggiuntivo giornaliero di Punire il Male.",
+    "Punire il Male 10/g": "Uso aggiuntivo giornaliero di Punire il Male.",
+    "Grazia Divina": "Aggiunge il modificatore di Carisma a tutti i tiri salvezza.",
+    "Imposizione delle Mani": "Guarigione rapida come azione standard (o veloce su se stessi), pool usi basato su CAR.",
+    "Aura di Coraggio": "Immunità alla paura per il paladino; alleati adiacenti +4 contro paura.",
+    "Divina Salute": "Immunità a tutte le malattie, anche magiche.",
+    "Mercé": "Quando usa Imposizione delle Mani può rimuovere specifiche condizioni.",
+    "Incanalare Energia": "Può spendere usi di Imposizione delle Mani per incanalare energia positiva.",
+    "Incantesimi": "Lancio incantesimi divini da paladino (progressione 4/9 per paladino/ranger).",
+    "Vincolo Divino": "Legame con arma (potenziamenti) o cavalcatura speciale.",
+    "Aura di Risolutezza": "Immunità a charme per il paladino; alleati adiacenti +4 ai TS contro charme.",
+    "Aura di Giustizia": "Condivide Punire il Male con gli alleati vicini.",
+    "Aura di Fede": "Le armi del paladino sono considerate buone per superare RD.",
+    "Aura di Rettitudine": "RD 5/male e immunità a compulsione per il paladino; bonus agli alleati vicini.",
+    "Campione Sacro": "DR, potenziamenti contro il male e Punire il Male definitivo.",
+    "Incantesimi/Trucchetti": "Incantatore spontaneo divino con accesso ai trucchetti/orisons.",
+    "Maledizione": "Maledizione dell'oracolo che dà penalità e benefici crescenti coi livelli.",
+    "Mistero": "Tema dell'oracolo che determina incantesimi bonus e rivelazioni disponibili.",
+    "Rivelazione": "Capacità speciale scelta dal mistero; se ne ottengono più ai livelli indicati.",
+    "Incantesimo di Mistero": "Incantesimo bonus del mistero aggiunto agli incantesimi conosciuti.",
+    "Rivelazione Finale": "Capacità conclusiva del mistero al 20° livello.",
+    "Lignaggio": "Determina poteri di classe, incantesimi bonus e talenti bonus dello stregone.",
+    "Potere del Lignaggio": "Capacità speciale del lignaggio acquisita ai livelli previsti.",
+    "Incantesimo del Lignaggio": "Incantesimo bonus del lignaggio conosciuto automaticamente.",
+    "Talento di Lignaggio": "Talento bonus scelto dalla lista del lignaggio.",
+    "Apoteosi del Lignaggio": "Capacità finale del lignaggio al 20° livello.",
+    "Nemico Prescelto +2": "Bonus contro un tipo di creatura scelto (abilità, percezione, sopravvivenza, danni).",
+    "Nemico Prescelto +4/+2": "Aumenta il bonus del nemico prescelto esistente o ne aggiunge un altro.",
+    "Nemico Prescelto +6/+2": "Aumenta il bonus del nemico prescelto esistente o ne aggiunge un altro.",
+    "Nemico Prescelto +8/+4/+2": "Aumenti cumulativi ai bonus dei nemici prescelti.",
+    "Nemico Prescelto +10/+6/+2": "Aumenti cumulativi ai bonus dei nemici prescelti.",
+    "Tracciare": "Bonus alle prove di Sopravvivenza per seguire tracce.",
+    "Empatia Selvatica": "Migliora l'atteggiamento degli animali come prova di Diplomazia.",
+    "Talento di Stile di Combattimento": "Talento bonus da uno stile, ignorando prerequisiti di caratteristica.",
+    "Tempra Fisica": "Talento Endurance bonus.",
+    "Compagno Animale": "Ottiene un compagno animale come il druido di livello ridotto.",
+    "Maestria nei Boschi": "Si muove senza penalità nel terreno naturale e lascia meno tracce.",
+    "Passo nel Bosco": "Si muove tra rovi e sottobosco senza subire rallentamenti o danni.",
+    "Tempra Fisica Migliorata": "Secondo talento di resistenza/fatica della progressione ranger.",
+    "Preda": "Può designare una preda e ottenere bonus contro di essa.",
+    "Camuffamento": "Può usare Furtività in terreno favorito anche senza copertura completa.",
+    "Tempra Fisica Superiore": "Terzo talento di resistenza/fatica della progressione ranger.",
+    "Occultamento": "Migliora Camuffamento diventando molto difficile da individuare in terreno favorito.",
+    "Maestria Evasiva": "Evasione migliorata (nessun danno con TS riuscito, metà con TS fallito).",
+    "Maestro Cacciatore": "Colpo finale contro nemico prescelto con possibile uccisione/abbattimento.",
+  };
+
   function getPrestigeClassData(name) {
     return PRESTIGE_CLASS_DATA[String(name || "").trim()] || null;
+  }
+
+  function getBaseClassFeatureData(name) {
+    return BASE_CLASS_FEATURES_DATA[String(name || "").trim()] || null;
+  }
+
+  function getClassFeatureDetailText(featureName) {
+    const key = String(featureName || "").trim();
+    if (!key || key === "—" || key === "-") return "—";
+    if (Object.prototype.hasOwnProperty.call(BASE_CLASS_FEATURE_DETAIL_TEXT, key)) {
+      return BASE_CLASS_FEATURE_DETAIL_TEXT[key];
+    }
+    return "Dettaglio da completare.";
+  }
+
+  const CLASS_FEATURE_CHOICE_OPTIONS = {
+    paladino_merce: [
+      "Affaticato",
+      "Infermo",
+      "Nauseato",
+      "Scosso",
+      "Stordito",
+      "Accecato",
+      "Assordato",
+      "Paralizzato",
+      "Confuso",
+    ],
+    paladino_vincolo_divino: ["Arma Sacra", "Cavalcatura Speciale"],
+    oracolo_maledizione: [
+      "Accecato",
+      "Senza Gambe",
+      "Sordo",
+      "Muto",
+      "Nero Presagio",
+      "Plagato",
+      "Infestato",
+      "Lingua",
+      "Consumato",
+    ],
+    oracolo_mistero: [
+      "Battaglia",
+      "Fiamme",
+      "Natura",
+      "Vita",
+      "Ossa",
+      "Onde",
+      "Tempo",
+      "Vento",
+      "Cielo",
+      "Sapere",
+    ],
+    oracolo_rivelazione: [
+      "Rivelazione 1",
+      "Rivelazione 2",
+      "Rivelazione 3",
+      "Rivelazione 4",
+      "Rivelazione 5",
+      "Rivelazione 6",
+    ],
+    stregone_lignaggio: [
+      "Draconico",
+      "Arcano",
+      "Abyssale",
+      "Celestiale",
+      "Infernale",
+      "Fatato",
+      "Elementale",
+      "Non Morto",
+      "Serpentino",
+    ],
+    stregone_talento_lignaggio: [
+      "Incantesimi Focalizzati",
+      "Incantesimi Potenziati",
+      "Incantesimi Massimizzati",
+      "Tempra Possente",
+      "Volontà di Ferro",
+      "Iniziativa Migliorata",
+    ],
+    ranger_nemico_prescelto: [
+      "Animali",
+      "Aberrazioni",
+      "Bestie Magiche",
+      "Costrutti",
+      "Draghi",
+      "Fate",
+      "Melme",
+      "Esterni (Buoni)",
+      "Esterni (Malvagi)",
+      "Umanoidi (Sottotipo)",
+      "Non Morti",
+      "Piante",
+      "Parassiti",
+    ],
+    ranger_stile_combattimento: ["Tiro con Arco", "Combattere con Due Armi"],
+    ranger_compagno_animale: [
+      "Lupo",
+      "Cane",
+      "Aquila",
+      "Orso",
+      "Felino",
+      "Cavallo",
+      "Cinghiale",
+      "Serpente",
+    ],
+  };
+
+  function slugifyFeatureName(featureName) {
+    return String(featureName || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+  }
+
+  function getClassFeatureChoiceSpec(className, featureName) {
+    const cls = String(className || "").trim();
+    const feature = String(featureName || "").trim();
+    if (!cls || !feature || feature === "—" || feature === "-") return null;
+
+    if (cls === "Paladino" && feature.startsWith("Mercé")) {
+      return { key: "paladino_merce", options: CLASS_FEATURE_CHOICE_OPTIONS.paladino_merce };
+    }
+    if (cls === "Paladino" && feature.startsWith("Vincolo Divino")) {
+      return { key: "paladino_vincolo_divino", options: CLASS_FEATURE_CHOICE_OPTIONS.paladino_vincolo_divino };
+    }
+
+    if (cls === "Oracolo" && feature.startsWith("Maledizione")) {
+      return { key: "oracolo_maledizione", options: CLASS_FEATURE_CHOICE_OPTIONS.oracolo_maledizione };
+    }
+    if (cls === "Oracolo" && feature.startsWith("Mistero")) {
+      return { key: "oracolo_mistero", options: CLASS_FEATURE_CHOICE_OPTIONS.oracolo_mistero };
+    }
+    if (cls === "Oracolo" && feature.startsWith("Rivelazione")) {
+      return { key: "oracolo_rivelazione", options: CLASS_FEATURE_CHOICE_OPTIONS.oracolo_rivelazione };
+    }
+
+    if (cls === "Stregone" && feature.startsWith("Lignaggio")) {
+      return { key: "stregone_lignaggio", options: CLASS_FEATURE_CHOICE_OPTIONS.stregone_lignaggio };
+    }
+    if (cls === "Stregone" && feature.startsWith("Talento di Lignaggio")) {
+      return { key: "stregone_talento_lignaggio", options: CLASS_FEATURE_CHOICE_OPTIONS.stregone_talento_lignaggio };
+    }
+
+    if (cls === "Ranger" && feature.startsWith("Nemico Prescelto")) {
+      return { key: "ranger_nemico_prescelto", options: CLASS_FEATURE_CHOICE_OPTIONS.ranger_nemico_prescelto };
+    }
+    if (cls === "Ranger" && feature.startsWith("Talento di Stile di Combattimento")) {
+      return { key: "ranger_stile_combattimento", options: CLASS_FEATURE_CHOICE_OPTIONS.ranger_stile_combattimento };
+    }
+    if (cls === "Ranger" && feature.startsWith("Compagno Animale")) {
+      return { key: "ranger_compagno_animale", options: CLASS_FEATURE_CHOICE_OPTIONS.ranger_compagno_animale };
+    }
+
+    return null;
   }
 
   function formatBabProgressionLabel(key) {
@@ -6327,6 +7094,154 @@ document.addEventListener("DOMContentLoaded", () => {
           summaryBody.appendChild(tr);
         }
       }
+    }
+  }
+
+  function updateClassFeaturesTab() {
+    const selectEl = document.getElementById("class-features-class");
+    const levelEl = document.getElementById("class-features-level");
+    const babEl = document.getElementById("class-features-bab");
+    const hitDieEl = document.getElementById("class-features-hit-die");
+    const saveEl = document.getElementById("class-features-save-progression");
+    const currentEl = document.getElementById("class-features-current");
+    const skillPointsEl = document.getElementById("class-features-skill-points");
+    const skillsEl = document.getElementById("class-features-class-skills");
+    const summaryBody = document.getElementById("class-features-summary-body");
+    const detailBody = document.getElementById("class-features-detail-body");
+    if (!selectEl || !levelEl || !babEl || !hitDieEl || !saveEl || !currentEl || !skillPointsEl || !skillsEl || !summaryBody || !detailBody) return;
+
+    const supportedClasses = Object.keys(BASE_CLASS_FEATURES_DATA);
+    const classEntries = getClassEntries();
+    const levelsByClass = Object.fromEntries(
+      supportedClasses.map((className) => [
+        className,
+        classEntries
+          .filter((entry) => entry.className === className)
+          .reduce((sum, entry) => sum + entry.level, 0),
+      ])
+    );
+
+    const currentlySelected = String(selectEl.value || "").trim();
+    const options = supportedClasses.slice();
+
+    selectEl.innerHTML = "";
+    options.forEach((className) => {
+      const option = document.createElement("option");
+      option.value = className;
+      option.textContent = className;
+      selectEl.appendChild(option);
+    });
+
+    const selectedClass = options.includes(currentlySelected) ? currentlySelected : options[0];
+    selectEl.value = selectedClass;
+
+    const characterLevel = Math.max(0, Math.trunc(num(document.getElementById("pc-level-total")?.value)));
+    const classLevel = Math.min(20, characterLevel);
+    const data =
+      window.PF1EData?.tables?.classFeatures?.getByClass?.(selectedClass) ||
+      getBaseClassFeatureData(selectedClass);
+    const babApi = getBabApi();
+    const hpApi = getHitPointApi();
+    const skillApi = getSkillPointApi();
+    const babKey = String(babApi?.getProgressionByClass?.(selectedClass) || "").trim();
+    const hitDie = Math.max(0, Math.trunc(num(hpApi?.getHitDieByClass?.(selectedClass))));
+    const skillPoints = Math.max(0, Math.trunc(num(skillApi?.getPointsByClass?.(selectedClass))));
+    const saveProg = BASE_CLASS_SAVE_PROGRESSION[selectedClass] || null;
+    const classSkills = CLASS_SKILLS[selectedClass] || [];
+
+    levelEl.value = String(classLevel);
+    babEl.value = babKey ? formatBabProgressionLabel(babKey) : "—";
+    hitDieEl.value = hitDie > 0 ? `d${hitDie}` : "—";
+    saveEl.value = saveProg ? formatSaveProgressionLabel(saveProg) : "—";
+    skillPointsEl.value = skillPoints > 0 ? String(skillPoints) : "—";
+    skillsEl.value = classSkills.map((name) => String(name || "").trim()).filter(Boolean).join(", ");
+    const currentFeatures = String(data?.[classLevel] || data?.featuresByLevel?.[classLevel] || "—");
+    currentEl.value = classLevel > 0 ? currentFeatures : "Imposta il livello personaggio per evidenziare la riga corrente.";
+
+    summaryBody.innerHTML = "";
+    detailBody.innerHTML = "";
+    if (data) {
+      for (let level = 1; level <= 20; level++) {
+        const tr = document.createElement("tr");
+        const featureText = String(data[level] || data.featuresByLevel?.[level] || "—");
+        const featureNames = featureText
+          .split(";")
+          .map((name) => String(name || "").trim())
+          .filter((name) => name && name !== "—" && name !== "-");
+        tr.innerHTML = `
+          <td>${level}</td>
+          <td>${featureText}</td>
+        `;
+        summaryBody.appendChild(tr);
+
+        if (!featureNames.length) {
+          const trDetail = document.createElement("tr");
+          trDetail.innerHTML = `
+            <td>${level}</td>
+            <td>—</td>
+            <td>—</td>
+            <td>—</td>
+          `;
+          detailBody.appendChild(trDetail);
+          continue;
+        }
+
+        featureNames.forEach((featureName) => {
+          const trDetail = document.createElement("tr");
+          const choiceSpec = getClassFeatureChoiceSpec(selectedClass, featureName);
+          let choiceCell = "—";
+          if (choiceSpec?.options?.length) {
+            const safeFeature = slugifyFeatureName(featureName);
+            const dataKey = `class_feature_choice:${selectedClass}:${level}:${choiceSpec.key}:${safeFeature}`;
+            const optionsHtml = choiceSpec.options
+              .map((opt) => `<option value="${opt.replace(/"/g, "&quot;")}">${opt}</option>`)
+              .join("");
+            choiceCell = `
+              <select class="select class-feature-choice" data-key="${dataKey}">
+                <option value="" selected>— Seleziona —</option>
+                ${optionsHtml}
+              </select>
+            `;
+          }
+          trDetail.innerHTML = `
+            <td>${level}</td>
+            <td>${featureName}</td>
+            <td>${getClassFeatureDetailText(featureName)}</td>
+            <td>${choiceCell}</td>
+          `;
+          detailBody.appendChild(trDetail);
+
+          const choiceEl = trDetail.querySelector(".class-feature-choice");
+          if (choiceEl) {
+            const k = keyFor(choiceEl);
+            if (Object.prototype.hasOwnProperty.call(state, k)) {
+              choiceEl.value = String(state[k]);
+            }
+            const onChoiceChange = () => {
+              state[k] = String(choiceEl.value || "");
+              saveState(state);
+            };
+            choiceEl.addEventListener("input", onChoiceChange);
+            choiceEl.addEventListener("change", onChoiceChange);
+          }
+        });
+      }
+    } else {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>—</td>
+        <td>Nessun livello in questa classe.</td>
+      `;
+      summaryBody.appendChild(tr);
+
+      const trDetail = document.createElement("tr");
+      trDetail.innerHTML = `
+        <td>—</td>
+        <td>—</td>
+        <td>Nessun livello in questa classe.</td>
+        <td>—</td>
+      `;
+      detailBody.appendChild(trDetail);
     }
   }
 
@@ -6555,6 +7470,7 @@ document.addEventListener("DOMContentLoaded", () => {
         applyAutoClassSkills();
         applyAutoBabFromClass();
         recalcHitPoints();
+        recalcDerived();
       });
     }
 
@@ -6585,6 +7501,7 @@ document.addEventListener("DOMContentLoaded", () => {
     recalcCompanionEffectiveLevel();
     refreshClassLevelCaps();
     updateTalentLevelMarkers(summaryEntries);
+    updateClassFeaturesTab();
   }
 
   function updateTalentLevelMarkers(summaryEntries = null) {
@@ -7041,6 +7958,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const tr = t.closest?.("tr.skill-row");
     if (tr && t.matches(".skill-cs, .skill-abil, .skill-acp, .skill-ranks, .skill-misc")) {
       recalcSkillRow(tr);
+      updateSkillRanksSpent();
     }
 
     if (t.id === "skills-acp") recalcAllSkills();
@@ -7055,6 +7973,11 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("change", (e) => {
     const t = e.target;
     if (!t) return;
+    const tr = t.closest?.("tr.skill-row");
+    if (tr && t.matches(".skill-cs, .skill-abil, .skill-acp, .skill-ranks, .skill-misc")) {
+      recalcSkillRow(tr);
+      updateSkillRanksSpent();
+    }
     if (t.id === "spellcaster-class") {
       updateSpellcastingClassFields();
       updateSpellLevelsVisibility();
@@ -7312,6 +8235,9 @@ document.addEventListener("DOMContentLoaded", () => {
      Derived recalcs (tutto in un punto)
   ========================= */
   function recalcDerived() {
+    updateLevelAbilityBoostAvailability();
+    applyMythicAbilityBonusToScores();
+
     // iniziativa
     recalcInitiative();
 
@@ -7748,6 +8674,8 @@ document.addEventListener("DOMContentLoaded", () => {
     pcLevelEl.addEventListener("change", recalcHitPoints);
     pcLevelEl.addEventListener("input", recalcCompanionEffectiveLevel);
     pcLevelEl.addEventListener("change", recalcCompanionEffectiveLevel);
+    pcLevelEl.addEventListener("input", updateClassFeaturesTab);
+    pcLevelEl.addEventListener("change", updateClassFeaturesTab);
   }
 
   ["comp-level", "comp-boon-companion"].forEach((id) => {
@@ -7792,6 +8720,7 @@ document.addEventListener("DOMContentLoaded", () => {
       applyAutoClassSkills();
       applyAutoBabFromClass();
       recalcHitPoints();
+      recalcDerived();
     });
     el.addEventListener("change", () => {
       if (el.classList.contains("class-row-level")) {
@@ -7808,7 +8737,15 @@ document.addEventListener("DOMContentLoaded", () => {
       applyAutoClassSkills();
       applyAutoBabFromClass();
       recalcHitPoints();
+      recalcDerived();
     });
+  });
+
+  ["class-features-class"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", updateClassFeaturesTab);
+    el.addEventListener("change", updateClassFeaturesTab);
   });
 
   ["cdp-name", "cdp-level", "enable-cdp-section"].forEach((id) => {
@@ -7823,6 +8760,7 @@ document.addEventListener("DOMContentLoaded", () => {
       syncClassSummaryFields();
       applyAutoBabFromClass();
       recalcHitPoints();
+      recalcDerived();
     });
     el.addEventListener("change", () => {
       if (id === "cdp-level") {
@@ -7833,6 +8771,7 @@ document.addEventListener("DOMContentLoaded", () => {
       syncClassSummaryFields();
       applyAutoBabFromClass();
       recalcHitPoints();
+      recalcDerived();
     });
   });
 
@@ -7848,6 +8787,7 @@ document.addEventListener("DOMContentLoaded", () => {
       syncClassSummaryFields();
       applyAutoBabFromClass();
       recalcHitPoints();
+      recalcDerived();
     });
     el.addEventListener("change", () => {
       if (id === "cdp-level-tab") {
@@ -7858,6 +8798,7 @@ document.addEventListener("DOMContentLoaded", () => {
       syncClassSummaryFields();
       applyAutoBabFromClass();
       recalcHitPoints();
+      recalcDerived();
     });
   });
 
@@ -8024,6 +8965,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetBtn = document.getElementById("reset-storage");
   if (resetBtn) {
     resetBtn.addEventListener("click", () => {
+      const confirmed = window.confirm(
+        "Confermi il reset completo della scheda?\nTutti i dati salvati localmente verranno cancellati."
+      );
+      if (!confirmed) return;
+
       const theme = storageGet(THEME_KEY);
 
       // 1) Rimuove stato salvato e contatori righe dinamiche.
@@ -8105,6 +9051,7 @@ document.addEventListener("DOMContentLoaded", () => {
       updatePrestigeDerivedFields();
       initClassCard();
       syncClassSummaryFields();
+      updateClassFeaturesTab();
       applyAutoClassSkills();
       applySkillFilters();
       updateSpellcastingClassFields();
@@ -8127,6 +9074,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updatePrestigeDerivedFields();
   initClassCard();
   syncClassSummaryFields();
+  updateClassFeaturesTab();
   applyAutoClassSkills();
   applySkillFilters();
   applyAutoBabFromClass();
