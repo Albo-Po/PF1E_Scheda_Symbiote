@@ -8231,6 +8231,47 @@ document.addEventListener("DOMContentLoaded", () => {
     rollViaTaleSpire(tot, name);
   });
 
+  function getPaladinDivineGraceBonus() {
+    const paladinLevel = getClassEntries()
+      .filter((entry) => entry.className === "Paladino")
+      .reduce((sum, entry) => sum + Math.max(0, Math.trunc(num(entry.level))), 0);
+    if (paladinLevel <= 2) return 0;
+    return Math.trunc(getAbilityModByCode("CAR"));
+  }
+
+  function syncSaveBaseWithoutDivineGrace(saveEl) {
+    if (!saveEl) return;
+    const applied = parseSignedInt(saveEl.dataset.appliedDivineGraceBonus || "0");
+    const current = parseSignedInt(saveEl.value);
+    saveEl.dataset.baseWithoutDivineGrace = String(current - applied);
+  }
+
+  function applyPaladinDivineGraceToSaves() {
+    const divineGraceBonus = getPaladinDivineGraceBonus();
+    const saveIds = ["save-fort", "save-ref", "save-will"];
+    let changed = false;
+
+    saveIds.forEach((id) => {
+      const saveEl = document.getElementById(id);
+      if (!saveEl) return;
+
+      if (saveEl.dataset.baseWithoutDivineGrace === undefined) {
+        syncSaveBaseWithoutDivineGrace(saveEl);
+      }
+
+      const base = parseSignedInt(saveEl.dataset.baseWithoutDivineGrace || "0");
+      const nextValue = fmtSigned(base + divineGraceBonus);
+      if (saveEl.value !== nextValue) {
+        saveEl.value = nextValue;
+        state[keyFor(saveEl)] = nextValue;
+        changed = true;
+      }
+      saveEl.dataset.appliedDivineGraceBonus = String(divineGraceBonus);
+    });
+
+    if (changed) saveState(state);
+  }
+
   /* =========================
      Derived recalcs (tutto in un punto)
   ========================= */
@@ -8264,6 +8305,9 @@ document.addEventListener("DOMContentLoaded", () => {
     recalcSpellPenetrationBonus();
     recalcAllSpellSlots();
     recalcAllSpellRows();
+
+    // Paladino (Grazia Divina): aggiunge CAR ai TS oltre il 2° livello
+    applyPaladinDivineGraceToSaves();
   }
 
   function initCollapsibleCards() {
@@ -8746,6 +8790,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!el) return;
     el.addEventListener("input", updateClassFeaturesTab);
     el.addEventListener("change", updateClassFeaturesTab);
+  });
+
+  ["save-fort", "save-ref", "save-will"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const onSaveChanged = () => {
+      syncSaveBaseWithoutDivineGrace(el);
+      applyPaladinDivineGraceToSaves();
+    };
+    el.addEventListener("input", onSaveChanged);
+    el.addEventListener("change", onSaveChanged);
   });
 
   ["cdp-name", "cdp-level", "enable-cdp-section"].forEach((id) => {
