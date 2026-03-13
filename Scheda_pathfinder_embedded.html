@@ -2764,7 +2764,10 @@ td .roll-btn + .roll-btn{
             <div class="field span-3">
               <label>Livello Classe</label>
               <input id="class-features-level" class="small" type="number" min="0" max="20" step="1" value="0" readonly />
-              <div class="hint">Auto dal livello personaggio</div>
+            </div>
+            <div class="field span-3" id="class-features-paladin-smite-field" hidden>
+              <label>Punire il Male/g</label>
+              <input id="class-features-paladin-smite" class="small" type="text" value="—" readonly />
             </div>
             <div class="field span-3">
               <label>Punti Abilità/Liv</label>
@@ -3084,6 +3087,18 @@ td .roll-btn + .roll-btn{
               </div>
             </div>
 
+            <div class="fields" id="combat-paladin-smite-panel" style="margin-top:10px; margin-bottom:10px;" hidden>
+              <div class="field span-4">
+                <label>Bonus CA Punire</label>
+                <input id="combat-paladin-smite-ac" class="small" type="text" value="+0" readonly />
+              </div>
+              <div class="field span-8">
+                <div class="hint" style="margin-top:0;">
+                  Contro il bersaglio marchiato: la CA contro quel bersaglio riceve +CAR.
+                </div>
+              </div>
+            </div>
+
             <div class="ac-row row-3">
               <div class="field compact wide">
                 <label>Note</label>
@@ -3095,6 +3110,7 @@ td .roll-btn + .roll-btn{
           <div class="hint" style="margin-top:8px;">
             Tot = 10 + Armatura + Incant. Armatura + Scudo(attivo) + Incant. Scudo + min(DES, Bonus Des Max) + Taglia + Varie • Contatto: no Armatura/Scudo • Impreparato: no DES
           </div>
+
         </div>
 
         <div class="card" style="padding:10px;">
@@ -3134,6 +3150,17 @@ td .roll-btn + .roll-btn{
   <div class="actions" style="margin-top:0;">
     <button type="button" class="btn" id="add-attack-row">Aggiungi attacco</button>
     <button type="button" class="btn" id="remove-attack-row">Rimuovi ultimo</button>
+  </div>
+
+  <div class="fields" id="combat-paladin-smite-attack-panel" style="margin-top:10px; margin-bottom:10px;" hidden>
+    <div class="field span-6">
+      <label>Bonus TpC</label>
+      <input id="combat-paladin-smite-attack" class="small" type="text" value="+0" readonly />
+    </div>
+    <div class="field span-6">
+      <label>Bonus Danni</label>
+      <input id="combat-paladin-smite-damage" class="small" type="text" value="+0" readonly />
+    </div>
   </div>
 
   <div class="table-wrap" style="margin-top:10px;">
@@ -3225,6 +3252,10 @@ td .roll-btn + .roll-btn{
                   <label class="attack-flag atk-melee-only">
                     <input class="atk-furious-focus" type="checkbox" />
                     Furia Focalizzata
+                  </label>
+                  <label class="attack-flag atk-melee-only" id="combat-paladin-smite-toggle" hidden>
+                    <input id="combat-paladin-smite-active" type="checkbox" />
+                    Punire il Male
                   </label>
                   <label class="attack-flag atk-ranged-only">
                     <input class="atk-deadly-aim" type="checkbox" />
@@ -5957,14 +5988,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const dexApplied = hasDexMax ? Math.min(dex, num(dexMaxRaw)) : dex;
     const size = getCurrentSizeMods().acAtk;
     const misc = num(miscEl.value);
+    const paladinSmite = getPaladinSmiteCombatState();
 
     const shieldActive = !(shieldOffEl && shieldOffEl.checked);
     const shield = shieldActive ? shieldBase + shieldEnhancement : 0;
     const armorTotal = armor + armorEnhancement;
 
-    totalEl.value = String(10 + armorTotal + shield + dexApplied + size + misc);
-    touchEl.value = String(10 + dexApplied + size + misc);
-    ffEl.value = String(10 + armorTotal + shield + size + misc);
+    totalEl.value = String(10 + armorTotal + shield + dexApplied + size + misc + paladinSmite.acBonus);
+    touchEl.value = String(10 + dexApplied + size + misc + paladinSmite.acBonus);
+    ffEl.value = String(10 + armorTotal + shield + size + misc + paladinSmite.acBonus);
 
     if (shieldOffEl) {
       shieldEl.disabled = !!shieldOffEl.checked;
@@ -5985,13 +6017,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const misc = num(document.getElementById("atk-misc")?.value);
     const str = getAbilityModByCode("FOR");
     const dex = getAbilityModByCode("DES");
+    const paladinSmite = getPaladinSmiteCombatState();
 
     const melee = {
       bab,
       ability: str,
       size,
       misc,
-      total: bab + str + size + misc,
+      total: bab + str + size + misc + paladinSmite.attackBonus,
     };
 
     const ranged = {
@@ -5999,10 +6032,46 @@ document.addEventListener("DOMContentLoaded", () => {
       ability: dex,
       size,
       misc,
-      total: bab + dex + size + misc,
+      total: bab + dex + size + misc + paladinSmite.attackBonus,
     };
 
-    return { bab, size, misc, str, dex, melee, ranged };
+    return { bab, size, misc, str, dex, paladinSmite, melee, ranged };
+  }
+
+  function getPaladinClassLevel() {
+    return getClassEntries()
+      .filter((entry) => entry.className === "Paladino")
+      .reduce((sum, entry) => sum + Math.max(0, Math.trunc(num(entry.level))), 0);
+  }
+
+  function getPaladinSmiteCombatState() {
+    const panelEl = document.getElementById("combat-paladin-smite-panel");
+    const attackPanelEl = document.getElementById("combat-paladin-smite-attack-panel");
+    const toggleEl = document.getElementById("combat-paladin-smite-toggle");
+    const activeEl = document.getElementById("combat-paladin-smite-active");
+    const attackEl = document.getElementById("combat-paladin-smite-attack");
+    const acEl = document.getElementById("combat-paladin-smite-ac");
+    const damageEl = document.getElementById("combat-paladin-smite-damage");
+    const paladinLevel = getPaladinClassLevel();
+    const charismaBonus = getAbilityModByCode("CAR");
+    const available = paladinLevel > 0;
+
+    if (panelEl) panelEl.hidden = !available;
+    if (attackPanelEl) attackPanelEl.hidden = !available;
+    if (toggleEl) toggleEl.hidden = !available;
+    if (activeEl) activeEl.disabled = !available;
+    if (activeEl && !available) activeEl.checked = false;
+
+    const enabled = available && !!activeEl?.checked;
+    const attackBonus = enabled ? charismaBonus : 0;
+    const acBonus = enabled ? charismaBonus : 0;
+    const damageBonus = enabled ? paladinLevel : 0;
+
+    if (attackEl) attackEl.value = fmtSigned(attackBonus);
+    if (acEl) acEl.value = fmtSigned(acBonus);
+    if (damageEl) damageEl.value = fmtSigned(damageBonus);
+
+    return { available, enabled, paladinLevel, charismaBonus, attackBonus, acBonus, damageBonus };
   }
 
   function syncAttackBaseTotals(attackVars = buildAttackBaseVariables()) {
@@ -6710,22 +6779,22 @@ document.addEventListener("DOMContentLoaded", () => {
       featuresByLevel: {
         1: "Aura del Bene; Individuazione del Male; Punire il Male 1/g",
         2: "Grazia Divina; Imposizione delle Mani",
-        3: "Aura di Coraggio; Divina Salute; Mercé",
+        3: "Aura di Coraggio; Divina Salute; Indulgenza",
         4: "Punire il Male 2/g; Incanalare Energia; Incantesimi",
         5: "Vincolo Divino",
-        6: "Mercé; Punire il Male 3/g",
+        6: "Indulgenza; Punire il Male 3/g",
         7: "—",
         8: "Aura di Risolutezza; Punire il Male 4/g",
-        9: "Mercé",
+        9: "Indulgenza",
         10: "Punire il Male 5/g",
         11: "Aura di Giustizia",
-        12: "Mercé; Punire il Male 6/g",
+        12: "Indulgenza; Punire il Male 6/g",
         13: "Aura di Fede",
         14: "Punire il Male 7/g",
-        15: "Mercé",
+        15: "Indulgenza",
         16: "Aura di Rettitudine; Punire il Male 8/g",
         17: "—",
-        18: "Mercé; Punire il Male 9/g",
+        18: "Indulgenza; Punire il Male 9/g",
         19: "—",
         20: "Campione Sacro; Punire il Male 10/g",
       },
@@ -6828,7 +6897,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "Imposizione delle Mani": "Guarigione rapida come azione standard (o veloce su se stessi), pool usi basato su CAR.",
     "Aura di Coraggio": "Immunità alla paura per il paladino; alleati adiacenti +4 contro paura.",
     "Divina Salute": "Immunità a tutte le malattie, anche magiche.",
-    "Mercé": "Quando usa Imposizione delle Mani può rimuovere specifiche condizioni.",
+    "Indulgenza": "Quando usa Imposizione delle Mani può rimuovere specifiche condizioni.",
     "Incanalare Energia": "Può spendere usi di Imposizione delle Mani per incanalare energia positiva.",
     "Incantesimi": "Lancio incantesimi divini da paladino (progressione 4/9 per paladino/ranger).",
     "Vincolo Divino": "Legame con arma (potenziamenti) o cavalcatura speciale.",
@@ -6991,7 +7060,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const feature = String(featureName || "").trim();
     if (!cls || !feature || feature === "—" || feature === "-") return null;
 
-    if (cls === "Paladino" && feature.startsWith("Mercé")) {
+    if (cls === "Paladino" && feature.startsWith("Indulgenza")) {
       return { key: "paladino_merce", options: CLASS_FEATURE_CHOICE_OPTIONS.paladino_merce };
     }
     if (cls === "Paladino" && feature.startsWith("Vincolo Divino")) {
@@ -7100,6 +7169,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateClassFeaturesTab() {
     const selectEl = document.getElementById("class-features-class");
     const levelEl = document.getElementById("class-features-level");
+    const paladinSmiteFieldEl = document.getElementById("class-features-paladin-smite-field");
+    const paladinSmiteEl = document.getElementById("class-features-paladin-smite");
     const babEl = document.getElementById("class-features-bab");
     const hitDieEl = document.getElementById("class-features-hit-die");
     const saveEl = document.getElementById("class-features-save-progression");
@@ -7108,7 +7179,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const skillsEl = document.getElementById("class-features-class-skills");
     const summaryBody = document.getElementById("class-features-summary-body");
     const detailBody = document.getElementById("class-features-detail-body");
-    if (!selectEl || !levelEl || !babEl || !hitDieEl || !saveEl || !currentEl || !skillPointsEl || !skillsEl || !summaryBody || !detailBody) return;
+    if (!selectEl || !levelEl || !paladinSmiteFieldEl || !paladinSmiteEl || !babEl || !hitDieEl || !saveEl || !currentEl || !skillPointsEl || !skillsEl || !summaryBody || !detailBody) return;
 
     const supportedClasses = Object.keys(BASE_CLASS_FEATURES_DATA);
     const classEntries = getClassEntries();
@@ -7136,7 +7207,9 @@ document.addEventListener("DOMContentLoaded", () => {
     selectEl.value = selectedClass;
 
     const characterLevel = Math.max(0, Math.trunc(num(document.getElementById("pc-level-total")?.value)));
-    const classLevel = Math.min(20, characterLevel);
+    const hasTrackedClassLevels = Object.values(levelsByClass).some((value) => Math.max(0, Math.trunc(num(value))) > 0);
+    const selectedClassLevel = Math.max(0, Math.trunc(num(levelsByClass[selectedClass])));
+    const classLevel = Math.min(20, hasTrackedClassLevels ? selectedClassLevel : characterLevel);
     const data =
       window.PF1EData?.tables?.classFeatures?.getByClass?.(selectedClass) ||
       getBaseClassFeatureData(selectedClass);
@@ -7150,6 +7223,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const classSkills = CLASS_SKILLS[selectedClass] || [];
 
     levelEl.value = String(classLevel);
+    paladinSmiteFieldEl.hidden = selectedClass !== "Paladino";
+    paladinSmiteEl.value = selectedClass === "Paladino" && classLevel > 0
+      ? String(Math.max(1, Math.floor(classLevel / 2)))
+      : "—";
     babEl.value = babKey ? formatBabProgressionLabel(babKey) : "—";
     hitDieEl.value = hitDie > 0 ? `d${hitDie}` : "—";
     saveEl.value = saveProg ? formatSaveProgressionLabel(saveProg) : "—";
@@ -8278,6 +8355,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function recalcDerived() {
     updateLevelAbilityBoostAvailability();
     applyMythicAbilityBonusToScores();
+    getPaladinSmiteCombatState();
 
     // iniziativa
     recalcInitiative();
@@ -8671,6 +8749,13 @@ document.addEventListener("DOMContentLoaded", () => {
       recalcAllSpellRows();
     });
   }
+
+  ["combat-paladin-smite-active"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", recalcDerived);
+    el.addEventListener("change", recalcDerived);
+  });
 
   const spellcasterLevelEl = document.getElementById("spellcaster-level");
   if (spellcasterLevelEl) {
