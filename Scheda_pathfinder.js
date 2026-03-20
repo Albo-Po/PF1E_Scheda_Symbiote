@@ -579,6 +579,22 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   updateOptionalTabsVisibility();
 
+  [
+    "equip-forehead-mental-targets",
+    "equip-forehead-mental-bonus",
+    "equip-belt-physical-targets",
+    "equip-belt-physical-bonus",
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const refreshForeheadMentalBonus = () => {
+      applyMythicAbilityBonusToScores();
+      recalcDerived();
+    };
+    el.addEventListener("input", refreshForeheadMentalBonus);
+    el.addEventListener("change", refreshForeheadMentalBonus);
+  });
+
   const sizeSelectors = $$(".size-select-sync");
   const SIZE_MODIFIERS = {
     small: { acAtk: 1, stealth: 4, cmbCmd: -1 },
@@ -612,6 +628,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getSizeAbilityModBonus(code) {
     return Math.trunc(getSizeAbilityScoreBonus(code) / 2);
+  }
+
+  function getEquipSlotBonusFor(code, targetsId, bonusId, supportedCodes) {
+    const normalizedCode = String(code || "").trim().toUpperCase();
+    if (!supportedCodes.includes(normalizedCode)) return 0;
+
+    const targetsEl = document.getElementById(targetsId);
+    const bonusEl = document.getElementById(bonusId);
+    const targets = String(targetsEl?.value || "")
+      .split(",")
+      .map((value) => value.trim().toUpperCase())
+      .filter(Boolean);
+    const bonus = Math.max(0, Math.trunc(num(bonusEl?.value)));
+
+    if (!targets.includes(normalizedCode)) return 0;
+    return [2, 4, 6].includes(bonus) ? bonus : 0;
+  }
+
+  function getEquipAbilityBonusFor(code) {
+    return (
+      getEquipSlotBonusFor(
+        code,
+        "equip-forehead-mental-targets",
+        "equip-forehead-mental-bonus",
+        ["INT", "SAG", "CAR"]
+      ) +
+      getEquipSlotBonusFor(
+        code,
+        "equip-belt-physical-targets",
+        "equip-belt-physical-bonus",
+        ["FOR", "DES", "COS"]
+      )
+    );
   }
 
   function setAllSizeSelectors(sizeKey) {
@@ -726,16 +775,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const mythicBonus = getMythicAbilityBonusFor(code);
       const sizeScoreBonus = getSizeAbilityScoreBonus(code);
+      const equipBonus = getEquipAbilityBonusFor(code);
       const min = num(scoreEl.min || 1);
       const max = num(scoreEl.max || 50);
 
       if (scoreEl.dataset.baseScore === undefined) {
         const currentVisible = num(scoreEl.value);
-        scoreEl.dataset.baseScore = String(currentVisible - mythicBonus - sizeScoreBonus);
+        scoreEl.dataset.baseScore = String(currentVisible - mythicBonus - sizeScoreBonus - equipBonus);
       }
 
       const base = num(scoreEl.dataset.baseScore);
-      const total = clamp(base + mythicBonus + sizeScoreBonus, min, max);
+      const total = clamp(base + mythicBonus + sizeScoreBonus + equipBonus, min, max);
       const nextValue = String(total);
 
       if (scoreEl.value !== nextValue) {
@@ -757,7 +807,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const code = String(statEl.dataset.ability || "");
     const mythicBonus = getMythicAbilityBonusFor(code);
     const sizeScoreBonus = getSizeAbilityScoreBonus(code);
-    scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus);
+    const equipBonus = getEquipAbilityBonusFor(code);
+    scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus - equipBonus);
   }
 
   function syncAllAbilityBaseFromVisibleScores() {
@@ -767,7 +818,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const code = String(statEl.dataset.ability || "");
       const mythicBonus = getMythicAbilityBonusFor(code);
       const sizeScoreBonus = getSizeAbilityScoreBonus(code);
-      scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus);
+      const equipBonus = getEquipAbilityBonusFor(code);
+      scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus - equipBonus);
     });
   }
 
@@ -810,11 +862,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const code = String(stat?.dataset?.ability || "");
         const mythicBonus = getMythicAbilityBonusFor(code);
         const sizeScoreBonus = getSizeAbilityScoreBonus(code);
+        const equipBonus = getEquipAbilityBonusFor(code);
         const desired = scoreFromPfMod(num(t.value));
         const min = num(scoreEl.min || 1);
         const max = num(scoreEl.max || 50);
         const total = clamp(desired, min, max);
-        scoreEl.dataset.baseScore = String(total - mythicBonus - sizeScoreBonus);
+        scoreEl.dataset.baseScore = String(total - mythicBonus - sizeScoreBonus - equipBonus);
         scoreEl.value = String(total);
         updateAbilityBlock(stat);
       }

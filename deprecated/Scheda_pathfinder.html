@@ -910,20 +910,67 @@
                 <tr>
                   <th>Slot</th>
                   <th>Oggetto equipaggiato</th>
+                  <th>Effetto slot</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td>Slot Testa</td><td><input type="text" placeholder="Es. elmo, fascia..." /></td></tr>
-                <tr><td>Slot Fronte</td><td><input type="text" placeholder="Es. diadema..." /></td></tr>
-                <tr><td>Slot Occhi</td><td><input type="text" placeholder="Es. lenti..." /></td></tr>
-                <tr><td>Slot Collo</td><td><input type="text" placeholder="Es. amuleto..." /></td></tr>
-                <tr><td>Slot Spalle</td><td><input type="text" placeholder="Es. mantello..." /></td></tr>
-                <tr><td>Slot Corpo</td><td><input type="text" placeholder="Es. armatura..." /></td></tr>
-                <tr><td>Slot Torace</td><td><input type="text" placeholder="Es. pettorale..." /></td></tr>
-                <tr><td>Slot Polsi</td><td><input type="text" placeholder="Es. bracciali..." /></td></tr>
-                <tr><td>Slot Mani</td><td><input type="text" placeholder="Es. guanti..." /></td></tr>
-                <tr><td>Slot Cintura</td><td><input type="text" placeholder="Es. cintura..." /></td></tr>
-                <tr><td>Slot Piedi</td><td><input type="text" placeholder="Es. stivali..." /></td></tr>
+                <tr><td>Slot Testa</td><td><input type="text" placeholder="Es. elmo, fascia..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr>
+                  <td>Slot Fronte</td>
+                  <td><input id="equip-forehead-item" type="text" placeholder="Es. fascia della vasta intelligenza..." /></td>
+                  <td>
+                    <div class="equip-slot-effect-stack">
+                      <select id="equip-forehead-mental-targets" class="select">
+                        <option value="" selected>-</option>
+                        <option value="INT">INT</option>
+                        <option value="SAG">SAG</option>
+                        <option value="CAR">CAR</option>
+                        <option value="INT,SAG">INT + SAG</option>
+                        <option value="INT,CAR">INT + CAR</option>
+                        <option value="SAG,CAR">SAG + CAR</option>
+                        <option value="INT,SAG,CAR">INT + SAG + CAR</option>
+                      </select>
+                      <select id="equip-forehead-mental-bonus" class="select">
+                        <option value="0" selected>-</option>
+                        <option value="2">Bonus +2</option>
+                        <option value="4">Bonus +4</option>
+                        <option value="6">Bonus +6</option>
+                      </select>
+                    </div>
+                  </td>
+                </tr>
+                <tr><td>Slot Occhi</td><td><input type="text" placeholder="Es. lenti..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr><td>Slot Collo</td><td><input type="text" placeholder="Es. amuleto..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr><td>Slot Spalle</td><td><input type="text" placeholder="Es. mantello..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr><td>Slot Corpo</td><td><input type="text" placeholder="Es. armatura..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr><td>Slot Torace</td><td><input type="text" placeholder="Es. pettorale..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr><td>Slot Polsi</td><td><input type="text" placeholder="Es. bracciali..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr><td>Slot Mani</td><td><input type="text" placeholder="Es. guanti..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr>
+                  <td>Slot Cintura</td>
+                  <td><input id="equip-belt-item" type="text" placeholder="Es. cintura della forza del gigante..." /></td>
+                  <td>
+                    <div class="equip-slot-effect-stack">
+                      <select id="equip-belt-physical-targets" class="select">
+                        <option value="" selected>-</option>
+                        <option value="FOR">FOR</option>
+                        <option value="DES">DES</option>
+                        <option value="COS">COS</option>
+                        <option value="FOR,DES">FOR + DES</option>
+                        <option value="FOR,COS">FOR + COS</option>
+                        <option value="DES,COS">DES + COS</option>
+                        <option value="FOR,DES,COS">FOR + DES + COS</option>
+                      </select>
+                      <select id="equip-belt-physical-bonus" class="select">
+                        <option value="0" selected>-</option>
+                        <option value="2">Bonus +2</option>
+                        <option value="4">Bonus +4</option>
+                        <option value="6">Bonus +6</option>
+                      </select>
+                    </div>
+                  </td>
+                </tr>
+                <tr><td>Slot Piedi</td><td><input type="text" placeholder="Es. stivali..." /></td><td class="equip-slot-empty">—</td></tr>
 
                 <tr>
                   <td>Anelli (x2)</td>
@@ -933,18 +980,20 @@
                       <input type="text" placeholder="Anello 2" />
                     </div>
                   </td>
+                  <td class="equip-slot-empty">—</td>
                 </tr>
 
                 <tr class="slot-notes">
                   <td>Senza Slot</td>
                   <td><textarea placeholder="Oggetti senza slot&#10;• ...&#10;• ..."></textarea></td>
+                  <td class="equip-slot-empty">—</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           <div class="hint" style="margin-top:10px;">
-            “Senza Slot” include oggetti narrativi o che non rientrano negli slot standard.
+            Lo slot fronte aggiorna INT, SAG e CAR; la cintura aggiorna FOR, DES e COS in tutta la scheda.
           </div>
         </div>
 

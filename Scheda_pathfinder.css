@@ -1385,8 +1385,18 @@ td input{
 
 /* ===== Equip slots table tweaks ===== */
 .equip-slots table{ min-width: 0; font-size: 12.5px; }
-.equip-slots th:nth-child(1){ width: 34%; }
-.equip-slots th:nth-child(2){ width: 66%; }
+.equip-slots th:nth-child(1){ width: 24%; }
+.equip-slots th:nth-child(2){ width: 36%; }
+.equip-slots th:nth-child(3){ width: 40%; }
+.equip-slot-effect-stack{
+  display:grid;
+  grid-template-columns:minmax(0, 1.35fr) minmax(104px, .9fr);
+  gap:8px;
+}
+.equip-slot-empty{
+  text-align:center;
+  color:var(--text-muted);
+}
 
 .equip-core-table{
   width:100%;
@@ -1496,6 +1506,12 @@ td input{
   gap:8px;
 }
 .ring-pair input{ width:100%; }
+
+@media (max-width: 760px){
+  .equip-slot-effect-stack{
+    grid-template-columns:1fr;
+  }
+}
 
 .slot-notes textarea{
   min-height: 90px;

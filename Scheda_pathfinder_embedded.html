@@ -1311,6 +1311,13 @@ input:focus, textarea:focus, .select:focus{
   min-width:58px;
 }
 
+.save-breakdown-inline{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:8px;
+}
+
 .companion-toggle{
   margin-top:8px;
   font-size:13px;
@@ -1626,8 +1633,18 @@ td input{
 
 /* ===== Equip slots table tweaks ===== */
 .equip-slots table{ min-width: 0; font-size: 12.5px; }
-.equip-slots th:nth-child(1){ width: 34%; }
-.equip-slots th:nth-child(2){ width: 66%; }
+.equip-slots th:nth-child(1){ width: 24%; }
+.equip-slots th:nth-child(2){ width: 36%; }
+.equip-slots th:nth-child(3){ width: 40%; }
+.equip-slot-effect-stack{
+  display:grid;
+  grid-template-columns:minmax(0, 1.35fr) minmax(104px, .9fr);
+  gap:8px;
+}
+.equip-slot-empty{
+  text-align:center;
+  color:var(--text-muted);
+}
 
 .equip-core-table{
   width:100%;
@@ -1737,6 +1754,150 @@ td input{
   gap:8px;
 }
 .ring-pair input{ width:100%; }
+
+@media (max-width: 760px){
+  .equip-slot-effect-stack{
+    grid-template-columns:1fr;
+  }
+
+  #attacks-table,
+  #comp-attacks-table{
+    min-width:0 !important;
+    width:100%;
+  }
+
+  #attacks-table thead,
+  #comp-attacks-table thead{
+    display:none;
+  }
+
+  #attacks-table,
+  #attacks-table tbody,
+  #attacks-table tr,
+  #attacks-table td,
+  #comp-attacks-table,
+  #comp-attacks-table tbody,
+  #comp-attacks-table tr,
+  #comp-attacks-table td{
+    display:block;
+    width:100%;
+  }
+
+  #attacks-table tr.attack-row,
+  #comp-attacks-table tr.comp-attack-row{
+    margin-top:12px;
+    border:2px solid var(--line);
+    border-radius:14px 14px 0 0;
+    background:var(--surface);
+    overflow:hidden;
+  }
+
+  #attacks-table tr.attack-row-dmg,
+  #comp-attacks-table tr.comp-attack-row-dmg{
+    margin:0 0 14px 0;
+    border:2px solid var(--line);
+    border-top:0;
+    border-radius:0 0 14px 14px;
+    background:var(--surface-2);
+    overflow:hidden;
+  }
+
+  #attacks-table tr.attack-row td,
+  #comp-attacks-table tr.comp-attack-row td{
+    border:0;
+    border-bottom:1px solid var(--line);
+    padding:10px 12px;
+  }
+
+  #attacks-table tr.attack-row td:last-child,
+  #comp-attacks-table tr.comp-attack-row td:last-child{
+    border-bottom:0;
+  }
+
+  #attacks-table tr.attack-row td::before,
+  #comp-attacks-table tr.comp-attack-row td::before{
+    display:block;
+    margin-bottom:6px;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.45px;
+    text-transform:uppercase;
+    color:var(--text-muted);
+  }
+
+  #attacks-table tr.attack-row td:nth-child(1)::before{ content:"Nome Attacco"; }
+  #attacks-table tr.attack-row td:nth-child(2)::before{ content:"Tipo"; }
+  #attacks-table tr.attack-row td:nth-child(3)::before{ content:"BAB Att."; }
+  #attacks-table tr.attack-row td:nth-child(4)::before{ content:"Bonus Mag."; }
+  #attacks-table tr.attack-row td:nth-child(5)::before{ content:"Varie"; }
+  #attacks-table tr.attack-row td:nth-child(6)::before{ content:"Totale"; }
+
+  #comp-attacks-table tr.comp-attack-row td:nth-child(1)::before{ content:"Tipo"; }
+  #comp-attacks-table tr.comp-attack-row td:nth-child(2)::before{ content:"BAB Att."; }
+  #comp-attacks-table tr.comp-attack-row td:nth-child(3)::before{ content:"Varie"; }
+  #comp-attacks-table tr.comp-attack-row td:nth-child(4)::before{ content:"Totale"; }
+
+  #attacks-table tr.attack-row td input,
+  #attacks-table tr.attack-row td .select,
+  #comp-attacks-table tr.comp-attack-row td input,
+  #comp-attacks-table tr.comp-attack-row td .select{
+    width:100%;
+  }
+
+  #attacks-table tr.attack-row-dmg td,
+  #comp-attacks-table tr.comp-attack-row-dmg td{
+    border:0;
+    padding:12px;
+  }
+
+  #attacks-table tr.attack-row-dmg td::before,
+  #comp-attacks-table tr.comp-attack-row-dmg td::before{
+    content:none;
+  }
+
+  .attack-dmg-line{
+    gap:10px;
+  }
+
+  .attack-main{
+    width:100%;
+  }
+
+  .attack-groups{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
+  .attack-group{
+    width:100%;
+  }
+
+  .attack-dmg-inline{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .atk-dmg-builder,
+  .atk-crit-builder{
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  .attack-flags{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  .attack-roll-line{
+    width:100%;
+    justify-content:stretch;
+  }
+
+  .attack-roll-line .roll-btn{
+    flex:1 1 0;
+  }
+}
 
 .slot-notes textarea{
   min-height: 90px;
@@ -2034,10 +2195,196 @@ td input{
   background:transparent;
 }
 
+.combat-attacks-card{
+  position:relative;
+  overflow:hidden;
+  background:var(--surface);
+}
+
+.combat-attacks-card > h2{
+  position:relative;
+}
+
+.combat-attacks-card > h2::after{
+  content:"";
+  position:absolute;
+  right:0;
+  top:50%;
+  width:48px;
+  height:1px;
+  background:rgba(179, 38, 30, .22);
+  transform:translateY(-50%);
+}
+
+.combat-attacks-actions .btn{
+  border-color:var(--c-combattimento);
+}
+
+.combat-attacks-wrap{
+  padding-top:4px;
+}
+
+#attacks-table{
+  border-collapse:separate;
+  border-spacing:0 8px;
+}
+
+#attacks-table thead th{
+  background:transparent;
+  color:var(--text-muted);
+  border:0;
+  padding:0 8px 4px;
+  font-size:9px;
+  letter-spacing:.45px;
+}
+
+#attacks-table tbody tr{
+  transition:transform .18s ease, filter .18s ease;
+}
+
+#attacks-table tbody tr:hover{
+  transform:translateY(-1px);
+}
+
+#attacks-table tr.attack-row td{
+  background:var(--surface);
+  border-top:1px solid var(--line);
+  border-bottom:0;
+}
+
+#attacks-table tr.attack-row td:first-child{
+  border-left:1px solid var(--line);
+  border-top-left-radius:12px;
+}
+
+#attacks-table tr.attack-row td:last-child{
+  border-right:1px solid var(--line);
+  border-top-right-radius:12px;
+}
+
+#attacks-table tr.attack-row-dmg td{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-top:0;
+  border-bottom-left-radius:12px;
+  border-bottom-right-radius:12px;
+  box-shadow:0 4px 10px rgba(34, 19, 10, .04);
+}
+
+#attacks-table .atk-name{
+  font-weight:700;
+  font-size:13px;
+  color:var(--text);
+}
+
+#attacks-table .atk-type,
+#attacks-table .atk-sequence,
+#attacks-table .atk-magic-bonus{
+  font-weight:600;
+}
+
+#attacks-table .atk-total{
+  text-align:center;
+  font-family:var(--font-display);
+  font-size:16px;
+  line-height:1;
+  color:var(--text);
+  background:var(--surface-2);
+  border:1px solid rgba(74, 58, 39, .18);
+  border-radius:999px;
+  padding:7px 8px;
+  min-height:36px;
+}
+
+.attack-identity-stack,
+.attack-hit-grid{
+  display:grid;
+  gap:6px;
+}
+
+.attack-hit-grid{
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+}
+
+.attack-cell-total .atk-total{
+  width:100%;
+}
+
+.attack-roll-line-inline{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:5px;
+}
+
+.attack-group{
+  padding:8px 10px;
+  border:1px solid rgba(74, 58, 39, .16);
+  border-radius:12px;
+  background:var(--surface-2);
+}
+
+.attack-subtitle{
+  display:block;
+  margin-bottom:6px;
+  font-size:9px;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  color:var(--text-muted);
+  font-weight:700;
+}
+
+.atk-dmg-total,
+.atk-crit{
+  text-align:center;
+  font-weight:700;
+  color:var(--text);
+  background:var(--surface) !important;
+  border:1px dashed rgba(74, 58, 39, .24) !important;
+  border-radius:10px !important;
+  padding:6px 8px !important;
+}
+
+.attack-flags{
+  gap:8px;
+}
+
+.attack-flag{
+  background:var(--surface);
+  border:1px solid rgba(74, 58, 39, .22);
+  border-radius:999px;
+  padding:5px 8px;
+  transition:background .18s ease, border-color .18s ease, box-shadow .18s ease, color .18s ease;
+}
+
+.attack-flag:has(input:checked){
+  background:var(--surface-2);
+  border-color:rgba(74, 58, 39, .26);
+  color:var(--text);
+  box-shadow:0 4px 10px rgba(34, 19, 10, .06);
+}
+
+.attack-roll-line{
+  align-self:stretch;
+}
+
+.attack-roll-line .roll-btn{
+  min-width:78px;
+  border-color:var(--c-combattimento);
+}
+
+.attack-roll-line .atk-roll-btn{
+  background:var(--c-combattimento);
+  color:#fff6f3;
+}
+
+.attack-roll-line .atk-dmg-roll-btn{
+  background:var(--surface);
+}
+
 .atk-dmg-builder,
 .atk-crit-builder{
   display:grid;
-  grid-template-columns: 56px 78px;
+  grid-template-columns: 50px 72px;
   gap:4px;
   margin-bottom:0;
 }
@@ -2049,7 +2396,7 @@ td input{
 .attack-dmg-line{
   display:grid;
   grid-template-columns:minmax(0, 1fr) auto;
-  gap:10px 12px;
+  gap:8px 10px;
   align-items:start;
 }
 
@@ -2057,23 +2404,39 @@ td input{
   min-width:0;
 }
 
+.attack-row td:first-child{
+  position:relative;
+}
+
+.attack-row td:first-child::after{
+  content:"";
+  position:absolute;
+  left:12px;
+  bottom:7px;
+  width:38px;
+  height:2px;
+  border-radius:999px;
+  background:rgba(179, 38, 30, .22);
+  opacity:.45;
+}
+
 .attack-groups{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+  display:grid;
+  grid-template-columns:minmax(0, 1.1fr) minmax(0, .9fr) minmax(0, 1.4fr);
+  gap:8px;
 }
 
 .attack-group{
   display:flex;
   flex-direction:column;
   align-items:flex-start;
-  gap:5px;
+  gap:4px;
 }
 
 .attack-dmg-inline{
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:6px;
   flex-wrap:nowrap;
 }
 
@@ -2081,33 +2444,45 @@ td input{
   display:flex;
   flex-direction:column;
   align-items:stretch;
-  gap:6px;
+  gap:5px;
   justify-content:flex-start;
 }
 
 .attack-roll-line .roll-btn{
   width:100%;
   border-radius:999px;
-  border:0;
+  border:1px solid rgba(74, 58, 39, .18);
   min-width:74px;
-  padding:8px 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,.1);
+  padding:6px 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.06);
 }
 
 .attack-roll-line .roll-btn:hover{
   transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0,0,0,.15);
+  box-shadow: 0 4px 9px rgba(0,0,0,.08);
+}
+
+.combat-attacks-card .hint{
+  margin-top:14px !important;
+  padding:8px 10px;
+  border:1px dashed rgba(74, 58, 39, .18);
+  border-radius:10px;
+  background:var(--surface-2);
 }
 
 .attack-flags{
   margin-top:8px;
   display:flex;
   flex-wrap:wrap;
-  gap:12px;
+  gap:8px;
+}
+
+.attack-group-options .attack-flags{
+  margin-top:0;
 }
 
 .attack-subtitle{
-  font-size:12px;
+  font-size:10px;
   letter-spacing:.45px;
   text-transform:uppercase;
   color: var(--text-muted);
@@ -2116,8 +2491,8 @@ td input{
 
 .atk-dice-count{
   border:2px solid var(--line) !important;
-  border-radius:10px !important;
-  padding:6px 8px !important;
+  border-radius:8px !important;
+  padding:4px 6px !important;
   background: var(--surface) !important;
 }
 
@@ -2125,7 +2500,7 @@ td input{
   display:inline-flex;
   align-items:center;
   gap:6px;
-  font-size:11px;
+  font-size:10px;
   color: var(--text-muted);
   white-space:nowrap;
 }
@@ -2134,6 +2509,137 @@ td input{
   width:15px;
   height:15px;
   accent-color: var(--c-combattimento);
+}
+
+@media (max-width: 760px){
+  #attacks-table thead{
+    display:none;
+  }
+
+  #attacks-table,
+  #attacks-table tbody{
+    display:block;
+    width:100%;
+  }
+
+  #attacks-table tr.attack-row{
+    display:grid;
+    grid-template-columns:minmax(0, 1fr) 108px;
+    gap:0;
+    margin-top:10px;
+    border:1px solid var(--line);
+    border-radius:12px 12px 0 0;
+    background:var(--surface);
+    overflow:hidden;
+  }
+
+  #attacks-table tr.attack-row td{
+    display:block;
+    width:auto;
+    border:0;
+    padding:10px;
+  }
+
+  #attacks-table .attack-cell::before{
+    display:block;
+    margin-bottom:6px;
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+    color:var(--text-muted);
+  }
+
+  #attacks-table .attack-cell-identity{
+    grid-column:1 / -1;
+    padding-bottom:8px;
+  }
+
+  #attacks-table .attack-cell-identity::before{
+    content:"Attacco";
+  }
+
+  #attacks-table .attack-cell-hit{
+    grid-column:1 / 2;
+    padding-top:8px;
+  }
+
+  #attacks-table .attack-cell-hit::before{
+    content:"Colpire";
+  }
+
+  #attacks-table .attack-cell-total{
+    grid-column:2 / 3;
+    grid-row:2 / 3;
+    padding-top:8px;
+  }
+
+  #attacks-table .attack-cell-total::before{
+    content:"Totale";
+  }
+
+  #attacks-table .attack-cell-actions{
+    grid-column:1 / -1;
+    padding-top:8px;
+    border-top:1px solid var(--line);
+    background:var(--surface-2);
+  }
+
+  #attacks-table .attack-cell-actions::before{
+    content:"Azioni";
+  }
+
+  #attacks-table tr.attack-row-dmg{
+    display:block;
+    margin:0 0 12px 0;
+    border:1px solid var(--line);
+    border-top:0;
+    border-radius:0 0 12px 12px;
+    background:var(--surface);
+    overflow:hidden;
+  }
+
+  #attacks-table tr.attack-row-dmg td{
+    display:block;
+    padding:10px;
+    border:0;
+  }
+
+  #attacks-table .attack-hit-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  #attacks-table .attack-hit-grid .atk-row-misc{
+    grid-column:1 / -1;
+  }
+
+  #attacks-table .attack-roll-line-inline{
+    grid-template-columns:1fr 1fr;
+  }
+
+  #attacks-table .attack-groups{
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  #attacks-table .attack-group-options{
+    grid-column:1 / -1;
+  }
+
+  #attacks-table .attack-flags{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  #attacks-table .attack-flag{
+    width:100%;
+  }
+
+  .attack-row td:first-child::after{
+    left:0;
+    bottom:-2px;
+  }
 }
 
 .mythic-feat-list{
@@ -2750,7 +3256,7 @@ td .roll-btn + .roll-btn{
     <section class="page" id="page-classe" role="tabpanel" aria-labelledby="tab-classe">
       <div class="grid">
         <div class="card">
-          <h2>Capacità di Classe</h2>
+          <h2>Progressione Classe</h2>
           <div class="fields">
             <div class="field span-6">
               <label>Classe</label>
@@ -2761,41 +3267,47 @@ td .roll-btn + .roll-btn{
                 <option value="Ranger">Ranger</option>
               </select>
             </div>
-            <div class="field span-3">
-              <label>Livello Classe</label>
-              <input id="class-features-level" class="small" type="number" min="0" max="20" step="1" value="0" readonly />
-            </div>
             <div class="field span-3" id="class-features-paladin-smite-field" hidden>
               <label>Punire il Male/g</label>
               <input id="class-features-paladin-smite" class="small" type="text" value="—" readonly />
             </div>
-            <div class="field span-3">
-              <label>Punti Abilità/Liv</label>
-              <input id="class-features-skill-points" class="small" type="text" value="—" readonly />
+            <div class="field span-4" id="class-features-paladin-archetype-field" hidden>
+              <label>Archetipo</label>
+              <select id="class-features-paladin-archetype" class="select">
+                <option value="standard" selected>Standard</option>
+                <option value="tempered_champion">Tempered Champion</option>
+              </select>
             </div>
-            <div class="field span-4">
-              <label>BAB</label>
-              <input id="class-features-bab" class="small" type="text" value="—" readonly />
+            <div class="field span-4" id="class-features-paladin-oath-field" hidden>
+              <label>Oath</label>
+              <select id="class-features-paladin-oath" class="select">
+                <option value="none" selected>Nessuno</option>
+                <option value="oath_of_vengeance">Oath of Vengeance</option>
+              </select>
             </div>
-            <div class="field span-4">
-              <label>DV</label>
-              <input id="class-features-hit-die" class="small" type="text" value="—" readonly />
+            <div class="field span-4" id="class-features-paladin-loh-field" hidden>
+              <label>Imposizione delle Mani/g</label>
+              <input id="class-features-paladin-loh" class="small" type="text" value="—" readonly />
             </div>
-            <div class="field span-4">
-              <label>TS Fort / Rif / Vol</label>
-              <input id="class-features-save-progression" class="small" type="text" value="—" readonly />
+            <div class="field span-4" id="class-features-paladin-channel-wrath-field" hidden>
+              <label>Extra Smite da Channel Wrath</label>
+              <input id="class-features-paladin-channel-wrath" class="small" type="number" min="0" step="1" value="0" />
             </div>
-            <div class="field span-12">
-              <label>Capacità al livello attuale</label>
-              <textarea id="class-features-current" readonly placeholder="—"></textarea>
+            <div class="field span-4" id="class-features-paladin-sacred-weapon-field" hidden>
+              <label>Arma Sacra</label>
+              <input id="class-features-paladin-sacred-weapon" class="small" type="text" value="—" readonly />
             </div>
-            <div class="field span-12">
-              <label>Abilità di Classe</label>
-              <textarea id="class-features-class-skills" readonly placeholder="—"></textarea>
+            <div class="field span-4" id="class-features-paladin-justice-field" hidden>
+              <label>Giustizia</label>
+              <input id="class-features-paladin-justice" class="small" type="text" value="—" readonly />
+            </div>
+            <div class="field span-12" id="class-features-paladin-variant-notes-field" hidden>
+              <label>Note Archetipo / Oath</label>
+              <textarea id="class-features-paladin-variant-notes" readonly placeholder="—"></textarea>
             </div>
             <div class="field span-12">
               <div class="table-wrap">
-                <table id="class-features-summary-table" aria-label="Progressione capacità classe">
+                <table id="class-features-summary-table" aria-label="Progressione classe fino al livello attuale">
                   <thead>
                     <tr>
                       <th>Livello</th>
@@ -2806,21 +3318,25 @@ td .roll-btn + .roll-btn{
                 </table>
               </div>
             </div>
-            <div class="field span-12">
-              <div class="table-wrap">
-                <table id="class-features-detail-table" aria-label="Dettaglio capacità classe">
-                  <thead>
-                    <tr>
-                      <th>Livello</th>
-                      <th>Capacità</th>
-                      <th>Dettaglio</th>
-                      <th>Scelta</th>
-                    </tr>
-                  </thead>
-                  <tbody id="class-features-detail-body"></tbody>
-                </table>
-              </div>
-            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Dettaglio Capacità e Scelte</h2>
+          <div class="table-wrap">
+            <table id="class-features-detail-table" aria-label="Dettaglio capacità e scelte della classe">
+              <thead>
+                <tr>
+                  <th>Livello</th>
+                  <th>Capacità</th>
+                  <th>Dettaglio</th>
+                  <th>Scelta</th>
+                </tr>
+              </thead>
+              <tbody id="class-features-detail-body"></tbody>
+            </table>
+          </div>
+          <div class="fields" style="margin-top:12px;">
             <div class="field span-12">
               <label>Note Classe</label>
               <textarea id="class-features-notes" placeholder="Appunti sulle capacità di classe..."></textarea>
@@ -2925,22 +3441,34 @@ td .roll-btn + .roll-btn{
         <div class="field span-4">
           <label>Tempra</label>
           <div class="save-roll-inline">
-            <input id="save-fort" class="small save-roll-value" type="text" value="+0" />
+            <input id="save-fort" class="small save-roll-value" type="text" value="+0" readonly />
             <button type="button" class="roll-btn save-roll-btn" data-target="save-fort" data-label="Tempra" title="Tira 1d20 + Tempra">Tiro</button>
+          </div>
+          <div class="save-breakdown-inline">
+            <input id="save-fort-base" class="small" type="text" value="+0" readonly title="TS base da classi" />
+            <input id="save-fort-misc" class="small" type="number" step="1" value="0" title="Bonus vari Tempra" />
           </div>
         </div>
         <div class="field span-4">
           <label>Riflessi</label>
           <div class="save-roll-inline">
-            <input id="save-ref" class="small save-roll-value" type="text" value="+0" />
+            <input id="save-ref" class="small save-roll-value" type="text" value="+0" readonly />
             <button type="button" class="roll-btn save-roll-btn" data-target="save-ref" data-label="Riflessi" title="Tira 1d20 + Riflessi">Tiro</button>
+          </div>
+          <div class="save-breakdown-inline">
+            <input id="save-ref-base" class="small" type="text" value="+0" readonly title="TS base da classi" />
+            <input id="save-ref-misc" class="small" type="number" step="1" value="0" title="Bonus vari Riflessi" />
           </div>
         </div>
         <div class="field span-4">
           <label>Volontà</label>
           <div class="save-roll-inline">
-            <input id="save-will" class="small save-roll-value" type="text" value="+0" />
+            <input id="save-will" class="small save-roll-value" type="text" value="+0" readonly />
             <button type="button" class="roll-btn save-roll-btn" data-target="save-will" data-label="Volontà" title="Tira 1d20 + Volontà">Tiro</button>
+          </div>
+          <div class="save-breakdown-inline">
+            <input id="save-will-base" class="small" type="text" value="+0" readonly title="TS base da classi" />
+            <input id="save-will-misc" class="small" type="number" step="1" value="0" title="Bonus vari Volontà" />
           </div>
         </div>
       </div>
@@ -3113,7 +3641,7 @@ td .roll-btn + .roll-btn{
 
         </div>
 
-        <div class="card" style="padding:10px;">
+        <div class="card combat-attacks-card" style="padding:10px;">
   <h2 style="margin-bottom:8px;">Attacchi</h2>
 
   <!-- Modificatori globali per attacco -->
@@ -3147,7 +3675,7 @@ td .roll-btn + .roll-btn{
     </div>
   </div>
 
-  <div class="actions" style="margin-top:0;">
+  <div class="actions combat-attacks-actions" style="margin-top:0;">
     <button type="button" class="btn" id="add-attack-row">Aggiungi attacco</button>
     <button type="button" class="btn" id="remove-attack-row">Rimuovi ultimo</button>
   </div>
@@ -3163,47 +3691,53 @@ td .roll-btn + .roll-btn{
     </div>
   </div>
 
-  <div class="table-wrap" style="margin-top:10px;">
-    <table aria-label="Tabella Attacchi" id="attacks-table" style="min-width:760px;">
+  <div class="table-wrap combat-attacks-wrap" style="margin-top:10px;">
+    <table aria-label="Tabella Attacchi" id="attacks-table" style="min-width:640px;">
       <thead>
         <tr>
-          <th style="width:24%;">Nome Attacco</th>
-          <th style="width:24%;">Tipo</th>
-          <th style="width:18%;">BAB Att.</th>
-          <th style="width:14%;">Bonus Mag.</th>
-          <th style="width:10%;">Varie</th>
-          <th style="width:10%;">Tot</th>
+          <th style="width:38%;">Attacco</th>
+          <th style="width:30%;">Colpire</th>
+          <th style="width:12%;">Tot</th>
+          <th style="width:20%;">Azioni</th>
         </tr>
       </thead>
       <tbody id="attacks-tbody">
         <tr class="attack-row">
-          <td><input class="atk-name" type="text" placeholder="Es. Arco lungo +1" /></td>
-          <td>
-            <select class="select atk-type">
-              <option value="melee" selected>Mischia (FOR)</option>
-              <option value="ranged">Distanza (DES)</option>
-            </select>
+          <td class="attack-cell attack-cell-identity">
+            <div class="attack-identity-stack">
+              <input class="atk-name" type="text" placeholder="Es. Arco lungo +1" />
+              <select class="select atk-type">
+                <option value="melee" selected>Mischia (FOR)</option>
+                <option value="ranged">Distanza (DES)</option>
+              </select>
+            </div>
           </td>
-          <td>
-            <select class="select atk-sequence">
-              <option value="0" selected>1°</option>
-            </select>
+          <td class="attack-cell attack-cell-hit">
+            <div class="attack-hit-grid">
+              <select class="select atk-sequence">
+                <option value="0" selected>1°</option>
+              </select>
+              <select class="select atk-magic-bonus">
+                <option value="0" selected>+0</option>
+                <option value="1">+1</option>
+                <option value="2">+2</option>
+                <option value="3">+3</option>
+                <option value="4">+4</option>
+                <option value="5">+5</option>
+              </select>
+              <input class="small atk-row-misc" type="number" step="1" value="0" />
+            </div>
           </td>
-          <td>
-            <select class="select atk-magic-bonus">
-              <option value="0" selected>+0</option>
-              <option value="1">+1</option>
-              <option value="2">+2</option>
-              <option value="3">+3</option>
-              <option value="4">+4</option>
-              <option value="5">+5</option>
-            </select>
+          <td class="attack-cell attack-cell-total"><input class="small atk-total" type="text" value="+0" readonly /></td>
+          <td class="attack-cell attack-cell-actions">
+            <div class="attack-roll-line attack-roll-line-inline">
+              <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
+              <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
+            </div>
           </td>
-          <td><input class="small atk-row-misc" type="number" step="1" value="0" /></td>
-          <td><input class="small atk-total" type="text" value="+0" readonly /></td>
         </tr>
         <tr class="attack-row-dmg">
-          <td colspan="6">
+          <td colspan="4">
             <div class="attack-dmg-line">
               <div class="attack-main">
                 <div class="attack-groups">
@@ -3239,41 +3773,40 @@ td .roll-btn + .roll-btn{
                       </select>
                     </div>
                   </div>
+                  <div class="attack-group attack-group-options">
+                    <span class="attack-subtitle">Opzioni</span>
+                    <div class="attack-flags">
+                      <label class="attack-flag atk-melee-only">
+                        <input class="atk-twohands" type="checkbox" />
+                        2 mani
+                      </label>
+                      <label class="attack-flag atk-melee-only">
+                        <input class="atk-power-attack" type="checkbox" />
+                        Attacco Poderoso
+                      </label>
+                      <label class="attack-flag atk-melee-only">
+                        <input class="atk-furious-focus" type="checkbox" />
+                        Furia Focalizzata
+                      </label>
+                      <label class="attack-flag atk-melee-only" id="combat-paladin-smite-toggle" hidden>
+                        <input id="combat-paladin-smite-active" type="checkbox" />
+                        Punire il Male
+                      </label>
+                      <label class="attack-flag atk-ranged-only">
+                        <input class="atk-deadly-aim" type="checkbox" />
+                        Mira Letale
+                      </label>
+                      <label class="attack-flag atk-ranged-only">
+                        <input class="atk-rapid-shot" type="checkbox" />
+                        Tiro Rapido
+                      </label>
+                      <label class="attack-flag atk-ranged-only">
+                        <input class="atk-manyshot" type="checkbox" />
+                        Tiro Multiplo
+                      </label>
+                    </div>
+                  </div>
                 </div>
-                <div class="attack-flags">
-                  <label class="attack-flag atk-melee-only">
-                    <input class="atk-twohands" type="checkbox" />
-                    2 mani
-                  </label>
-                  <label class="attack-flag atk-melee-only">
-                    <input class="atk-power-attack" type="checkbox" />
-                    Attacco Poderoso
-                  </label>
-                  <label class="attack-flag atk-melee-only">
-                    <input class="atk-furious-focus" type="checkbox" />
-                    Furia Focalizzata
-                  </label>
-                  <label class="attack-flag atk-melee-only" id="combat-paladin-smite-toggle" hidden>
-                    <input id="combat-paladin-smite-active" type="checkbox" />
-                    Punire il Male
-                  </label>
-                  <label class="attack-flag atk-ranged-only">
-                    <input class="atk-deadly-aim" type="checkbox" />
-                    Mira Letale
-                  </label>
-                  <label class="attack-flag atk-ranged-only">
-                    <input class="atk-rapid-shot" type="checkbox" />
-                    Tiro Rapido
-                  </label>
-                  <label class="attack-flag atk-ranged-only">
-                    <input class="atk-manyshot" type="checkbox" />
-                    Tiro Multiplo
-                  </label>
-                </div>
-              </div>
-              <div class="attack-roll-line">
-                <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
-                <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
               </div>
             </div>
           </td>
@@ -3398,6 +3931,7 @@ td .roll-btn + .roll-btn{
             <div class="field span-4"><label>Incantesimi Noti</label><input class="small" type="number" min="0" step="1" value="0" /></div>
             <div class="field span-4"><label>Incantesimi Preparati</label><input class="small" type="number" min="0" step="1" value="0" /></div>
           </div>
+          <div class="hint" id="spellcasting-paladin-variant-note" style="margin-top:10px;" hidden></div>
         </div>
 
         <div class="card">
@@ -3511,20 +4045,67 @@ td .roll-btn + .roll-btn{
                 <tr>
                   <th>Slot</th>
                   <th>Oggetto equipaggiato</th>
+                  <th>Effetto slot</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td>Slot Testa</td><td><input type="text" placeholder="Es. elmo, fascia..." /></td></tr>
-                <tr><td>Slot Fronte</td><td><input type="text" placeholder="Es. diadema..." /></td></tr>
-                <tr><td>Slot Occhi</td><td><input type="text" placeholder="Es. lenti..." /></td></tr>
-                <tr><td>Slot Collo</td><td><input type="text" placeholder="Es. amuleto..." /></td></tr>
-                <tr><td>Slot Spalle</td><td><input type="text" placeholder="Es. mantello..." /></td></tr>
-                <tr><td>Slot Corpo</td><td><input type="text" placeholder="Es. armatura..." /></td></tr>
-                <tr><td>Slot Torace</td><td><input type="text" placeholder="Es. pettorale..." /></td></tr>
-                <tr><td>Slot Polsi</td><td><input type="text" placeholder="Es. bracciali..." /></td></tr>
-                <tr><td>Slot Mani</td><td><input type="text" placeholder="Es. guanti..." /></td></tr>
-                <tr><td>Slot Cintura</td><td><input type="text" placeholder="Es. cintura..." /></td></tr>
-                <tr><td>Slot Piedi</td><td><input type="text" placeholder="Es. stivali..." /></td></tr>
+                <tr><td>Slot Testa</td><td><input type="text" placeholder="Es. elmo, fascia..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr>
+                  <td>Slot Fronte</td>
+                  <td><input id="equip-forehead-item" type="text" placeholder="Es. fascia della vasta intelligenza..." /></td>
+                  <td>
+                    <div class="equip-slot-effect-stack">
+                      <select id="equip-forehead-mental-targets" class="select">
+                        <option value="" selected>-</option>
+                        <option value="INT">INT</option>
+                        <option value="SAG">SAG</option>
+                        <option value="CAR">CAR</option>
+                        <option value="INT,SAG">INT + SAG</option>
+                        <option value="INT,CAR">INT + CAR</option>
+                        <option value="SAG,CAR">SAG + CAR</option>
+                        <option value="INT,SAG,CAR">INT + SAG + CAR</option>
+                      </select>
+                      <select id="equip-forehead-mental-bonus" class="select">
+                        <option value="0" selected>-</option>
+                        <option value="2">Bonus +2</option>
+                        <option value="4">Bonus +4</option>
+                        <option value="6">Bonus +6</option>
+                      </select>
+                    </div>
+                  </td>
+                </tr>
+                <tr><td>Slot Occhi</td><td><input type="text" placeholder="Es. lenti..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr><td>Slot Collo</td><td><input type="text" placeholder="Es. amuleto..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr><td>Slot Spalle</td><td><input type="text" placeholder="Es. mantello..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr><td>Slot Corpo</td><td><input type="text" placeholder="Es. armatura..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr><td>Slot Torace</td><td><input type="text" placeholder="Es. pettorale..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr><td>Slot Polsi</td><td><input type="text" placeholder="Es. bracciali..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr><td>Slot Mani</td><td><input type="text" placeholder="Es. guanti..." /></td><td class="equip-slot-empty">—</td></tr>
+                <tr>
+                  <td>Slot Cintura</td>
+                  <td><input id="equip-belt-item" type="text" placeholder="Es. cintura della forza del gigante..." /></td>
+                  <td>
+                    <div class="equip-slot-effect-stack">
+                      <select id="equip-belt-physical-targets" class="select">
+                        <option value="" selected>-</option>
+                        <option value="FOR">FOR</option>
+                        <option value="DES">DES</option>
+                        <option value="COS">COS</option>
+                        <option value="FOR,DES">FOR + DES</option>
+                        <option value="FOR,COS">FOR + COS</option>
+                        <option value="DES,COS">DES + COS</option>
+                        <option value="FOR,DES,COS">FOR + DES + COS</option>
+                      </select>
+                      <select id="equip-belt-physical-bonus" class="select">
+                        <option value="0" selected>-</option>
+                        <option value="2">Bonus +2</option>
+                        <option value="4">Bonus +4</option>
+                        <option value="6">Bonus +6</option>
+                      </select>
+                    </div>
+                  </td>
+                </tr>
+                <tr><td>Slot Piedi</td><td><input type="text" placeholder="Es. stivali..." /></td><td class="equip-slot-empty">—</td></tr>
 
                 <tr>
                   <td>Anelli (x2)</td>
@@ -3534,18 +4115,20 @@ td .roll-btn + .roll-btn{
                       <input type="text" placeholder="Anello 2" />
                     </div>
                   </td>
+                  <td class="equip-slot-empty">—</td>
                 </tr>
 
                 <tr class="slot-notes">
                   <td>Senza Slot</td>
                   <td><textarea placeholder="Oggetti senza slot&#10;• ...&#10;• ..."></textarea></td>
+                  <td class="equip-slot-empty">—</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           <div class="hint" style="margin-top:10px;">
-            “Senza Slot” include oggetti narrativi o che non rientrano negli slot standard.
+            Lo slot fronte aggiorna INT, SAG e CAR; la cintura aggiorna FOR, DES e COS in tutta la scheda.
           </div>
         </div>
 
@@ -5109,6 +5692,22 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   updateOptionalTabsVisibility();
 
+  [
+    "equip-forehead-mental-targets",
+    "equip-forehead-mental-bonus",
+    "equip-belt-physical-targets",
+    "equip-belt-physical-bonus",
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const refreshForeheadMentalBonus = () => {
+      applyMythicAbilityBonusToScores();
+      recalcDerived();
+    };
+    el.addEventListener("input", refreshForeheadMentalBonus);
+    el.addEventListener("change", refreshForeheadMentalBonus);
+  });
+
   const sizeSelectors = $$(".size-select-sync");
   const SIZE_MODIFIERS = {
     small: { acAtk: 1, stealth: 4, cmbCmd: -1 },
@@ -5142,6 +5741,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getSizeAbilityModBonus(code) {
     return Math.trunc(getSizeAbilityScoreBonus(code) / 2);
+  }
+
+  function getEquipSlotBonusFor(code, targetsId, bonusId, supportedCodes) {
+    const normalizedCode = String(code || "").trim().toUpperCase();
+    if (!supportedCodes.includes(normalizedCode)) return 0;
+
+    const targetsEl = document.getElementById(targetsId);
+    const bonusEl = document.getElementById(bonusId);
+    const targets = String(targetsEl?.value || "")
+      .split(",")
+      .map((value) => value.trim().toUpperCase())
+      .filter(Boolean);
+    const bonus = Math.max(0, Math.trunc(num(bonusEl?.value)));
+
+    if (!targets.includes(normalizedCode)) return 0;
+    return [2, 4, 6].includes(bonus) ? bonus : 0;
+  }
+
+  function getEquipAbilityBonusFor(code) {
+    return (
+      getEquipSlotBonusFor(
+        code,
+        "equip-forehead-mental-targets",
+        "equip-forehead-mental-bonus",
+        ["INT", "SAG", "CAR"]
+      ) +
+      getEquipSlotBonusFor(
+        code,
+        "equip-belt-physical-targets",
+        "equip-belt-physical-bonus",
+        ["FOR", "DES", "COS"]
+      )
+    );
   }
 
   function setAllSizeSelectors(sizeKey) {
@@ -5285,16 +5917,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const mythicBonus = getMythicAbilityBonusFor(code);
       const sizeScoreBonus = getSizeAbilityScoreBonus(code);
       const levelScoreBonus = getLevelAbilityBoostFor(code);
+      const equipBonus = getEquipAbilityBonusFor(code);
       const min = num(scoreEl.min || 1);
       const max = num(scoreEl.max || 50);
 
       if (scoreEl.dataset.baseScore === undefined) {
         const currentVisible = num(scoreEl.value);
-        scoreEl.dataset.baseScore = String(currentVisible - mythicBonus - sizeScoreBonus - levelScoreBonus);
+        scoreEl.dataset.baseScore = String(currentVisible - mythicBonus - sizeScoreBonus - levelScoreBonus - equipBonus);
       }
 
       const base = num(scoreEl.dataset.baseScore);
-      const total = clamp(base + mythicBonus + sizeScoreBonus + levelScoreBonus, min, max);
+      const total = clamp(base + mythicBonus + sizeScoreBonus + levelScoreBonus + equipBonus, min, max);
       const nextValue = String(total);
 
       if (scoreEl.value !== nextValue) {
@@ -5317,7 +5950,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const mythicBonus = getMythicAbilityBonusFor(code);
     const sizeScoreBonus = getSizeAbilityScoreBonus(code);
     const levelScoreBonus = getLevelAbilityBoostFor(code);
-    scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus - levelScoreBonus);
+    const equipBonus = getEquipAbilityBonusFor(code);
+    scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus - levelScoreBonus - equipBonus);
   }
 
   function syncAllAbilityBaseFromVisibleScores() {
@@ -5328,7 +5962,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const mythicBonus = getMythicAbilityBonusFor(code);
       const sizeScoreBonus = getSizeAbilityScoreBonus(code);
       const levelScoreBonus = getLevelAbilityBoostFor(code);
-      scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus - levelScoreBonus);
+      const equipBonus = getEquipAbilityBonusFor(code);
+      scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus - levelScoreBonus - equipBonus);
     });
   }
 
@@ -5372,11 +6007,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const mythicBonus = getMythicAbilityBonusFor(code);
         const sizeScoreBonus = getSizeAbilityScoreBonus(code);
         const levelScoreBonus = getLevelAbilityBoostFor(code);
+        const equipBonus = getEquipAbilityBonusFor(code);
         const desired = scoreFromPfMod(num(t.value));
         const min = num(scoreEl.min || 1);
         const max = num(scoreEl.max || 50);
         const total = clamp(desired, min, max);
-        scoreEl.dataset.baseScore = String(total - mythicBonus - sizeScoreBonus - levelScoreBonus);
+        scoreEl.dataset.baseScore = String(total - mythicBonus - sizeScoreBonus - levelScoreBonus - equipBonus);
         scoreEl.value = String(total);
         updateAbilityBlock(stat);
       }
@@ -5442,12 +6078,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const classEl = document.getElementById("spellcaster-class");
     const abilityEl = document.getElementById("spellcasting-ability");
     const modEl = document.getElementById("spellcasting-ability-mod");
+    const noteEl = document.getElementById("spellcasting-paladin-variant-note");
+    const levelEl = document.getElementById("spellcaster-level");
     if (!classEl || !abilityEl || !modEl) return;
 
     const cls = String(classEl.value || "").trim();
     const abilityCode = SPELLCASTING_ABILITY_BY_CLASS[cls] || "";
     abilityEl.value = abilityCode || "—";
     modEl.value = abilityCode ? fmtSigned(getAbilityModByCode(abilityCode)) : "+0";
+
+    const paladinConfig = getPaladinVariantState();
+    const paladinCastingDisabled = cls === "Paladino" && paladinConfig.archetype === "tempered_champion";
+    if (levelEl) levelEl.disabled = paladinCastingDisabled;
+    if (noteEl) {
+      if (paladinCastingDisabled) {
+        noteEl.hidden = false;
+        noteEl.textContent =
+          paladinConfig.oath === "oath_of_vengeance"
+            ? "Tempered Champion sostituisce gli incantesimi del paladino. Anche gli oath spells di Oath of Vengeance restano solo informativi."
+            : "Tempered Champion sostituisce gli incantesimi del paladino con Arma Sacra e Specializzazione Arma Divina.";
+      } else {
+        noteEl.hidden = true;
+        noteEl.textContent = "";
+      }
+    }
   }
 
   function getSpellApi() {
@@ -5457,6 +6111,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function getMaxCastableSpellLevel() {
     const className = String(document.getElementById("spellcaster-class")?.value || "").trim();
     if (!className) return 9;
+    if (className === "Paladino" && getPaladinVariantState().archetype === "tempered_champion") return -1;
     const li = num(document.getElementById("spellcaster-level")?.value);
     const spellApi = getSpellApi();
     if (!spellApi || typeof spellApi.getMaxLevelByClass !== "function") return 9;
@@ -6044,6 +6699,123 @@ document.addEventListener("DOMContentLoaded", () => {
       .reduce((sum, entry) => sum + Math.max(0, Math.trunc(num(entry.level))), 0);
   }
 
+  function getTemperedChampionSacredWeaponDie(level) {
+    const paladinLevel = Math.max(0, Math.trunc(num(level)));
+    if (paladinLevel < 4) return "—";
+    if (paladinLevel >= 20) return "2d8";
+    if (paladinLevel >= 15) return "2d6";
+    if (paladinLevel >= 10) return "1d10";
+    if (paladinLevel >= 5) return "1d8";
+    return "1d6";
+  }
+
+  function getPaladinVariantState() {
+    const archetypeEl = document.getElementById("class-features-paladin-archetype");
+    const oathEl = document.getElementById("class-features-paladin-oath");
+    const channelWrathEl = document.getElementById("class-features-paladin-channel-wrath");
+    const paladinLevel = getPaladinClassLevel();
+    const charismaMod = getAbilityModByCode("CAR");
+    const archetype = String(archetypeEl?.value || "standard").trim() || "standard";
+    const oath = String(oathEl?.value || "none").trim() || "none";
+    const baseSmiteUses = paladinLevel > 0 ? Math.max(1, Math.floor(paladinLevel / 2)) : 0;
+    const layOnHandsUses = paladinLevel >= 2 ? Math.max(0, Math.floor(paladinLevel / 2) + charismaMod) : 0;
+    const channelWrathMax = oath === "oath_of_vengeance" && paladinLevel >= 4 ? Math.floor(layOnHandsUses / 2) : 0;
+    const extraSmiteRaw = Math.max(0, Math.trunc(num(channelWrathEl?.value)));
+    const channelWrathExtra = Math.min(extraSmiteRaw, channelWrathMax);
+    const totalSmiteUses = baseSmiteUses + channelWrathExtra;
+
+    if (channelWrathEl) {
+      channelWrathEl.max = String(channelWrathMax);
+      if (String(channelWrathExtra) !== String(channelWrathEl.value)) channelWrathEl.value = String(channelWrathExtra);
+    }
+
+    const divineBondLabel =
+      paladinLevel < 5
+        ? "—"
+        : archetype === "tempered_champion"
+          ? "Solo arma favorita; 1 LOH se esaurito"
+          : "Arma Sacra / Cavalcatura Speciale";
+    const justiceLabel =
+      oath === "oath_of_vengeance" && paladinLevel >= 11
+        ? "Powerful Justice"
+        : paladinLevel >= 11
+          ? "Aura di Giustizia"
+          : "—";
+
+    return {
+      paladinLevel,
+      charismaMod,
+      archetype,
+      oath,
+      baseSmiteUses,
+      layOnHandsUses,
+      channelWrathMax,
+      channelWrathExtra,
+      totalSmiteUses,
+      sacredWeaponDie: archetype === "tempered_champion" ? getTemperedChampionSacredWeaponDie(paladinLevel) : "—",
+      divineBondLabel,
+      justiceLabel,
+    };
+  }
+
+  function getPaladinFeaturesByLevel(config = getPaladinVariantState()) {
+    const baseData = getBaseClassFeatureData("Paladino");
+    const featuresByLevel = { ...(baseData?.featuresByLevel || {}) };
+
+    if (config.archetype === "tempered_champion") {
+      const level4Base = String(featuresByLevel[4] || "")
+        .replace("Incantesimi", "")
+        .replace(";;", ";")
+        .replace(/;\s*$/, "")
+        .trim();
+      featuresByLevel[4] = [level4Base, "Specializzazione Arma Divina", "Arma Sacra"]
+        .filter((part) => String(part || "").trim())
+        .join("; ");
+      [8, 12, 16, 20].forEach((lvl) => {
+        const text = String(featuresByLevel[lvl] || "").trim();
+        const parts = text && text !== "—" && text !== "-" ? [text] : [];
+        parts.push("Specializzazione Arma Divina");
+        featuresByLevel[lvl] = parts.join("; ");
+      });
+      if (config.paladinLevel >= 5 || String(featuresByLevel[5] || "").trim()) {
+        featuresByLevel[5] = "Vincolo Divino (solo arma)";
+      }
+    }
+
+    if (config.oath === "oath_of_vengeance") {
+      featuresByLevel[4] = String(featuresByLevel[4] || "")
+        .replace("Incanalare Energia", "Channel Wrath")
+        .replace(/;\s*;/g, ";");
+      featuresByLevel[11] = String(featuresByLevel[11] || "").replace("Aura di Giustizia", "Powerful Justice");
+    }
+
+    return featuresByLevel;
+  }
+
+  function getPaladinFeatureDetailText(featureName, config = getPaladinVariantState()) {
+    const feature = String(featureName || "").trim();
+    if (!feature || feature === "—" || feature === "-") return "—";
+    if (feature === "Specializzazione Arma Divina") {
+      return "Al 4° e ogni 4 livelli successivi ottieni un talento bonus legato all'arma favorita della divinità e conti i livelli da paladino come livelli da guerriero per i prerequisiti.";
+    }
+    if (feature === "Arma Sacra") {
+      return `Il danno base dell'arma favorita scala come Sacred Weapon del warpriest. Valore attuale: ${config.sacredWeaponDie}.`;
+    }
+    if (feature === "Vincolo Divino (solo arma)") {
+      return "Devi scegliere il legame con l'arma favorita della divinità. Se hai esaurito gli usi giornalieri, puoi spenderne 1 di Imposizione delle Mani per attivarlo.";
+    }
+    if (feature === "Channel Wrath") {
+      return "Dal 4° livello puoi spendere 2 usi di Imposizione delle Mani per ottenere 1 uso extra di Punire il Male per quella giornata.";
+    }
+    if (feature === "Powerful Justice") {
+      return "Dall'11° livello puoi spendere 1 uso di Punire il Male per condividere agli alleati entro 10 ft solo il bonus ai danni contro il bersaglio.";
+    }
+    if (feature === "Incantesimi" && config.archetype === "tempered_champion") {
+      return "Tempered Champion sostituisce il lancio di incantesimi con Specializzazione Arma Divina e Arma Sacra.";
+    }
+    return getClassFeatureDetailText(feature);
+  }
+
   function getPaladinSmiteCombatState() {
     const panelEl = document.getElementById("combat-paladin-smite-panel");
     const attackPanelEl = document.getElementById("combat-paladin-smite-attack-panel");
@@ -6052,8 +6824,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const attackEl = document.getElementById("combat-paladin-smite-attack");
     const acEl = document.getElementById("combat-paladin-smite-ac");
     const damageEl = document.getElementById("combat-paladin-smite-damage");
-    const paladinLevel = getPaladinClassLevel();
-    const charismaBonus = getAbilityModByCode("CAR");
+    const paladinConfig = getPaladinVariantState();
+    const paladinLevel = paladinConfig.paladinLevel;
+    const charismaBonus = paladinConfig.charismaMod;
     const available = paladinLevel > 0;
 
     if (panelEl) panelEl.hidden = !available;
@@ -6333,36 +7106,44 @@ document.addEventListener("DOMContentLoaded", () => {
     const hitRow = document.createElement("tr");
     hitRow.className = "attack-row attack-row-extra";
     hitRow.innerHTML = `
-      <td><input class="atk-name" type="text" placeholder="Es. Arco lungo +1" /></td>
-      <td>
-        <select class="select atk-type">
-          <option value="melee" selected>Mischia (FOR)</option>
-          <option value="ranged">Distanza (DES)</option>
-        </select>
+      <td class="attack-cell attack-cell-identity">
+        <div class="attack-identity-stack">
+          <input class="atk-name" type="text" placeholder="Es. Arco lungo +1" />
+          <select class="select atk-type">
+            <option value="melee" selected>Mischia (FOR)</option>
+            <option value="ranged">Distanza (DES)</option>
+          </select>
+        </div>
       </td>
-      <td>
-        <select class="select atk-sequence">
-          <option value="0" selected>1°</option>
-        </select>
+      <td class="attack-cell attack-cell-hit">
+        <div class="attack-hit-grid">
+          <select class="select atk-sequence">
+            <option value="0" selected>1°</option>
+          </select>
+          <select class="select atk-magic-bonus">
+            <option value="0" selected>+0</option>
+            <option value="1">+1</option>
+            <option value="2">+2</option>
+            <option value="3">+3</option>
+            <option value="4">+4</option>
+            <option value="5">+5</option>
+          </select>
+          <input class="small atk-row-misc" type="number" step="1" value="0" />
+        </div>
       </td>
-      <td>
-        <select class="select atk-magic-bonus">
-          <option value="0" selected>+0</option>
-          <option value="1">+1</option>
-          <option value="2">+2</option>
-          <option value="3">+3</option>
-          <option value="4">+4</option>
-          <option value="5">+5</option>
-        </select>
+      <td class="attack-cell attack-cell-total"><input class="small atk-total" type="text" value="+0" readonly /></td>
+      <td class="attack-cell attack-cell-actions">
+        <div class="attack-roll-line attack-roll-line-inline">
+          <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
+          <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
+        </div>
       </td>
-      <td><input class="small atk-row-misc" type="number" step="1" value="0" /></td>
-      <td><input class="small atk-total" type="text" value="+0" readonly /></td>
     `;
 
     const dmgRow = document.createElement("tr");
     dmgRow.className = "attack-row-dmg attack-row-dmg-extra";
     dmgRow.innerHTML = `
-      <td colspan="6">
+      <td colspan="4">
         <div class="attack-dmg-line">
           <div class="attack-main">
             <div class="attack-groups">
@@ -6398,37 +7179,36 @@ document.addEventListener("DOMContentLoaded", () => {
                   </select>
                 </div>
               </div>
+              <div class="attack-group attack-group-options">
+                <span class="attack-subtitle">Opzioni</span>
+                <div class="attack-flags">
+                  <label class="attack-flag atk-melee-only">
+                    <input class="atk-twohands" type="checkbox" />
+                    2 mani
+                  </label>
+                  <label class="attack-flag atk-melee-only">
+                    <input class="atk-power-attack" type="checkbox" />
+                    Attacco Poderoso
+                  </label>
+                  <label class="attack-flag atk-melee-only">
+                    <input class="atk-furious-focus" type="checkbox" />
+                    Furia Focalizzata
+                  </label>
+                  <label class="attack-flag atk-ranged-only">
+                    <input class="atk-deadly-aim" type="checkbox" />
+                    Mira Letale
+                  </label>
+                  <label class="attack-flag atk-ranged-only">
+                    <input class="atk-rapid-shot" type="checkbox" />
+                    Tiro Rapido
+                  </label>
+                  <label class="attack-flag atk-ranged-only">
+                    <input class="atk-manyshot" type="checkbox" />
+                    Tiro Multiplo
+                  </label>
+                </div>
+              </div>
             </div>
-            <div class="attack-flags">
-              <label class="attack-flag atk-melee-only">
-                <input class="atk-twohands" type="checkbox" />
-                2 mani
-              </label>
-              <label class="attack-flag atk-melee-only">
-                <input class="atk-power-attack" type="checkbox" />
-                Attacco Poderoso
-              </label>
-              <label class="attack-flag atk-melee-only">
-                <input class="atk-furious-focus" type="checkbox" />
-                Furia Focalizzata
-              </label>
-              <label class="attack-flag atk-ranged-only">
-                <input class="atk-deadly-aim" type="checkbox" />
-                Mira Letale
-              </label>
-              <label class="attack-flag atk-ranged-only">
-                <input class="atk-rapid-shot" type="checkbox" />
-                Tiro Rapido
-              </label>
-              <label class="attack-flag atk-ranged-only">
-                <input class="atk-manyshot" type="checkbox" />
-                Tiro Multiplo
-              </label>
-            </div>
-          </div>
-          <div class="attack-roll-line">
-            <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
-            <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
           </div>
         </div>
       </td>
@@ -7064,7 +7844,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return { key: "paladino_merce", options: CLASS_FEATURE_CHOICE_OPTIONS.paladino_merce };
     }
     if (cls === "Paladino" && feature.startsWith("Vincolo Divino")) {
-      return { key: "paladino_vincolo_divino", options: CLASS_FEATURE_CHOICE_OPTIONS.paladino_vincolo_divino };
+      const paladinConfig = getPaladinVariantState();
+      return {
+        key: "paladino_vincolo_divino",
+        options:
+          paladinConfig.archetype === "tempered_champion"
+            ? ["Arma Sacra"]
+            : CLASS_FEATURE_CHOICE_OPTIONS.paladino_vincolo_divino,
+      };
     }
 
     if (cls === "Oracolo" && feature.startsWith("Maledizione")) {
@@ -7168,18 +7955,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateClassFeaturesTab() {
     const selectEl = document.getElementById("class-features-class");
-    const levelEl = document.getElementById("class-features-level");
     const paladinSmiteFieldEl = document.getElementById("class-features-paladin-smite-field");
     const paladinSmiteEl = document.getElementById("class-features-paladin-smite");
-    const babEl = document.getElementById("class-features-bab");
-    const hitDieEl = document.getElementById("class-features-hit-die");
-    const saveEl = document.getElementById("class-features-save-progression");
-    const currentEl = document.getElementById("class-features-current");
-    const skillPointsEl = document.getElementById("class-features-skill-points");
-    const skillsEl = document.getElementById("class-features-class-skills");
+    const paladinArchetypeFieldEl = document.getElementById("class-features-paladin-archetype-field");
+    const paladinOathFieldEl = document.getElementById("class-features-paladin-oath-field");
+    const paladinLohFieldEl = document.getElementById("class-features-paladin-loh-field");
+    const paladinChannelWrathFieldEl = document.getElementById("class-features-paladin-channel-wrath-field");
+    const paladinSacredWeaponFieldEl = document.getElementById("class-features-paladin-sacred-weapon-field");
+    const paladinJusticeFieldEl = document.getElementById("class-features-paladin-justice-field");
+    const paladinVariantNotesFieldEl = document.getElementById("class-features-paladin-variant-notes-field");
+    const paladinLohEl = document.getElementById("class-features-paladin-loh");
+    const paladinChannelWrathEl = document.getElementById("class-features-paladin-channel-wrath");
+    const paladinSacredWeaponEl = document.getElementById("class-features-paladin-sacred-weapon");
+    const paladinJusticeEl = document.getElementById("class-features-paladin-justice");
+    const paladinVariantNotesEl = document.getElementById("class-features-paladin-variant-notes");
     const summaryBody = document.getElementById("class-features-summary-body");
     const detailBody = document.getElementById("class-features-detail-body");
-    if (!selectEl || !levelEl || !paladinSmiteFieldEl || !paladinSmiteEl || !babEl || !hitDieEl || !saveEl || !currentEl || !skillPointsEl || !skillsEl || !summaryBody || !detailBody) return;
+    if (!selectEl || !paladinSmiteFieldEl || !paladinSmiteEl || !summaryBody || !detailBody) return;
 
     const supportedClasses = Object.keys(BASE_CLASS_FEATURES_DATA);
     const classEntries = getClassEntries();
@@ -7213,34 +8005,44 @@ document.addEventListener("DOMContentLoaded", () => {
     const data =
       window.PF1EData?.tables?.classFeatures?.getByClass?.(selectedClass) ||
       getBaseClassFeatureData(selectedClass);
-    const babApi = getBabApi();
-    const hpApi = getHitPointApi();
-    const skillApi = getSkillPointApi();
-    const babKey = String(babApi?.getProgressionByClass?.(selectedClass) || "").trim();
-    const hitDie = Math.max(0, Math.trunc(num(hpApi?.getHitDieByClass?.(selectedClass))));
-    const skillPoints = Math.max(0, Math.trunc(num(skillApi?.getPointsByClass?.(selectedClass))));
-    const saveProg = BASE_CLASS_SAVE_PROGRESSION[selectedClass] || null;
-    const classSkills = CLASS_SKILLS[selectedClass] || [];
+    const isPaladin = selectedClass === "Paladino";
+    const paladinConfig = getPaladinVariantState();
+    const paladinFeatures = isPaladin ? getPaladinFeaturesByLevel(paladinConfig) : null;
 
-    levelEl.value = String(classLevel);
-    paladinSmiteFieldEl.hidden = selectedClass !== "Paladino";
-    paladinSmiteEl.value = selectedClass === "Paladino" && classLevel > 0
-      ? String(Math.max(1, Math.floor(classLevel / 2)))
-      : "—";
-    babEl.value = babKey ? formatBabProgressionLabel(babKey) : "—";
-    hitDieEl.value = hitDie > 0 ? `d${hitDie}` : "—";
-    saveEl.value = saveProg ? formatSaveProgressionLabel(saveProg) : "—";
-    skillPointsEl.value = skillPoints > 0 ? String(skillPoints) : "—";
-    skillsEl.value = classSkills.map((name) => String(name || "").trim()).filter(Boolean).join(", ");
-    const currentFeatures = String(data?.[classLevel] || data?.featuresByLevel?.[classLevel] || "—");
-    currentEl.value = classLevel > 0 ? currentFeatures : "Imposta il livello personaggio per evidenziare la riga corrente.";
-
+    paladinSmiteFieldEl.hidden = !isPaladin;
+    if (paladinArchetypeFieldEl) paladinArchetypeFieldEl.hidden = !isPaladin;
+    if (paladinOathFieldEl) paladinOathFieldEl.hidden = !isPaladin;
+    if (paladinLohFieldEl) paladinLohFieldEl.hidden = !isPaladin;
+    if (paladinChannelWrathFieldEl) paladinChannelWrathFieldEl.hidden = !isPaladin || paladinConfig.oath !== "oath_of_vengeance" || classLevel < 4;
+    if (paladinSacredWeaponFieldEl) paladinSacredWeaponFieldEl.hidden = !isPaladin || paladinConfig.archetype !== "tempered_champion";
+    if (paladinJusticeFieldEl) paladinJusticeFieldEl.hidden = !isPaladin;
+    if (paladinVariantNotesFieldEl) paladinVariantNotesFieldEl.hidden = !isPaladin;
+    paladinSmiteEl.value = isPaladin && classLevel > 0 ? String(paladinConfig.totalSmiteUses) : "—";
+    if (paladinLohEl) paladinLohEl.value = isPaladin && classLevel >= 2 ? String(paladinConfig.layOnHandsUses) : "—";
+    if (paladinChannelWrathEl && (!isPaladin || paladinConfig.oath !== "oath_of_vengeance" || classLevel < 4)) paladinChannelWrathEl.value = "0";
+    if (paladinSacredWeaponEl) paladinSacredWeaponEl.value = isPaladin && paladinConfig.archetype === "tempered_champion" ? paladinConfig.sacredWeaponDie : "—";
+    if (paladinJusticeEl) paladinJusticeEl.value = isPaladin ? paladinConfig.justiceLabel : "—";
+    if (paladinVariantNotesEl) {
+      const notes = [];
+      if (isPaladin && paladinConfig.archetype === "tempered_champion") {
+        notes.push(`Tempered Champion: niente Incantesimi, Arma Sacra ${paladinConfig.sacredWeaponDie}, Vincolo Divino solo arma, talenti bonus al 4°/8°/12°/16°/20°.`);
+      }
+      if (isPaladin && paladinConfig.oath === "oath_of_vengeance") {
+        notes.push(`Oath of Vengeance: Channel Wrath concede Smite extra spendendo 2 Imposizioni delle Mani (max ${paladinConfig.channelWrathMax}).`);
+        if (classLevel >= 11) notes.push("Aura di Giustizia è sostituita da Powerful Justice.");
+      }
+      if (isPaladin && paladinConfig.archetype === "tempered_champion" && paladinConfig.oath === "oath_of_vengeance") {
+        notes.push("Gli oath spells restano solo informativi perché il Tempered Champion sostituisce il casting del paladino.");
+      }
+      paladinVariantNotesEl.value = notes.length ? notes.join(" ") : "Paladino standard.";
+    }
     summaryBody.innerHTML = "";
     detailBody.innerHTML = "";
-    if (data) {
-      for (let level = 1; level <= 20; level++) {
+    if (data || isPaladin) {
+      const maxDisplayedLevel = Math.max(1, classLevel);
+      for (let level = 1; level <= maxDisplayedLevel; level++) {
         const tr = document.createElement("tr");
-        const featureText = String(data[level] || data.featuresByLevel?.[level] || "—");
+        const featureText = String(isPaladin ? paladinFeatures?.[level] || "—" : data[level] || data.featuresByLevel?.[level] || "—");
         const featureNames = featureText
           .split(";")
           .map((name) => String(name || "").trim())
@@ -7283,7 +8085,7 @@ document.addEventListener("DOMContentLoaded", () => {
           trDetail.innerHTML = `
             <td>${level}</td>
             <td>${featureName}</td>
-            <td>${getClassFeatureDetailText(featureName)}</td>
+            <td>${isPaladin ? getPaladinFeatureDetailText(featureName, paladinConfig) : getClassFeatureDetailText(featureName)}</td>
             <td>${choiceCell}</td>
           `;
           detailBody.appendChild(trDetail);
@@ -8316,37 +9118,60 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.trunc(getAbilityModByCode("CAR"));
   }
 
-  function syncSaveBaseWithoutDivineGrace(saveEl) {
-    if (!saveEl) return;
-    const applied = parseSignedInt(saveEl.dataset.appliedDivineGraceBonus || "0");
-    const current = parseSignedInt(saveEl.value);
-    saveEl.dataset.baseWithoutDivineGrace = String(current - applied);
+  function getAllSaveProgressionEntries() {
+    const baseEntries = getClassEntries()
+      .map((entry) => ({
+        level: Math.max(0, Math.trunc(num(entry.level))),
+        saves: BASE_CLASS_SAVE_PROGRESSION[entry.className] || null,
+      }))
+      .filter((entry) => entry.level > 0 && entry.saves);
+    const prestigeEntry = getPrestigeEntry();
+    if (prestigeEntry?.level > 0 && prestigeEntry?.data?.saves) {
+      baseEntries.push({
+        level: Math.max(0, Math.trunc(num(prestigeEntry.level))),
+        saves: prestigeEntry.data.saves,
+      });
+    }
+    return baseEntries;
   }
 
-  function applyPaladinDivineGraceToSaves() {
+  function getBaseSaveTotals() {
+    const totals = { fort: 0, ref: 0, will: 0 };
+    getAllSaveProgressionEntries().forEach((entry) => {
+      totals.fort += getSaveBonusByProgression(entry.level, entry.saves.fort);
+      totals.ref += getSaveBonusByProgression(entry.level, entry.saves.ref);
+      totals.will += getSaveBonusByProgression(entry.level, entry.saves.will);
+    });
+    return totals;
+  }
+
+  function recalcSavingThrows() {
+    const baseTotals = getBaseSaveTotals();
     const divineGraceBonus = getPaladinDivineGraceBonus();
-    const saveIds = ["save-fort", "save-ref", "save-will"];
-    let changed = false;
+    const mappings = [
+      { key: "fort", totalId: "save-fort", baseId: "save-fort-base", miscId: "save-fort-misc", abilityCode: "COS" },
+      { key: "ref", totalId: "save-ref", baseId: "save-ref-base", miscId: "save-ref-misc", abilityCode: "DES" },
+      { key: "will", totalId: "save-will", baseId: "save-will-base", miscId: "save-will-misc", abilityCode: "SAG" },
+    ];
 
-    saveIds.forEach((id) => {
-      const saveEl = document.getElementById(id);
-      if (!saveEl) return;
+    mappings.forEach(({ key, totalId, baseId, miscId, abilityCode }) => {
+      const totalEl = document.getElementById(totalId);
+      const baseEl = document.getElementById(baseId);
+      const miscEl = document.getElementById(miscId);
+      if (!totalEl || !baseEl || !miscEl) return;
 
-      if (saveEl.dataset.baseWithoutDivineGrace === undefined) {
-        syncSaveBaseWithoutDivineGrace(saveEl);
-      }
+      const base = Math.max(0, Math.trunc(baseTotals[key] || 0));
+      const abilityMod = Math.trunc(getAbilityModByCode(abilityCode));
+      const misc = Math.trunc(num(miscEl.value));
+      const total = base + abilityMod + misc + divineGraceBonus;
 
-      const base = parseSignedInt(saveEl.dataset.baseWithoutDivineGrace || "0");
-      const nextValue = fmtSigned(base + divineGraceBonus);
-      if (saveEl.value !== nextValue) {
-        saveEl.value = nextValue;
-        state[keyFor(saveEl)] = nextValue;
-        changed = true;
-      }
-      saveEl.dataset.appliedDivineGraceBonus = String(divineGraceBonus);
+      baseEl.value = fmtSigned(base);
+      totalEl.value = fmtSigned(total);
+      state[keyFor(baseEl)] = baseEl.value;
+      state[keyFor(totalEl)] = totalEl.value;
     });
 
-    if (changed) saveState(state);
+    saveState(state);
   }
 
   /* =========================
@@ -8377,6 +9202,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // PF
     recalcHitPoints();
 
+    // TS
+    recalcSavingThrows();
+
     // incantesimi (caratteristica chiave + mod)
     updateSpellcastingClassFields();
     updateSpellLevelsVisibility();
@@ -8384,8 +9212,6 @@ document.addEventListener("DOMContentLoaded", () => {
     recalcAllSpellSlots();
     recalcAllSpellRows();
 
-    // Paladino (Grazia Divina): aggiunge CAR ai TS oltre il 2° livello
-    applyPaladinDivineGraceToSaves();
   }
 
   function initCollapsibleCards() {
@@ -8846,6 +9672,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       syncClassSummaryFields();
+      updateClassFeaturesTab();
       applyAutoClassSkills();
       applyAutoBabFromClass();
       recalcHitPoints();
@@ -8863,6 +9690,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       syncClassSummaryFields();
+      updateClassFeaturesTab();
       applyAutoClassSkills();
       applyAutoBabFromClass();
       recalcHitPoints();
@@ -8870,20 +9698,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  ["class-features-class"].forEach((id) => {
+  [
+    "class-features-class",
+    "class-features-paladin-archetype",
+    "class-features-paladin-oath",
+    "class-features-paladin-channel-wrath",
+  ].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener("input", updateClassFeaturesTab);
-    el.addEventListener("change", updateClassFeaturesTab);
+    const onPaladinProfileChanged = () => {
+      updateClassFeaturesTab();
+      updateSpellcastingClassFields();
+      updateSpellLevelsVisibility();
+      recalcAllSpellSlots();
+      recalcAllSpellRows();
+      recalcDerived();
+    };
+    el.addEventListener("input", onPaladinProfileChanged);
+    el.addEventListener("change", onPaladinProfileChanged);
   });
 
-  ["save-fort", "save-ref", "save-will"].forEach((id) => {
+  ["save-fort-misc", "save-ref-misc", "save-will-misc"].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
-    const onSaveChanged = () => {
-      syncSaveBaseWithoutDivineGrace(el);
-      applyPaladinDivineGraceToSaves();
-    };
+    const onSaveChanged = () => recalcSavingThrows();
     el.addEventListener("input", onSaveChanged);
     el.addEventListener("change", onSaveChanged);
   });
