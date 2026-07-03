@@ -1247,18 +1247,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getSurgeDieByTier(tier) {
-    if (tier >= 9) return "d12";
-    if (tier >= 6) return "d10";
-    if (tier >= 3) return "d8";
+    if (tier >= 10) return "d12";
+    if (tier >= 7) return "d10";
+    if (tier >= 4) return "d8";
     if (tier >= 1) return "d6";
     return "—";
   }
 
   function getSurgeReminderByTier(tier) {
     if (tier <= 0) return "Diventa mitico (Categoria 1) per ottenere il dado impulso.";
-    if (tier < 3) return "Impulso d6. Prossimo aumento a d8 alla Categoria 3.";
-    if (tier < 6) return "Impulso d8. Prossimo aumento a d10 alla Categoria 6.";
-    if (tier < 9) return "Impulso d10. Prossimo aumento a d12 alla Categoria 9.";
+    if (tier < 4) return "Impulso d6. Prossimo aumento a d8 alla Categoria 4.";
+    if (tier < 7) return "Impulso d8. Prossimo aumento a d10 alla Categoria 7.";
+    if (tier < 10) return "Impulso d10. Prossimo aumento a d12 alla Categoria 10.";
     return "Impulso d12 (massimo).";
   }
 
@@ -1473,6 +1473,87 @@ document.addEventListener("DOMContentLoaded", () => {
     return { bab, size, misc, str, dex, melee, ranged };
   }
 
+  const ATTACK_TYPE_OPTIONS = [
+    { value: "melee", label: "Mischia" },
+    { value: "ranged", label: "Distanza" },
+    { value: "natural", label: "Naturale" },
+    { value: "touch", label: "Contatto" },
+    { value: "ranged_touch", label: "Contatto a distanza" },
+  ];
+  const ATTACK_HANDLING_OPTIONS = [
+    { value: "one_handed", label: "Una mano" },
+    { value: "two_handed", label: "Due mani" },
+    { value: "off_hand", label: "Mano secondaria" },
+    { value: "ranged", label: "Arma a distanza" },
+    { value: "thrown", label: "Arma da lancio" },
+    { value: "natural_primary", label: "Naturale primaria" },
+    { value: "natural_secondary", label: "Naturale secondaria" },
+  ];
+  const ATTACK_DAMAGE_TYPES = [
+    { value: "tagliente", label: "Tagliente" },
+    { value: "perforante", label: "Perforante" },
+    { value: "contundente", label: "Contundente" },
+    { value: "energia", label: "Energia" },
+    { value: "misto", label: "Misto" },
+  ];
+  const ATTACK_PRESETS = [
+    {
+      name: "Spada lunga +2",
+      type: "melee",
+      handling: "two_handed",
+      babUsed: 11,
+      hitAbility: "FOR",
+      enhancementAttack: 2,
+      attackMisc: 0,
+      attackPenalty: 0,
+      sequenceIndex: 0,
+      diceCount: 1,
+      dieSize: 8,
+      damageAbility: "FOR",
+      damageAbilityMultiplier: 1.5,
+      enhancementDamage: 2,
+      damageMisc: 0,
+      critRange: 19,
+      critMult: 2,
+      rangeIncrement: "—",
+      damageType: "tagliente",
+      notes: "Arma a due mani; versatile al tavolo.",
+      addStrToRangedDamage: false,
+    },
+    {
+      name: "Arco lungo composito",
+      type: "ranged",
+      handling: "ranged",
+      babUsed: 11,
+      hitAbility: "DES",
+      enhancementAttack: 0,
+      attackMisc: 0,
+      attackPenalty: 0,
+      sequenceIndex: 0,
+      diceCount: 1,
+      dieSize: 8,
+      damageAbility: "FOR",
+      damageAbilityMultiplier: 1,
+      enhancementDamage: 0,
+      damageMisc: 0,
+      critRange: 20,
+      critMult: 3,
+      rangeIncrement: "33 m",
+      damageType: "perforante",
+      notes: "Arco composito: aggiunge FOR ai danni.",
+      addStrToRangedDamage: true,
+    },
+  ];
+
+  function runSafeUiStep(label, callback, fallbackValue = undefined) {
+    try {
+      return callback();
+    } catch (error) {
+      console.error(`[PF1E] ${label}`, error);
+      return fallbackValue;
+    }
+  }
+
   function syncAttackBaseTotals(attackVars = buildAttackBaseVariables()) {
     const meleeOut = document.getElementById("atk-melee-total");
     const rangedOut = document.getElementById("atk-ranged-total");
@@ -1480,41 +1561,161 @@ document.addEventListener("DOMContentLoaded", () => {
     if (rangedOut) rangedOut.value = fmtSigned(attackVars.ranged.total);
   }
 
-  function getAvailableAttackCount() {
-    const bab = Math.max(0, Math.trunc(num(document.getElementById("atk-bab")?.value)));
-    return Math.max(1, Math.floor(Math.max(0, bab - 1) / 5) + 1);
+  function readAttackAbilityModifier(code, customValue = 0) {
+    const normalized = String(code || "none").trim().toUpperCase();
+    if (normalized === "CUSTOM") return Math.trunc(num(customValue));
+    if (normalized === "NONE") return 0;
+    return Math.trunc(getAbilityModByCode(normalized));
   }
 
-  function buildAttackSequenceOptions() {
-    const count = getAvailableAttackCount();
-    const bab = Math.max(0, Math.trunc(num(document.getElementById("atk-bab")?.value)));
+  function getAttackAbilityLabel(code) {
+    const normalized = String(code || "NONE").trim().toUpperCase();
+    if (normalized === "FOR") return "Forza";
+    if (normalized === "DES") return "Destrezza";
+    return "Nessuna";
+  }
+
+  function getAutoHitAbilityCode(type) {
+    return type === "ranged" || type === "ranged_touch" ? "DES" : "FOR";
+  }
+
+  function getAutoDamageAbilityCode(profile) {
+    if (profile.isRanged && !profile.addsStrToRangedDamage) return "NONE";
+    return "FOR";
+  }
+
+  function getAutoDamageMultiplier(profile) {
+    if (profile.isRanged && !profile.addsStrToRangedDamage) return 0;
+    if (profile.isTwoHanded) return 1.5;
+    if (profile.isOffHand) return 0.5;
+    return 1;
+  }
+
+  function getQuickAttackModifiers() {
+    const mythicFeatEffects = getMythicCombatFeatEffects();
+    return {
+      powerAttack: !!document.getElementById("atk-quick-power-attack")?.checked,
+      mythicPowerAttack: mythicFeatEffects.powerAttack,
+      weaponFocus: !!document.getElementById("atk-quick-weapon-focus")?.checked,
+      morale: num(document.getElementById("atk-quick-morale")?.value),
+      sacred: num(document.getElementById("atk-quick-sacred")?.value),
+      luck: num(document.getElementById("atk-quick-luck")?.value),
+      competence: num(document.getElementById("atk-quick-competence")?.value),
+      defensivePenalty: Math.max(0, num(document.getElementById("atk-quick-defensive")?.value)),
+      twoWeaponPenalty: Math.max(0, num(document.getElementById("atk-quick-twf")?.value)),
+      smiteAttack: num(document.getElementById("atk-quick-smite-atk")?.value),
+      smiteDamage: num(document.getElementById("atk-quick-smite-dmg")?.value),
+      mythicAttack: num(document.getElementById("atk-quick-mythic-atk")?.value),
+      mythicDamage: num(document.getElementById("atk-quick-mythic-dmg")?.value),
+      globalMisc: num(document.getElementById("atk-misc")?.value),
+    };
+  }
+
+  function deriveAttackProfile(data) {
+    const type = String(data.type || "melee");
+    const handling = String(data.handling || "one_handed");
+    const isNatural = type === "natural";
+    const isTouch = type === "touch" || type === "ranged_touch";
+    const isRanged = type === "ranged" || type === "ranged_touch" || handling === "ranged" || handling === "thrown";
+    const isMelee = !isRanged || isNatural;
+    const isTwoHanded = handling === "two_handed";
+    const isOffHand = handling === "off_hand" || handling === "natural_secondary";
+    const isNaturalSecondary = handling === "natural_secondary";
+    const addsStrToRangedDamage = !!data.addStrToRangedDamage || handling === "thrown";
+    const iterativeAllowed = !isNatural;
+    return {
+      type,
+      handling,
+      isNatural,
+      isTouch,
+      isRanged,
+      isMelee,
+      isTwoHanded,
+      isOffHand,
+      isNaturalSecondary,
+      addsStrToRangedDamage,
+      iterativeAllowed,
+      canPowerAttack: isMelee && !isRanged,
+    };
+  }
+
+  function buildAttackSequenceOptionsForBab(babValue, profile = { iterativeAllowed: true }) {
+    const bab = Math.max(0, Math.trunc(num(babValue)));
+    const count = profile.iterativeAllowed ? Math.max(1, Math.floor(Math.max(0, bab - 1) / 5) + 1) : 1;
     const options = [];
     for (let i = 0; i < count; i++) {
       options.push({
         value: String(i),
         label: `${i + 1}°`,
         babValue: Math.max(0, bab - i * 5),
-        penalty: i * 5,
       });
     }
     return options;
   }
 
   function refreshAttackSequenceSelectors() {
-    const options = buildAttackSequenceOptions();
-    $$(".atk-sequence", attacksTbody || document).forEach((sel) => {
-      const current = String(sel.value || "0");
-      sel.innerHTML = "";
-      options.forEach((opt) => {
-        const option = document.createElement("option");
-        option.value = opt.value;
-        option.textContent = `${opt.label} (${fmtSigned(opt.babValue)})`;
-        if (opt.value === current) option.selected = true;
-        sel.appendChild(option);
-      });
-      if (![...sel.options].some((opt) => opt.value === current)) sel.value = "0";
-      sel.disabled = options.length <= 1;
-    });
+    if (!attacksTbody) return;
+    attacksTbody.querySelectorAll(".attack-row").forEach((row) => recalcAttackRow(row));
+  }
+
+  function calculateAbilityDamageBonus(data, profile) {
+    const abilityCode = String(data.damageAbility || "NONE");
+    const baseMod = readAttackAbilityModifier(abilityCode, 0);
+    if (abilityCode === "NONE") return 0;
+    return Math.floor(baseMod * num(data.damageAbilityMultiplier));
+  }
+
+  function calculatePowerAttackDamageBonus(data, quickMods, profile) {
+    if (!quickMods.powerAttack || !profile.canPowerAttack) return 0;
+    const step = computePowerAttackStep(data.babUsed);
+    const baseBonus = profile.isTwoHanded ? step * 3 : profile.isOffHand ? step : step * 2;
+    if (!quickMods.mythicPowerAttack) return baseBonus;
+    return baseBonus + Math.max(1, Math.trunc(getMythicTier()));
+  }
+
+  function calculateAttackDamageBonus(data, quickMods, profile) {
+    const abilityDamage = calculateAbilityDamageBonus(data, profile);
+    const powerAttackDamage = calculatePowerAttackDamageBonus(data, quickMods, profile);
+    let total = abilityDamage + num(data.enhancementDamage) + num(data.damageMisc) + quickMods.smiteDamage + quickMods.mythicDamage + powerAttackDamage;
+    return { total, abilityDamage };
+  }
+
+  function calculateAttackTotalToHit(data, quickMods, profile) {
+    const hitAbilityBonus = readAttackAbilityModifier(data.hitAbility, data.hitAbilityCustom);
+    let total =
+      num(data.babUsed) +
+      hitAbilityBonus +
+      getCurrentSizeMods().acAtk +
+      quickMods.globalMisc +
+      num(data.enhancementAttack) +
+      num(data.attackMisc) +
+      quickMods.morale +
+      quickMods.sacred +
+      quickMods.luck +
+      quickMods.competence +
+      quickMods.smiteAttack +
+      quickMods.mythicAttack;
+
+    if (quickMods.weaponFocus) total += 1;
+
+    let penalties =
+      num(data.attackPenalty) +
+      Math.max(0, Math.trunc(num(data.sequenceIndex))) * 5 +
+      quickMods.defensivePenalty +
+      quickMods.twoWeaponPenalty;
+
+    if (profile.isNaturalSecondary) penalties += 5;
+    if (quickMods.powerAttack && profile.canPowerAttack) penalties += computePowerAttackStep(data.babUsed);
+
+    return { total: total - penalties, hitAbilityBonus, penalties };
+  }
+
+  function generateIterativeAttacks(totalToHit, babUsed, profile) {
+    if (!profile.iterativeAllowed) return fmtSigned(totalToHit);
+    const count = Math.max(1, Math.floor((Math.max(1, Math.trunc(num(babUsed))) - 1) / 5) + 1);
+    const bonuses = [];
+    for (let i = 0; i < count; i++) bonuses.push(fmtSigned(totalToHit - i * 5));
+    return bonuses.join("/");
   }
 
   function recalcCmbCmd() {
@@ -1563,50 +1764,99 @@ document.addEventListener("DOMContentLoaded", () => {
     return next?.classList?.contains("attack-row-dmg") ? next : null;
   }
 
-  function syncAttackRowDerivedFields(tr) {
-    if (!tr) return;
+  function readAttackRowData(tr) {
     const dmgRow = getAttackDamageRow(tr);
-    if (!dmgRow) return { attackPenalty: 0 };
-    const diceCount = dmgRow.querySelector(".atk-dice-count")?.value;
-    const dieSize = dmgRow.querySelector(".atk-die")?.value;
-    const type = tr.querySelector(".atk-type")?.value || "melee";
-    const isMelee = type === "melee";
-    const meleeOnly = Array.from(dmgRow.querySelectorAll(".atk-melee-only"));
-    meleeOnly.forEach((el) => {
-      el.hidden = !isMelee;
-      el.setAttribute("aria-hidden", String(!isMelee));
+    return {
+      name: String(tr.querySelector(".atk-name")?.value || "").trim(),
+      type: String(tr.querySelector(".atk-type")?.value || "melee"),
+      handling: String(tr.querySelector(".atk-handling")?.value || "one_handed"),
+      babUsed: Math.max(0, Math.trunc(num(tr.querySelector(".atk-bab-used")?.value || document.getElementById("atk-bab")?.value))),
+      enhancementAttack: num(tr.querySelector(".atk-enhancement-atk")?.value),
+      attackMisc: num(tr.querySelector(".atk-attack-misc")?.value),
+      attackPenalty: num(tr.querySelector(".atk-attack-penalty")?.value),
+      sequenceIndex: Math.max(0, Math.trunc(num(tr.querySelector(".atk-sequence")?.value))),
+      diceCount: Math.max(1, Math.trunc(num(dmgRow?.querySelector(".atk-dice-count")?.value))),
+      dieSize: Math.max(2, Math.trunc(num(dmgRow?.querySelector(".atk-die")?.value))),
+      enhancementDamage: num(dmgRow?.querySelector(".atk-enhancement-dmg")?.value),
+      damageMisc: num(dmgRow?.querySelector(".atk-damage-misc")?.value),
+      critRange: num(dmgRow?.querySelector(".atk-crit-range")?.value),
+      critMult: num(dmgRow?.querySelector(".atk-crit-mult")?.value),
+      rangeIncrement: String(dmgRow?.querySelector(".atk-range")?.value || "").trim(),
+      damageType: String(dmgRow?.querySelector(".atk-damage-type")?.value || "misto"),
+      notes: String(dmgRow?.querySelector(".atk-notes")?.value || "").trim(),
+      addStrToRangedDamage: !!dmgRow?.querySelector(".atk-ranged-str")?.checked,
+    };
+  }
+
+  function syncAttackRowDerivedFields(tr) {
+    if (!tr) return { attackTotal: 0 };
+    const dmgRow = getAttackDamageRow(tr);
+    if (!dmgRow) return { attackTotal: 0 };
+
+    const data = readAttackRowData(tr);
+    const quickMods = getQuickAttackModifiers();
+    const profile = deriveAttackProfile(data);
+    data.hitAbility = getAutoHitAbilityCode(data.type);
+    data.hitAbilityCustom = 0;
+    data.damageAbility = getAutoDamageAbilityCode(profile);
+    data.damageAbilityCustom = 0;
+    data.damageAbilityMultiplier = getAutoDamageMultiplier(profile);
+    const attackResult = calculateAttackTotalToHit(data, quickMods, profile);
+    const damageResult = calculateAttackDamageBonus(data, quickMods, profile);
+    const critFormula = formatCritFormula(data.critRange, data.critMult);
+    const damageFormula = formatDamageFormula(data.diceCount, data.dieSize, damageResult.total);
+    const iterativeFormula = generateIterativeAttacks(attackResult.total, data.babUsed, profile);
+
+    tr.dataset.dmgFormula = damageFormula;
+    tr.dataset.attackProfile = JSON.stringify({
+      type: data.type,
+      handling: data.handling,
+      damageType: data.damageType,
+      notes: data.notes,
     });
 
-    const twoHandsEl = dmgRow.querySelector(".atk-twohands");
-    const powerAttackEl = dmgRow.querySelector(".atk-power-attack");
-    const furiousFocusEl = dmgRow.querySelector(".atk-furious-focus");
+    const hitAbilityOut = tr.querySelector(".atk-hit-ability-bonus");
+    if (hitAbilityOut) hitAbilityOut.value = fmtSigned(attackResult.hitAbilityBonus);
+    const hitAbilityLabelOut = tr.querySelector(".atk-hit-ability-label");
+    if (hitAbilityLabelOut) hitAbilityLabelOut.value = getAttackAbilityLabel(data.hitAbility);
+    const penaltiesOut = tr.querySelector(".atk-penalties-total");
+    if (penaltiesOut) penaltiesOut.value = fmtSigned(-attackResult.penalties);
+    const iterativeOut = tr.querySelector(".atk-iterative-seq");
+    if (iterativeOut) iterativeOut.value = iterativeFormula;
+    const totalOut = tr.querySelector(".atk-total");
+    if (totalOut) totalOut.value = fmtSigned(attackResult.total);
 
-    const twoHands = isMelee && !!twoHandsEl?.checked;
-    const powerAttack = isMelee && !!powerAttackEl?.checked;
-    const furiousFocus = isMelee && !!furiousFocusEl?.checked;
-    const magicBonus = clamp(Math.trunc(num(tr.querySelector(".atk-magic-bonus")?.value)), 0, 5);
-
-    const strMod = getAbilityModByCode("FOR");
-    const strToDamage = isMelee ? (twoHands ? Math.trunc(strMod * 1.5) : strMod) : 0;
-    const bab = num(document.getElementById("atk-bab")?.value);
-    const paStep = computePowerAttackStep(bab);
-    const paDamage = powerAttack ? paStep * (twoHands ? 3 : 2) : 0;
-    const attackPenaltyRaw = powerAttack ? paStep : 0;
-    const attackPenalty = furiousFocus ? 0 : attackPenaltyRaw;
-
-    const dmgBonus = strToDamage + paDamage + magicBonus;
-    const critRange = dmgRow.querySelector(".atk-crit-range")?.value;
-    const critMult = dmgRow.querySelector(".atk-crit-mult")?.value;
-
-    const dmgFormula = formatDamageFormula(diceCount, dieSize, dmgBonus);
-    tr.dataset.dmgFormula = dmgFormula;
-
-    const dmgTotalOut = dmgRow.querySelector(".atk-dmg-total");
-    if (dmgTotalOut) dmgTotalOut.value = dmgFormula;
-
+    const damageAbilityOut = dmgRow.querySelector(".atk-damage-ability-bonus");
+    if (damageAbilityOut) damageAbilityOut.value = fmtSigned(damageResult.abilityDamage);
+    const damageAbilityLabelOut = dmgRow.querySelector(".atk-damage-ability-label");
+    if (damageAbilityLabelOut) damageAbilityLabelOut.value = getAttackAbilityLabel(data.damageAbility);
+    const damageTotalOut = dmgRow.querySelector(".atk-dmg-total");
+    if (damageTotalOut) damageTotalOut.value = damageFormula;
+    const damageSummaryOut = tr.querySelector(".atk-dmg-summary");
+    if (damageSummaryOut) damageSummaryOut.value = damageFormula;
     const critOut = dmgRow.querySelector(".atk-crit");
-    if (critOut) critOut.value = formatCritFormula(critRange, critMult);
-    return { attackPenalty };
+    if (critOut) critOut.value = critFormula;
+    const critSummaryOut = tr.querySelector(".atk-crit-summary");
+    if (critSummaryOut) critSummaryOut.value = critFormula;
+
+    const typeBadge = tr.querySelector(".attack-type-badge");
+    if (typeBadge) typeBadge.textContent = ATTACK_TYPE_OPTIONS.find((opt) => opt.value === data.type)?.label || "Attacco";
+
+    const rangedHelpers = dmgRow.querySelectorAll(".atk-ranged-helper");
+    rangedHelpers.forEach((el) => {
+      const shouldHide = !profile.isRanged;
+      el.hidden = shouldHide;
+      el.setAttribute("aria-hidden", String(shouldHide));
+    });
+
+    const meleeHelpers = dmgRow.querySelectorAll(".atk-melee-helper");
+    meleeHelpers.forEach((el) => {
+      const shouldHide = !profile.isMelee;
+      el.hidden = shouldHide;
+      el.setAttribute("aria-hidden", String(shouldHide));
+    });
+
+    return { attackTotal: attackResult.total, babUsed: data.babUsed };
   }
 
   function getCompAttackDamageRow(hitRow) {
@@ -1639,31 +1889,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function recalcAttackRow(tr, attackVars = buildAttackBaseVariables()) {
     if (!tr) return;
+    syncAttackBaseTotals(attackVars);
     const derived = syncAttackRowDerivedFields(tr);
-    const type = tr.querySelector(".atk-type")?.value || "melee";
-    const sequenceIndex = Math.max(0, Math.trunc(num(tr.querySelector(".atk-sequence")?.value)));
-    const magicBonus = clamp(Math.trunc(num(tr.querySelector(".atk-magic-bonus")?.value)), 0, 5);
-    const rowMisc = num(tr.querySelector(".atk-row-misc")?.value);
-    const base = type === "ranged" ? attackVars.ranged.total : attackVars.melee.total;
-    const iterativePenalty = sequenceIndex * 5;
-    const total = base + magicBonus + rowMisc - num(derived?.attackPenalty) - iterativePenalty;
-    const out = tr.querySelector(".atk-total");
-    if (out) out.value = fmtSigned(total);
+    const data = readAttackRowData(tr);
+    const profile = deriveAttackProfile(data);
+    const sequenceSel = tr.querySelector(".atk-sequence");
+    if (sequenceSel) {
+      const options = buildAttackSequenceOptionsForBab(data.babUsed, profile);
+      const current = String(sequenceSel.value || "0");
+      sequenceSel.innerHTML = "";
+      options.forEach((opt) => {
+        const option = document.createElement("option");
+        option.value = opt.value;
+        option.textContent = `${opt.label} (${fmtSigned(opt.babValue)})`;
+        if (opt.value === current) option.selected = true;
+        sequenceSel.appendChild(option);
+      });
+      if (![...sequenceSel.options].some((opt) => opt.value === current)) sequenceSel.value = "0";
+      sequenceSel.disabled = options.length <= 1;
+      if (Number(sequenceSel.value) !== data.sequenceIndex) return recalcAttackRow(tr, attackVars);
+    }
+    tr.dataset.attackType = data.type;
+    tr.dataset.attackTotal = String(derived.attackTotal);
   }
 
   function recalcAllAttacks() {
-    const attackVars = buildAttackBaseVariables();
+    const attackVars = runSafeUiStep("Calcolo base attacchi", () => buildAttackBaseVariables(), null);
+    if (!attackVars) return;
     syncAttackBaseTotals(attackVars);
     if (!attacksTbody) return;
-    attacksTbody.querySelectorAll(".attack-row").forEach((row) => recalcAttackRow(row, attackVars));
+    attacksTbody.querySelectorAll(".attack-row").forEach((row, index) => {
+      runSafeUiStep(`Ricalcolo attacco ${index + 1}`, () => recalcAttackRow(row, attackVars));
+    });
   }
 
   function buildFullAttackBonuses(totalToHit, babValue) {
     const total = Math.trunc(num(totalToHit));
     const bab = Math.max(0, Math.trunc(num(babValue)));
-    const attacksCount = Math.max(1, Math.floor((Math.max(1, bab) - 1) / 5) + 1);
     const bonuses = [];
-    for (let i = 0; i < attacksCount; i++) bonuses.push(total - 5 * i);
+    const count = Math.max(1, Math.floor((Math.max(1, bab) - 1) / 5) + 1);
+    for (let i = 0; i < count; i++) bonuses.push(total - 5 * i);
     return bonuses;
   }
 
@@ -1681,150 +1946,283 @@ document.addEventListener("DOMContentLoaded", () => {
     storageSet(ATK_STORAGE_KEY, String(Math.max(0, n)));
   }
 
-  function makeAttackRow() {
+  function buildOptionsMarkup(options, selectedValue) {
+    return options
+      .map((opt) => `<option value="${opt.value}"${String(opt.value) === String(selectedValue) ? " selected" : ""}>${opt.label}</option>`)
+      .join("");
+  }
+
+  function createAttackRowMarkup(keyPrefix, preset = {}) {
+    const attackName = preset.name || "";
+    const attackType = preset.type || "melee";
+    const handling = preset.handling || "one_handed";
+    const babUsed = preset.babUsed ?? Math.max(0, Math.trunc(num(document.getElementById("atk-bab")?.value)));
+    const enhancementAttack = preset.enhancementAttack ?? 0;
+    const attackMisc = preset.attackMisc ?? 0;
+    const attackPenalty = preset.attackPenalty ?? 0;
+    const sequenceIndex = preset.sequenceIndex ?? 0;
+    const diceCount = preset.diceCount ?? 1;
+    const dieSize = preset.dieSize ?? 8;
+    const enhancementDamage = preset.enhancementDamage ?? enhancementAttack;
+    const damageMisc = preset.damageMisc ?? 0;
+    const critRange = preset.critRange ?? 20;
+    const critMult = preset.critMult ?? 2;
+    const rangeIncrement = preset.rangeIncrement || "";
+    const damageType = preset.damageType || "misto";
+    const notes = preset.notes || "";
+    const addStrToRangedDamage = !!preset.addStrToRangedDamage;
+    const sequenceOptions = buildAttackSequenceOptionsForBab(babUsed, deriveAttackProfile({ type: attackType, handling }));
+
+    return {
+      hit: `
+        <td class="attack-card-cell" colspan="4">
+          <div class="attack-card-shell">
+            <div class="attack-card-summary">
+              <label class="attack-summary-chip">
+                <span>TpC</span>
+                <input class="small atk-total" data-key="${keyPrefix}:total" type="text" value="+0" readonly />
+              </label>
+              <label class="attack-summary-chip">
+                <span>Danni</span>
+                <input class="small atk-dmg-summary" data-key="${keyPrefix}:dmg_summary" type="text" value="1d8+0" readonly />
+              </label>
+              <label class="attack-summary-chip">
+                <span>Critico</span>
+                <input class="small atk-crit-summary" data-key="${keyPrefix}:crit_summary" type="text" value="20/x2" readonly />
+              </label>
+              <label class="attack-summary-chip">
+                <span>Iterativi</span>
+                <input class="small atk-iterative-seq" data-key="${keyPrefix}:iteratives" type="text" value="+0" readonly />
+              </label>
+            </div>
+            <div class="attack-card-top">
+              <input class="atk-name" data-key="${keyPrefix}:name" type="text" value="${attackName}" placeholder="Nome attacco" aria-label="Nome attacco" />
+              <div class="attack-card-actions">
+                <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + TpC">Tiro</button>
+                <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
+                <button type="button" class="roll-btn atk-full-roll-btn" title="Tira la sequenza completa">Full</button>
+              </div>
+            </div>
+            <div class="attack-card-config">
+              <label class="attack-mini-field">
+                <span>Tipo</span>
+                <select class="select atk-type" data-key="${keyPrefix}:type">${buildOptionsMarkup(ATTACK_TYPE_OPTIONS, attackType)}</select>
+              </label>
+              <label class="attack-mini-field">
+                <span>Impostazione</span>
+                <select class="select atk-handling" data-key="${keyPrefix}:handling">${buildOptionsMarkup(ATTACK_HANDLING_OPTIONS, handling)}</select>
+              </label>
+              <label class="attack-mini-field">
+                <span>BAB usato</span>
+                <input class="small atk-bab-used" data-key="${keyPrefix}:bab_used" type="number" step="1" value="${babUsed}" />
+              </label>
+              <label class="attack-mini-field">
+                <span>Sequenza</span>
+                <select class="select atk-sequence" data-key="${keyPrefix}:sequence">${buildOptionsMarkup(sequenceOptions, sequenceIndex)}</select>
+              </label>
+            </div>
+          </div>
+        </td>
+      `,
+      dmg: `
+        <td colspan="4">
+          <div class="attack-dmg-line">
+            <details class="attack-collapsible" open>
+              <summary>Tiro per colpire</summary>
+              <div class="attack-collapsible-body">
+                <div class="attack-field-grid">
+                  <label class="attack-detail-field">
+                    <span>Caratteristica usata</span>
+                    <input class="small atk-hit-ability-label" type="text" value="${getAttackAbilityLabel(getAutoHitAbilityCode(attackType))}" readonly />
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Bonus caratteristica</span>
+                    <input class="small atk-hit-ability-bonus" data-key="${keyPrefix}:hit_bonus" type="text" value="+0" readonly />
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Potenziamento TpC</span>
+                    <input class="small atk-enhancement-atk" data-key="${keyPrefix}:enh_atk" type="number" step="1" value="${enhancementAttack}" />
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Bonus vari TpC</span>
+                    <input class="small atk-attack-misc" data-key="${keyPrefix}:attack_misc" type="number" step="1" value="${attackMisc}" />
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Penalita applicate</span>
+                    <input class="small atk-attack-penalty" data-key="${keyPrefix}:attack_penalty" type="number" step="1" value="${attackPenalty}" />
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Penalita totali</span>
+                    <input class="small atk-penalties-total" data-key="${keyPrefix}:penalties_total" type="text" value="+0" readonly />
+                  </label>
+                </div>
+              </div>
+            </details>
+            <details class="attack-collapsible" open>
+              <summary>Danni</summary>
+              <div class="attack-collapsible-body">
+                <div class="attack-field-grid">
+                  <label class="attack-detail-field">
+                    <span>Dadi</span>
+                    <div class="attack-inline-pair">
+                      <input class="small atk-dice-count" data-key="${keyPrefix}:dice_count" type="number" min="1" step="1" value="${diceCount}" />
+                      <select class="select atk-die" data-key="${keyPrefix}:die_size">
+                        <option value="4"${dieSize === 4 ? " selected" : ""}>d4</option>
+                        <option value="6"${dieSize === 6 ? " selected" : ""}>d6</option>
+                        <option value="8"${dieSize === 8 ? " selected" : ""}>d8</option>
+                        <option value="10"${dieSize === 10 ? " selected" : ""}>d10</option>
+                        <option value="12"${dieSize === 12 ? " selected" : ""}>d12</option>
+                      </select>
+                    </div>
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Caratt. ai danni</span>
+                    <input class="small atk-damage-ability-label" type="text" value="${getAttackAbilityLabel(getAutoDamageAbilityCode(deriveAttackProfile({ type: attackType, handling, addStrToRangedDamage })))}" readonly />
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Bonus caratteristica</span>
+                    <input class="small atk-damage-ability-bonus" data-key="${keyPrefix}:dmg_ability_bonus" type="text" value="+0" readonly />
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Potenziamento danni</span>
+                    <input class="small atk-enhancement-dmg" data-key="${keyPrefix}:enh_dmg" type="number" step="1" value="${enhancementDamage}" />
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Bonus vari danni</span>
+                    <input class="small atk-damage-misc" data-key="${keyPrefix}:dmg_misc" type="number" step="1" value="${damageMisc}" />
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Danno totale</span>
+                    <input class="small atk-dmg-total" data-key="${keyPrefix}:dmg_total" type="text" value="1d8+0" readonly />
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Range critico</span>
+                    <select class="select atk-crit-range" data-key="${keyPrefix}:crit_range">
+                      <option value="20"${critRange === 20 ? " selected" : ""}>20</option>
+                      <option value="19"${critRange === 19 ? " selected" : ""}>19-20</option>
+                      <option value="18"${critRange === 18 ? " selected" : ""}>18-20</option>
+                      <option value="17"${critRange === 17 ? " selected" : ""}>17-20</option>
+                    </select>
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Moltiplicatore critico</span>
+                    <select class="select atk-crit-mult" data-key="${keyPrefix}:crit_mult">
+                      <option value="2"${critMult === 2 ? " selected" : ""}>x2</option>
+                      <option value="3"${critMult === 3 ? " selected" : ""}>x3</option>
+                      <option value="4"${critMult === 4 ? " selected" : ""}>x4</option>
+                    </select>
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Critico</span>
+                    <input class="small atk-crit" data-key="${keyPrefix}:crit_display" type="text" value="20/x2" readonly />
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Incremento gittata</span>
+                    <input class="small atk-range" data-key="${keyPrefix}:range" type="text" value="${rangeIncrement}" placeholder="Es. 9 m / 30 ft" />
+                  </label>
+                  <label class="attack-detail-field">
+                    <span>Tipo danno</span>
+                    <select class="select atk-damage-type" data-key="${keyPrefix}:damage_type">${buildOptionsMarkup(ATTACK_DAMAGE_TYPES, damageType)}</select>
+                  </label>
+                  <label class="attack-detail-field atk-ranged-helper"${!["ranged", "ranged_touch"].includes(attackType) ? " hidden" : ""}>
+                    <span>Eccezione danni a distanza</span>
+                    <label class="attack-inline-check">
+                      <input class="atk-ranged-str" data-key="${keyPrefix}:ranged_str" type="checkbox"${addStrToRangedDamage ? " checked" : ""} />
+                      Aggiunge FOR ai danni
+                    </label>
+                  </label>
+                  <label class="attack-detail-field attack-detail-field-wide">
+                    <span>Note tattiche</span>
+                    <textarea class="atk-notes" data-key="${keyPrefix}:notes" rows="2" placeholder="Es. ferro freddo, sacra, precisione, furtivo...">${notes}</textarea>
+                  </label>
+                </div>
+              </div>
+            </details>
+          </div>
+        </td>
+      `,
+    };
+  }
+
+  function makeAttackRow(keyPrefix = `atk:extra:${getAtkExtraCount()}`) {
+    const markup = createAttackRowMarkup(keyPrefix);
     const hitRow = document.createElement("tr");
     hitRow.className = "attack-row attack-row-extra";
-    hitRow.innerHTML = `
-      <td>
-        <select class="select atk-type">
-          <option value="melee" selected>Mischia (FOR)</option>
-          <option value="ranged">Distanza (DES)</option>
-        </select>
-      </td>
-      <td>
-        <select class="select atk-sequence">
-          <option value="0" selected>1°</option>
-        </select>
-      </td>
-      <td>
-        <select class="select atk-magic-bonus">
-          <option value="0" selected>+0</option>
-          <option value="1">+1</option>
-          <option value="2">+2</option>
-          <option value="3">+3</option>
-          <option value="4">+4</option>
-          <option value="5">+5</option>
-        </select>
-      </td>
-      <td><input class="small atk-row-misc" type="number" step="1" value="0" /></td>
-      <td><input class="small atk-total" type="text" value="+0" readonly /></td>
-    `;
+    hitRow.innerHTML = markup.hit;
+    hitRow.dataset.attackKey = keyPrefix;
 
     const dmgRow = document.createElement("tr");
     dmgRow.className = "attack-row-dmg attack-row-dmg-extra";
-    dmgRow.innerHTML = `
-      <td colspan="5">
-        <div class="attack-dmg-line">
-          <div class="attack-main">
-            <div class="attack-groups">
-              <div class="attack-group">
-                <span class="attack-subtitle">Danni</span>
-                <div class="attack-dmg-inline">
-                  <div class="atk-dmg-builder">
-                    <input class="small atk-dice-count" type="number" min="1" step="1" value="1" title="Numero dadi" />
-                    <select class="select atk-die" title="Tipo dado">
-                      <option value="4">d4</option>
-                      <option value="6">d6</option>
-                      <option value="8" selected>d8</option>
-                      <option value="10">d10</option>
-                      <option value="12">d12</option>
-                    </select>
-                  </div>
-                  <input class="small atk-dmg-total" type="text" value="1d8+0" readonly title="Riepilogo danni calcolati" />
-                </div>
-              </div>
-              <div class="attack-group">
-                <span class="attack-subtitle">Critico</span>
-                <div class="atk-crit-builder">
-                  <select class="select atk-crit-range" title="Minaccia critico">
-                    <option value="20" selected>20</option>
-                    <option value="19">19-20</option>
-                    <option value="18">18-20</option>
-                    <option value="17">17-20</option>
-                  </select>
-                  <select class="select atk-crit-mult" title="Moltiplicatore critico">
-                    <option value="2" selected>x2</option>
-                    <option value="3">x3</option>
-                    <option value="4">x4</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div class="attack-flags">
-              <label class="attack-flag atk-melee-only">
-                <input class="atk-twohands" type="checkbox" />
-                2 mani
-              </label>
-              <label class="attack-flag atk-melee-only">
-                <input class="atk-power-attack" type="checkbox" />
-                Attacco Poderoso
-              </label>
-              <label class="attack-flag atk-melee-only">
-                <input class="atk-furious-focus" type="checkbox" />
-                Furia Focalizzata
-              </label>
-            </div>
-          </div>
-          <div class="attack-roll-line">
-            <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + Tot">Tiro</button>
-            <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
-          </div>
-        </div>
-      </td>
-    `;
+    dmgRow.innerHTML = markup.dmg;
+    dmgRow.dataset.attackKey = keyPrefix;
 
+    return { hitRow, dmgRow };
+  }
+
+  function mountAttackRow(rowConfig) {
+    const hitRow = document.createElement("tr");
+    hitRow.className = rowConfig.extra ? "attack-row attack-row-extra" : "attack-row";
+    const dmgRow = document.createElement("tr");
+    dmgRow.className = rowConfig.extra ? "attack-row-dmg attack-row-dmg-extra" : "attack-row-dmg";
+    const markup = createAttackRowMarkup(rowConfig.keyPrefix, rowConfig.preset || {});
+    hitRow.innerHTML = markup.hit;
+    dmgRow.innerHTML = markup.dmg;
+    hitRow.dataset.attackKey = rowConfig.keyPrefix;
+    dmgRow.dataset.attackKey = rowConfig.keyPrefix;
+    attacksTbody.appendChild(hitRow);
+    attacksTbody.appendChild(dmgRow);
+    applySavedValues(hitRow);
+    applySavedValues(dmgRow);
+    wireAutosave(hitRow);
+    wireAutosave(dmgRow);
     return { hitRow, dmgRow };
   }
 
   function rebuildAttackExtraRows() {
     if (!attacksTbody) return;
-    const n = getAtkExtraCount();
-    for (let i = 0; i < n; i++) {
-      const { hitRow, dmgRow } = makeAttackRow();
-      attacksTbody.appendChild(hitRow);
-      attacksTbody.appendChild(dmgRow);
-      applySavedValues(hitRow);
-      applySavedValues(dmgRow);
-      wireAutosave(hitRow);
-      wireAutosave(dmgRow);
-    }
-    refreshAttackSequenceSelectors();
-    recalcAllAttacks();
+    runSafeUiStep("Ricostruzione tabella attacchi", () => {
+      attacksTbody.innerHTML = "";
+      ATTACK_PRESETS.forEach((preset, idx) => {
+        mountAttackRow({ keyPrefix: `atk:base:${idx}`, preset, extra: false });
+      });
+      const n = getAtkExtraCount();
+      for (let i = 0; i < n; i++) {
+        mountAttackRow({ keyPrefix: `atk:extra:${i}`, preset: {}, extra: true });
+      }
+      recalcAllAttacks();
+    });
   }
 
   rebuildAttackExtraRows();
-  refreshAttackSequenceSelectors();
 
   if (addAtkBtn && attacksTbody) {
     addAtkBtn.addEventListener("click", () => {
-      const { hitRow, dmgRow } = makeAttackRow();
-      attacksTbody.appendChild(hitRow);
-      attacksTbody.appendChild(dmgRow);
-      setAtkExtraCount(getAtkExtraCount() + 1);
-      applySavedValues(hitRow);
-      applySavedValues(dmgRow);
-      wireAutosave(hitRow);
-      wireAutosave(dmgRow);
-      refreshAttackSequenceSelectors();
-      recalcAttackRow(hitRow);
+      runSafeUiStep("Aggiunta attacco", () => {
+        const nextIndex = getAtkExtraCount();
+        const { hitRow } = mountAttackRow({ keyPrefix: `atk:extra:${nextIndex}`, preset: {}, extra: true });
+        setAtkExtraCount(nextIndex + 1);
+        recalcAttackRow(hitRow);
+      });
     });
   }
 
   if (remAtkBtn && attacksTbody) {
     remAtkBtn.addEventListener("click", () => {
-      const extras = attacksTbody.querySelectorAll(".attack-row-extra");
-      if (!extras.length) return;
-      const lastHit = extras[extras.length - 1];
-      const lastDmg = getAttackDamageRow(lastHit);
-      [lastHit, lastDmg].forEach((row) => {
-        if (!row) return;
-        row.querySelectorAll("input, textarea, select").forEach((el) => delete state[keyFor(el)]);
+      runSafeUiStep("Rimozione attacco", () => {
+        const extras = attacksTbody.querySelectorAll(".attack-row-extra");
+        if (!extras.length) return;
+        const lastHit = extras[extras.length - 1];
+        const lastDmg = getAttackDamageRow(lastHit);
+        [lastHit, lastDmg].forEach((row) => {
+          if (!row) return;
+          row.querySelectorAll("input, textarea, select").forEach((el) => delete state[keyFor(el)]);
+        });
+        saveState(state);
+        if (lastDmg) lastDmg.remove();
+        lastHit.remove();
+        setAtkExtraCount(getAtkExtraCount() - 1);
+        recalcAllAttacks();
       });
-      saveState(state);
-      if (lastDmg) lastDmg.remove();
-      lastHit.remove();
-      setAtkExtraCount(getAtkExtraCount() - 1);
-      recalcAllAttacks();
     });
   }
 
@@ -2503,6 +2901,21 @@ document.addEventListener("DOMContentLoaded", () => {
     return window.PF1EData?.tables?.skills || null;
   }
 
+  function getMythicCombatFeatEffects() {
+    return {
+      powerAttack: !!document.getElementById("mythic-feat-power-attack")?.checked,
+      furiousFocus: !!document.getElementById("mythic-feat-furious-focus")?.checked,
+      mythicToughness: !!document.getElementById("mythic-feat-mythic-toughness")?.checked,
+      spellFocus: !!document.getElementById("mythic-feat-spell-focus")?.checked,
+      spellPenetration: !!document.getElementById("mythic-feat-spell-penetration")?.checked,
+      deadlyAim: !!document.getElementById("mythic-feat-deadly-aim")?.checked,
+      rapidShot: !!document.getElementById("mythic-feat-rapid-shot")?.checked,
+      manyshot: !!document.getElementById("mythic-feat-manyshot")?.checked,
+      improvedCritical: !!document.getElementById("mythic-feat-improved-critical")?.checked,
+      weaponFocus: !!document.getElementById("mythic-feat-weapon-focus")?.checked,
+    };
+  }
+
   function getResolvedHitDie() {
     const hpHitDieEl = document.getElementById("hp-hit-die");
     if (!hpHitDieEl) return 0;
@@ -2576,7 +2989,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const conMod = Math.trunc(getAbilityModByCode("COS"));
     const mythicTier = Math.max(0, Math.trunc(getMythicTier()));
     const mythicTotal = mythicTier * getMythicHitPointsPerTier();
+    const mythicFeatEffects = getMythicCombatFeatEffects();
     const toughnessTotal = hpToughnessEl.checked ? Math.max(3, levels) : 0;
+    const mythicToughnessBonus = mythicFeatEffects.mythicToughness ? Math.max(3, levels) : 0;
+    const robustnessTotal = toughnessTotal + mythicToughnessBonus;
     const favoredBonus = Math.max(0, Math.trunc(num(hpFavoredBonusEl.value)));
     const miscBonus = Math.trunc(num(hpMiscBonusEl.value));
     const tempHp = Math.max(0, Math.trunc(num(hpTempEl.value)));
@@ -2600,7 +3016,7 @@ document.addEventListener("DOMContentLoaded", () => {
       baseTotal = firstLevelHp + otherLevelsHp;
     }
     const conTotal = conMod * levels;
-    const totalBase = Math.max(0, baseTotal + conTotal + mythicTotal + toughnessTotal + favoredBonus + miscBonus);
+    const totalBase = Math.max(0, baseTotal + conTotal + mythicTotal + robustnessTotal + favoredBonus + miscBonus);
     const total = totalBase + tempHp;
 
     hpLevelsEl.value = String(levels);
@@ -2611,7 +3027,7 @@ document.addEventListener("DOMContentLoaded", () => {
     hpBaseTotalEl.value = String(baseTotal);
     hpConTotalEl.value = fmtSigned(conTotal);
     hpMythicTotalEl.value = fmtSigned(mythicTotal);
-    hpToughnessTotalEl.value = fmtSigned(toughnessTotal);
+    hpToughnessTotalEl.value = fmtSigned(robustnessTotal);
     hpTotalEl.value = String(total);
 
     const prevAutoTotal = Math.max(0, Math.trunc(num(hpCurrentEl.dataset.autoTotal)));
@@ -2639,8 +3055,8 @@ document.addEventListener("DOMContentLoaded", () => {
       ? babApi.getByProgression(prestigeEntry.level, prestigeEntry.babProgression)
       : 0;
     atkBabEl.value = String(autoBabBase + autoBabPrestige);
-    refreshAttackSequenceSelectors();
-    recalcAllAttacks();
+    runSafeUiStep("Aggiornamento sequenze attacchi", () => refreshAttackSequenceSelectors());
+    runSafeUiStep("Ricalcolo attacchi da BAB automatico", () => recalcAllAttacks());
     recalcCmbCmd();
   }
 
@@ -3109,6 +3525,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const atkFullBtn = e.target.closest?.(".atk-full-roll-btn");
+    if (atkFullBtn) {
+      const row = atkFullBtn.closest?.(".attack-row");
+      if (row) {
+        recalcAttackRow(row);
+        const total = parseSignedInt(row.querySelector(".atk-total")?.value);
+        const label = String(row.querySelector(".atk-name")?.value || "").trim() || "Attacco";
+        const babValue = num(document.getElementById("atk-bab")?.value);
+        rollFullAttackSequence(total, babValue, label);
+        return;
+      }
+    }
+
     const compAtkBtn = e.target.closest?.(".comp-atk-roll-btn");
     if (
       compAtkBtn &&
@@ -3161,8 +3590,8 @@ document.addEventListener("DOMContentLoaded", () => {
     recalcAC();
 
     // attacchi
-    recalcAllAttacks();
-    recalcAllCompAttacks();
+    runSafeUiStep("Ricalcolo attacchi personaggio", () => recalcAllAttacks());
+    runSafeUiStep("Ricalcolo attacchi compagno", () => recalcAllCompAttacks());
 
     // BMC / DMC
     recalcCmbCmd();
@@ -3517,14 +3946,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const atkBabEl = document.getElementById("atk-bab");
   if (atkBabEl) {
     atkBabEl.addEventListener("input", () => {
-      refreshAttackSequenceSelectors();
-      recalcAllAttacks();
+      runSafeUiStep("Aggiornamento sequenze attacchi", () => refreshAttackSequenceSelectors());
+      runSafeUiStep("Ricalcolo attacchi", () => recalcAllAttacks());
       recalcCmbCmd();
       recalcAllSpellRows();
     });
     atkBabEl.addEventListener("change", () => {
-      refreshAttackSequenceSelectors();
-      recalcAllAttacks();
+      runSafeUiStep("Aggiornamento sequenze attacchi", () => refreshAttackSequenceSelectors());
+      runSafeUiStep("Ricalcolo attacchi", () => recalcAllAttacks());
       recalcCmbCmd();
       recalcAllSpellRows();
     });
@@ -3533,14 +3962,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const atkMiscEl = document.getElementById("atk-misc");
   if (atkMiscEl) {
     atkMiscEl.addEventListener("input", () => {
-      recalcAllAttacks();
+      runSafeUiStep("Ricalcolo attacchi", () => recalcAllAttacks());
       recalcAllSpellRows();
     });
     atkMiscEl.addEventListener("change", () => {
-      recalcAllAttacks();
+      runSafeUiStep("Ricalcolo attacchi", () => recalcAllAttacks());
       recalcAllSpellRows();
     });
   }
+
+  [
+    "atk-quick-power-attack",
+    "atk-quick-weapon-focus",
+    "atk-quick-morale",
+    "atk-quick-sacred",
+    "atk-quick-luck",
+    "atk-quick-competence",
+    "atk-quick-defensive",
+    "atk-quick-twf",
+    "atk-quick-smite-atk",
+    "atk-quick-smite-dmg",
+    "atk-quick-mythic-atk",
+    "atk-quick-mythic-dmg",
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", recalcAllAttacks);
+    el.addEventListener("change", recalcAllAttacks);
+  });
 
   const spellcasterLevelEl = document.getElementById("spellcaster-level");
   if (spellcasterLevelEl) {
@@ -3602,6 +4051,30 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!el) return;
     el.addEventListener("input", recalcHitPoints);
     el.addEventListener("change", recalcHitPoints);
+  });
+
+  [
+    "mythic-feat-power-attack",
+    "mythic-feat-furious-focus",
+    "mythic-feat-mythic-toughness",
+    "mythic-feat-spell-focus",
+    "mythic-feat-spell-penetration",
+    "mythic-feat-deadly-aim",
+    "mythic-feat-rapid-shot",
+    "mythic-feat-manyshot",
+    "mythic-feat-improved-critical",
+    "mythic-feat-weapon-focus",
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      recalcHitPoints();
+      recalcDerived();
+    });
+    el.addEventListener("change", () => {
+      recalcHitPoints();
+      recalcDerived();
+    });
   });
 
   $$(".class-entry-row .class-row-select, .class-entry-row .class-row-level").forEach((el) => {
@@ -3685,21 +4158,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("input", (e) => {
     const row = resolveLinkedRowFromEventTarget(e.target, "attack-row", "attack-row-dmg");
     if (!row) return;
-    if (
-      targetHasAnyClass(e.target, [
-        "atk-row-misc",
-        "atk-magic-bonus",
-        "atk-type",
-        "atk-sequence",
-        "atk-dice-count",
-        "atk-die",
-        "atk-crit-range",
-        "atk-crit-mult",
-        "atk-twohands",
-        "atk-power-attack",
-        "atk-furious-focus",
-      ])
-    ) {
+    if (["INPUT", "SELECT", "TEXTAREA"].includes(e.target.tagName)) {
       recalcAttackRow(row);
     }
   });
@@ -3754,18 +4213,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("change", (e) => {
     const row = resolveLinkedRowFromEventTarget(e.target, "attack-row", "attack-row-dmg");
     if (!row) return;
-    if (
-      targetHasAnyClass(e.target, [
-        "atk-type",
-        "atk-magic-bonus",
-        "atk-die",
-        "atk-crit-range",
-        "atk-crit-mult",
-        "atk-twohands",
-        "atk-power-attack",
-        "atk-furious-focus",
-      ])
-    ) {
+    if (["INPUT", "SELECT", "TEXTAREA"].includes(e.target.tagName)) {
       recalcAttackRow(row);
     }
   });
@@ -3924,6 +4372,3 @@ document.addEventListener("DOMContentLoaded", () => {
   updateSpellcastingClassFields();
   recalcDerived();
 });
-
-
-

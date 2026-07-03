@@ -1550,6 +1550,18 @@ table{
   padding:6px 8px;
 }
 
+#skills-table th:last-child,
+#skills-table td:last-child{
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+
+#skills-table th:last-child{
+  color: transparent;
+  font-size: 0;
+}
+
 #page-classe .table-wrap{
   overflow-x:auto;
 }
@@ -4270,11 +4282,10 @@ td .roll-btn + .roll-btn{
                     </tr>
                   </thead>
                   <tbody>
-                    <tr><td>1</td><td>—</td><td>1d6</td><td><input type="text" placeholder="Talento mitico (cat. 1)" /></td></tr>
                     <tr>
-                      <td>2</td>
+                      <td>1</td>
                       <td>
-                        <select class="select mythic-ability-pick" data-tier="2">
+                        <select class="select mythic-ability-pick" data-tier="1">
                           <option value="" selected>— Seleziona —</option>
                           <option value="FOR">FOR</option>
                           <option value="DES">DES</option>
@@ -4284,10 +4295,11 @@ td .roll-btn + .roll-btn{
                           <option value="CAR">CAR</option>
                         </select>
                       </td>
-                      <td>—</td>
-                      <td><input type="text" placeholder="—" readonly /></td>
+                      <td>1d6</td>
+                      <td><input type="text" placeholder="Talento mitico (cat. 1)" /></td>
                     </tr>
-                    <tr><td>3</td><td>—</td><td>1d8</td><td><input type="text" placeholder="Talento mitico (cat. 3)" /></td></tr>
+                    <tr><td>2</td><td>—</td><td>—</td><td><input type="text" placeholder="—" readonly /></td></tr>
+                    <tr><td>3</td><td>—</td><td>—</td><td><input type="text" placeholder="—" readonly /></td></tr>
                     <tr>
                       <td>4</td>
                       <td>
@@ -4301,14 +4313,15 @@ td .roll-btn + .roll-btn{
                           <option value="CAR">CAR</option>
                         </select>
                       </td>
-                      <td>—</td>
-                      <td><input type="text" placeholder="—" readonly /></td>
+                      <td>1d8</td>
+                      <td><input type="text" placeholder="Talento mitico (cat. 4)" /></td>
                     </tr>
-                    <tr><td>5</td><td>—</td><td>—</td><td><input type="text" placeholder="Talento mitico (cat. 5)" /></td></tr>
+                    <tr><td>5</td><td>—</td><td>—</td><td><input type="text" placeholder="—" readonly /></td></tr>
+                    <tr><td>6</td><td>—</td><td>—</td><td><input type="text" placeholder="—" readonly /></td></tr>
                     <tr>
-                      <td>6</td>
+                      <td>7</td>
                       <td>
-                        <select class="select mythic-ability-pick" data-tier="6">
+                        <select class="select mythic-ability-pick" data-tier="7">
                           <option value="" selected>— Seleziona —</option>
                           <option value="FOR">FOR</option>
                           <option value="DES">DES</option>
@@ -4319,26 +4332,10 @@ td .roll-btn + .roll-btn{
                         </select>
                       </td>
                       <td>1d10</td>
-                      <td><input type="text" placeholder="—" readonly /></td>
+                      <td><input type="text" placeholder="Talento mitico (cat. 7)" /></td>
                     </tr>
-                    <tr><td>7</td><td>—</td><td>—</td><td><input type="text" placeholder="Talento mitico (cat. 7)" /></td></tr>
-                    <tr>
-                      <td>8</td>
-                      <td>
-                        <select class="select mythic-ability-pick" data-tier="8">
-                          <option value="" selected>— Seleziona —</option>
-                          <option value="FOR">FOR</option>
-                          <option value="DES">DES</option>
-                          <option value="COS">COS</option>
-                          <option value="INT">INT</option>
-                          <option value="SAG">SAG</option>
-                          <option value="CAR">CAR</option>
-                        </select>
-                      </td>
-                      <td>—</td>
-                      <td><input type="text" placeholder="—" readonly /></td>
-                    </tr>
-                    <tr><td>9</td><td>—</td><td>1d12</td><td><input type="text" placeholder="Talento mitico (cat. 9)" /></td></tr>
+                    <tr><td>8</td><td>—</td><td>—</td><td><input type="text" placeholder="—" readonly /></td></tr>
+                    <tr><td>9</td><td>—</td><td>—</td><td><input type="text" placeholder="—" readonly /></td></tr>
                     <tr>
                       <td>10</td>
                       <td>
@@ -4352,8 +4349,8 @@ td .roll-btn + .roll-btn{
                           <option value="CAR">CAR</option>
                         </select>
                       </td>
-                      <td>—</td>
-                      <td><input type="text" placeholder="—" readonly /></td>
+                      <td>1d12</td>
+                      <td><input type="text" placeholder="Talento mitico (cat. 10)" /></td>
                     </tr>
                   </tbody>
                 </table>
@@ -4828,6 +4825,7 @@ td .roll-btn + .roll-btn{
           <div class="mythic-feat-list">
             <label class="mythic-feat-item"><input id="mythic-feat-power-attack" type="checkbox" />Power Attack (Mythic)</label>
             <label class="mythic-feat-item"><input id="mythic-feat-furious-focus" type="checkbox" />Furia Focalizzata (Mitico)</label>
+            <label class="mythic-feat-item"><input id="mythic-feat-mythic-toughness" type="checkbox" />Robustezza (Mitica)</label>
             <label class="mythic-feat-item"><input id="mythic-feat-spell-focus" type="checkbox" />Spell Focus (Mythic)</label>
             <label class="mythic-feat-item"><input id="mythic-feat-spell-penetration" type="checkbox" />Spell Penetration (Mythic)</label>
             <label class="mythic-feat-item"><input id="mythic-feat-deadly-aim" type="checkbox" />Mira Letale (Mitico)</label>
@@ -6465,18 +6463,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getSurgeDieByTier(tier) {
-    if (tier >= 9) return "d12";
-    if (tier >= 6) return "d10";
-    if (tier >= 3) return "d8";
+    if (tier >= 10) return "d12";
+    if (tier >= 7) return "d10";
+    if (tier >= 4) return "d8";
     if (tier >= 1) return "d6";
     return "—";
   }
 
   function getSurgeReminderByTier(tier) {
     if (tier <= 0) return "Diventa mitico (Categoria 1) per ottenere il dado impulso.";
-    if (tier < 3) return "Impulso d6. Prossimo aumento a d8 alla Categoria 3.";
-    if (tier < 6) return "Impulso d8. Prossimo aumento a d10 alla Categoria 6.";
-    if (tier < 9) return "Impulso d10. Prossimo aumento a d12 alla Categoria 9.";
+    if (tier < 4) return "Impulso d6. Prossimo aumento a d8 alla Categoria 4.";
+    if (tier < 7) return "Impulso d8. Prossimo aumento a d10 alla Categoria 7.";
+    if (tier < 10) return "Impulso d10. Prossimo aumento a d12 alla Categoria 10.";
     return "Impulso d12 (massimo).";
   }
 
@@ -6928,6 +6926,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return {
       powerAttack: !!document.getElementById("mythic-feat-power-attack")?.checked,
       furiousFocus: !!document.getElementById("mythic-feat-furious-focus")?.checked,
+      mythicToughness: !!document.getElementById("mythic-feat-mythic-toughness")?.checked,
       spellFocus: !!document.getElementById("mythic-feat-spell-focus")?.checked,
       spellPenetration: !!document.getElementById("mythic-feat-spell-penetration")?.checked,
       deadlyAim: !!document.getElementById("mythic-feat-deadly-aim")?.checked,
@@ -8516,7 +8515,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const conMod = Math.trunc(getAbilityModByCode("COS"));
     const mythicTier = Math.max(0, Math.trunc(getMythicTier()));
     const mythicTotal = mythicTier * getMythicHitPointsPerTier();
+    const mythicFeatEffects = getMythicCombatFeatEffects();
     const toughnessTotal = hpToughnessEl.checked ? Math.max(3, levels) : 0;
+    const mythicToughnessBonus = mythicFeatEffects.mythicToughness ? Math.max(3, levels) : 0;
+    const robustnessTotal = toughnessTotal + mythicToughnessBonus;
     const favoredBonus = Math.max(0, Math.trunc(num(hpFavoredBonusEl.value)));
     const miscBonus = Math.trunc(num(hpMiscBonusEl.value));
     const tempHp = Math.max(0, Math.trunc(num(hpTempEl.value)));
@@ -8540,7 +8542,7 @@ document.addEventListener("DOMContentLoaded", () => {
       baseTotal = firstLevelHp + otherLevelsHp;
     }
     const conTotal = conMod * levels;
-    const totalBase = Math.max(0, baseTotal + conTotal + mythicTotal + toughnessTotal + favoredBonus + miscBonus);
+    const totalBase = Math.max(0, baseTotal + conTotal + mythicTotal + robustnessTotal + favoredBonus + miscBonus);
     const total = totalBase + tempHp;
 
     hpLevelsEl.value = String(levels);
@@ -8551,7 +8553,7 @@ document.addEventListener("DOMContentLoaded", () => {
     hpBaseTotalEl.value = String(baseTotal);
     hpConTotalEl.value = fmtSigned(conTotal);
     hpMythicTotalEl.value = fmtSigned(mythicTotal);
-    hpToughnessTotalEl.value = fmtSigned(toughnessTotal);
+    hpToughnessTotalEl.value = fmtSigned(robustnessTotal);
     hpTotalEl.value = String(total);
 
     const prevAutoTotal = Math.max(0, Math.trunc(num(hpCurrentEl.dataset.autoTotal)));
@@ -9916,6 +9918,7 @@ document.addEventListener("DOMContentLoaded", () => {
   [
     "mythic-feat-power-attack",
     "mythic-feat-furious-focus",
+    "mythic-feat-mythic-toughness",
     "mythic-feat-spell-focus",
     "mythic-feat-spell-penetration",
     "mythic-feat-deadly-aim",
