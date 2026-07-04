@@ -2200,7 +2200,7 @@ td .roll-btn + .roll-btn{
   grid-template-columns:minmax(220px, 1fr) auto;
   gap:10px;
   align-items:center;
-  padding:0 14px 10px;
+  padding:10px 14px 10px;
 }
 
 .attack-card-top .atk-name{
@@ -2223,6 +2223,10 @@ td .roll-btn + .roll-btn{
   border:1px solid rgba(74, 58, 39, .12);
   border-radius:12px;
   background:transparent;
+}
+
+.attack-summary-chip-wide{
+  grid-column:span 2;
 }
 
 .attack-summary-chip span,
@@ -2259,10 +2263,22 @@ td .roll-btn + .roll-btn{
   color:var(--text) !important;
 }
 
+.attack-summary-chip .atk-iterative-seq{
+  font-family:var(--font-display);
+  font-size:14px !important;
+  font-weight:700;
+  color:var(--text) !important;
+  text-align:left;
+}
+
 .attack-card-actions{
   display:grid;
   grid-template-columns:repeat(3, minmax(0, 1fr));
   gap:8px;
+}
+
+.attack-card-actions-bar{
+  padding:0 14px 10px;
 }
 
 .attack-card-actions .roll-btn{
@@ -2481,10 +2497,22 @@ td .roll-btn + .roll-btn{
 
 .attack-quick-mods{
   margin-bottom:12px;
-  padding:12px;
   border:1px solid rgba(74, 58, 39, .12);
   border-radius:16px;
-  background:color-mix(in srgb, var(--surface-2) 94%, white 6%);
+  background:transparent;
+  overflow:hidden;
+}
+
+.attack-quick-panel{
+  background:transparent;
+}
+
+.attack-quick-panel > summary{
+  list-style:none;
+}
+
+.attack-quick-panel > summary::-webkit-details-marker{
+  display:none;
 }
 
 .attack-quick-head{
@@ -2492,7 +2520,9 @@ td .roll-btn + .roll-btn{
   justify-content:space-between;
   gap:12px;
   align-items:flex-start;
-  margin-bottom:10px;
+  margin-bottom:0;
+  padding:12px;
+  cursor:pointer;
 }
 
 .attack-quick-head p{
@@ -2501,10 +2531,30 @@ td .roll-btn + .roll-btn{
   font-size:12px;
 }
 
+.attack-quick-head::before{
+  content:"▾";
+  color:var(--text-muted);
+  font-size:12px;
+  line-height:1;
+  margin-top:4px;
+}
+
+.attack-quick-panel:not([open]) .attack-quick-head::before{
+  content:"▸";
+}
+
 .attack-quick-grid{
   display:grid;
   grid-template-columns:repeat(4, minmax(0, 1fr));
   gap:10px;
+  padding:0 12px 12px;
+}
+
+.attack-quick-stack{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:0 12px 12px;
 }
 
 .attack-quick-grid-core{
@@ -2546,6 +2596,16 @@ td .roll-btn + .roll-btn{
 
 .attack-quick-collapsible .attack-quick-grid{
   margin-top:10px;
+}
+
+.attack-quick-collapsible .attack-quick-stack{
+  margin-top:10px;
+}
+
+.attack-quick-subpanel{
+  margin-top:0;
+  border-top:none;
+  padding-top:0;
 }
 
 .attack-quick-card{

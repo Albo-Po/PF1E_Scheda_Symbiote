@@ -1604,8 +1604,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const mythicFeatEffects = getMythicCombatFeatEffects();
     return {
       powerAttack: !!document.getElementById("atk-quick-power-attack")?.checked,
+      furiousFocus: !!document.getElementById("atk-quick-furious-focus")?.checked,
       mythicPowerAttack: mythicFeatEffects.powerAttack,
+      mythicFuriousFocus: mythicFeatEffects.furiousFocus,
       weaponFocus: !!document.getElementById("atk-quick-weapon-focus")?.checked,
+      mythicWeaponFocus: mythicFeatEffects.weaponFocus,
+      weaponSpecialization: !!document.getElementById("atk-quick-weapon-specialization")?.checked,
       morale: num(document.getElementById("atk-quick-morale")?.value),
       sacred: num(document.getElementById("atk-quick-sacred")?.value),
       luck: num(document.getElementById("atk-quick-luck")?.value),
@@ -1621,8 +1625,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function resolveAttackHitAbilityCode(data) {
-    const selected = String(data.hitAbility || "AUTO").trim().toUpperCase();
-    return selected === "AUTO" ? getAutoHitAbilityCode(data.type) : selected;
+    return getAutoHitAbilityCode(data.type);
   }
 
   function resolveAttackDamageAbilityCode(data, profile) {
@@ -1697,15 +1700,33 @@ document.addEventListener("DOMContentLoaded", () => {
     return baseBonus + Math.max(1, Math.trunc(getMythicTier()));
   }
 
+  function getWeaponFocusAttackBonus(quickMods) {
+    if (!quickMods.weaponFocus && !quickMods.mythicWeaponFocus) return 0;
+    // La versione mitica sostituisce il talento base invece di sommarsi.
+    return quickMods.mythicWeaponFocus ? 2 : 1;
+  }
+
+  function getPowerAttackPenalty(data, quickMods, profile) {
+    if (!quickMods.powerAttack || !profile.canPowerAttack) return 0;
+    const step = computePowerAttackStep(data.babUsed);
+    const isFirstAttack = Math.max(0, Math.trunc(num(data.sequenceIndex))) === 0;
+    const furiousFocusActive = (quickMods.furiousFocus || quickMods.mythicFuriousFocus) && profile.isTwoHanded && isFirstAttack;
+    // La versione mitica estende l'effetto a tutti gli attacchi della sequenza.
+    const mythicFuriousFocusActive = quickMods.mythicFuriousFocus && profile.isTwoHanded;
+    if (mythicFuriousFocusActive || furiousFocusActive) return 0;
+    return step;
+  }
+
   function calculateAttackDamageBonus(data, quickMods, profile) {
     const abilityDamage = calculateAbilityDamageBonus(data, profile);
     const powerAttackDamage = calculatePowerAttackDamageBonus(data, quickMods, profile);
-    let total = abilityDamage + num(data.enhancementDamage) + num(data.damageMisc) + quickMods.smiteDamage + quickMods.mythicDamage + powerAttackDamage;
+    const weaponSpecializationDamage = quickMods.weaponSpecialization ? 2 : 0;
+    let total = abilityDamage + num(data.enhancementDamage) + num(data.damageMisc) + quickMods.smiteDamage + quickMods.mythicDamage + powerAttackDamage + weaponSpecializationDamage;
     return { total, abilityDamage };
   }
 
   function calculateAttackTotalToHit(data, quickMods, profile) {
-    const hitAbilityBonus = readAttackAbilityModifier(resolveAttackHitAbilityCode(data), data.hitAbilityCustom);
+    const hitAbilityBonus = readAttackAbilityModifier(resolveAttackHitAbilityCode(data));
     let total =
       num(data.babUsed) +
       hitAbilityBonus +
@@ -1720,7 +1741,7 @@ document.addEventListener("DOMContentLoaded", () => {
       quickMods.smiteAttack +
       quickMods.mythicAttack;
 
-    if (quickMods.weaponFocus) total += 1;
+    total += getWeaponFocusAttackBonus(quickMods);
 
     let penalties =
       num(data.attackPenalty) +
@@ -1729,17 +1750,28 @@ document.addEventListener("DOMContentLoaded", () => {
       quickMods.twoWeaponPenalty;
 
     if (profile.isNaturalSecondary) penalties += 5;
-    if (quickMods.powerAttack && profile.canPowerAttack) penalties += computePowerAttackStep(data.babUsed);
+    penalties += getPowerAttackPenalty(data, quickMods, profile);
 
     return { total: total - penalties, hitAbilityBonus, penalties };
   }
 
-  function generateIterativeAttacks(totalToHit, babUsed, profile) {
-    if (!profile.iterativeAllowed) return fmtSigned(totalToHit);
-    const count = Math.max(1, Math.floor((Math.max(1, Math.trunc(num(babUsed))) - 1) / 5) + 1);
+  function getAttackSequenceCount(babUsed, profile) {
+    if (!profile.iterativeAllowed) return 1;
+    return Math.max(1, Math.floor((Math.max(1, Math.trunc(num(babUsed))) - 1) / 5) + 1);
+  }
+
+  function buildFullAttackBonusesFromData(data, quickMods, profile) {
+    const count = getAttackSequenceCount(data.babUsed, profile);
     const bonuses = [];
-    for (let i = 0; i < count; i++) bonuses.push(fmtSigned(totalToHit - i * 5));
-    return bonuses.join("/");
+    for (let i = 0; i < count; i++) {
+      const attackData = { ...data, sequenceIndex: i };
+      bonuses.push(calculateAttackTotalToHit(attackData, quickMods, profile).total);
+    }
+    return bonuses;
+  }
+
+  function generateIterativeAttacksFromData(data, quickMods, profile) {
+    return buildFullAttackBonusesFromData(data, quickMods, profile).map((bonus) => fmtSigned(bonus)).join("/");
   }
 
   function recalcCmbCmd() {
@@ -1796,9 +1828,7 @@ document.addEventListener("DOMContentLoaded", () => {
       name: String(tr.querySelector(".atk-name")?.value || "").trim(),
       type: String(tr.querySelector(".atk-type")?.value || "melee"),
       handling: String(tr.querySelector(".atk-handling")?.value || "one_handed"),
-      babUsed: Math.max(0, Math.trunc(num(tr.querySelector(".atk-bab-used")?.value || document.getElementById("atk-bab")?.value))),
-      hitAbility: String(tr.querySelector(".atk-hit-ability")?.value || "AUTO"),
-      hitAbilityCustom: num(tr.querySelector(".atk-hit-ability-custom")?.value),
+      babUsed: Math.max(0, Math.trunc(num(document.getElementById("atk-bab")?.value))),
       enhancementAttack: num(tr.querySelector(".atk-enhancement-atk")?.value),
       attackMisc: num(tr.querySelector(".atk-attack-misc")?.value),
       attackPenalty: num(tr.querySelector(".atk-attack-penalty")?.value),
@@ -1827,14 +1857,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = readAttackRowData(tr);
     const quickMods = getQuickAttackModifiers();
     const profile = deriveAttackProfile(data);
+    const primaryAttackData = { ...data, sequenceIndex: 0 };
     const resolvedHitAbility = resolveAttackHitAbilityCode(data);
     const resolvedDamageAbility = resolveAttackDamageAbilityCode(data, profile);
     const resolvedDamageMultiplier = resolveAttackDamageMultiplier(data, profile);
     const attackResult = calculateAttackTotalToHit(data, quickMods, profile);
+    const primaryAttackResult = calculateAttackTotalToHit(primaryAttackData, quickMods, profile);
     const damageResult = calculateAttackDamageBonus(data, quickMods, profile);
     const critFormula = formatCritFormula(data.critRange, data.critMult);
     const damageFormula = formatDamageFormula(data.diceCount, data.dieSize, damageResult.total);
-    const iterativeFormula = generateIterativeAttacks(attackResult.total, data.babUsed, profile);
+    const iterativeFormula = generateIterativeAttacksFromData(data, quickMods, profile);
 
     tr.dataset.dmgFormula = damageFormula;
     tr.dataset.attackProfile = JSON.stringify({
@@ -1846,12 +1878,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const hitAbilityOut = tr.querySelector(".atk-hit-ability-bonus");
     if (hitAbilityOut) hitAbilityOut.value = fmtSigned(attackResult.hitAbilityBonus);
+    const hitAbilitySourceOut = tr.querySelector(".atk-hit-ability-source");
+    if (hitAbilitySourceOut) hitAbilitySourceOut.value = getAttackAbilityLabel(resolvedHitAbility);
     const penaltiesOut = tr.querySelector(".atk-penalties-total");
     if (penaltiesOut) penaltiesOut.value = fmtSigned(-attackResult.penalties);
     const iterativeOut = tr.querySelector(".atk-iterative-seq");
     if (iterativeOut) iterativeOut.value = iterativeFormula;
     const totalOut = tr.querySelector(".atk-total");
-    if (totalOut) totalOut.value = fmtSigned(attackResult.total);
+    if (totalOut) totalOut.value = fmtSigned(primaryAttackResult.total);
 
     const damageAbilityOut = dmgRow.querySelector(".atk-damage-ability-bonus");
     if (damageAbilityOut) damageAbilityOut.value = fmtSigned(damageResult.abilityDamage);
@@ -1883,9 +1917,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const hitAbilityCustomWrap = tr.querySelector(".atk-hit-ability-custom-wrap");
     if (hitAbilityCustomWrap) {
-      const showCustom = String(data.hitAbility).toUpperCase() === "CUSTOM";
-      hitAbilityCustomWrap.hidden = !showCustom;
-      hitAbilityCustomWrap.setAttribute("aria-hidden", String(!showCustom));
+      hitAbilityCustomWrap.hidden = true;
+      hitAbilityCustomWrap.setAttribute("aria-hidden", "true");
     }
 
     const damageAbilityCustomWrap = dmgRow.querySelector(".atk-damage-ability-custom-wrap");
@@ -1900,7 +1933,7 @@ document.addEventListener("DOMContentLoaded", () => {
       damageRulesOut.value = `${getAttackAbilityLabel(resolvedDamageAbility)} ${resolvedDamageMultiplier === 0 ? "x0" : `x${resolvedDamageMultiplier}`}`;
     }
 
-    return { attackTotal: attackResult.total, babUsed: data.babUsed };
+    return { attackTotal: primaryAttackResult.total, babUsed: data.babUsed };
   }
 
   function getCompAttackDamageRow(hitRow) {
@@ -1967,17 +2000,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function buildFullAttackBonuses(totalToHit, babValue) {
-    const total = Math.trunc(num(totalToHit));
-    const bab = Math.max(0, Math.trunc(num(babValue)));
-    const bonuses = [];
-    const count = Math.max(1, Math.floor((Math.max(1, bab) - 1) / 5) + 1);
-    for (let i = 0; i < count; i++) bonuses.push(total - 5 * i);
-    return bonuses;
-  }
-
-  function rollFullAttackSequence(totalToHit, babValue, label) {
-    const bonuses = buildFullAttackBonuses(totalToHit, babValue);
+  function rollFullAttackSequence(data, label) {
+    const quickMods = getQuickAttackModifiers();
+    const profile = deriveAttackProfile(data);
+    const bonuses = buildFullAttackBonusesFromData(data, quickMods, profile);
     bonuses.forEach((bonus, idx) => {
       rollViaTaleSpire(bonus, `${label} Full #${idx + 1}`);
     });
@@ -2000,7 +2026,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const attackName = preset.name || "";
     const attackType = preset.type || "melee";
     const handling = preset.handling || "one_handed";
-    const babUsed = preset.babUsed ?? Math.max(0, Math.trunc(num(document.getElementById("atk-bab")?.value)));
+    const babUsed = Math.max(0, Math.trunc(num(document.getElementById("atk-bab")?.value)));
     const enhancementAttack = preset.enhancementAttack ?? 0;
     const attackMisc = preset.attackMisc ?? 0;
     const attackPenalty = preset.attackPenalty ?? 0;
@@ -2016,8 +2042,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const notes = preset.notes || "";
     const addStrToRangedDamage = !!preset.addStrToRangedDamage;
     const sequenceOptions = buildAttackSequenceOptionsForBab(babUsed, deriveAttackProfile({ type: attackType, handling }));
-    const hitAbility = preset.hitAbility || "AUTO";
-    const hitAbilityCustom = preset.hitAbilityCustom ?? 0;
     const damageAbility = preset.damageAbility || "AUTO";
     const damageAbilityCustom = preset.damageAbilityCustom ?? 0;
     const damageAbilityMultiplier = preset.damageAbilityMultiplier || "AUTO";
@@ -2028,12 +2052,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="attack-collapsible-body">
               <div class="attack-field-grid">
                 <label class="attack-detail-field">
-                  <span>Caratt. per colpire</span>
-                  <select class="select atk-hit-ability" data-key="${keyPrefix}:hit_ability">${buildOptionsMarkup(ATTACK_ABILITY_OPTIONS, hitAbility)}</select>
-                </label>
-                <label class="attack-detail-field atk-hit-ability-custom-wrap"${String(hitAbility).toUpperCase() === "CUSTOM" ? "" : " hidden"}>
-                  <span>Bonus altra caratteristica</span>
-                  <input class="small atk-hit-ability-custom" data-key="${keyPrefix}:hit_ability_custom" type="number" step="1" value="${hitAbilityCustom}" />
+                  <span>Caratteristica usata</span>
+                  <input class="small atk-hit-ability-source" type="text" value="${["ranged", "ranged_touch"].includes(attackType) ? "Destrezza" : "Forza"}" readonly />
                 </label>
                 <label class="attack-detail-field">
                   <span>Bonus caratteristica</span>
@@ -2159,11 +2179,6 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="attack-card-shell">
             <div class="attack-card-top">
               <input class="atk-name" data-key="${keyPrefix}:name" type="text" value="${attackName}" placeholder="Nome attacco" aria-label="Nome attacco" />
-              <div class="attack-card-actions">
-                <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + TpC">Tiro</button>
-                <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
-                <button type="button" class="roll-btn atk-full-roll-btn" title="Tira la sequenza completa">Full</button>
-              </div>
             </div>
             <div class="attack-card-summary">
               <label class="attack-summary-chip">
@@ -2178,7 +2193,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span>Critico</span>
                 <input class="small atk-crit-summary" data-key="${keyPrefix}:crit_summary" type="text" value="20/x2" readonly />
               </label>
-              <label class="attack-summary-chip">
+              <label class="attack-summary-chip attack-summary-chip-wide">
                 <span>Iterativi</span>
                 <input class="small atk-iterative-seq" data-key="${keyPrefix}:iteratives" type="text" value="+0" readonly />
               </label>
@@ -2193,13 +2208,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 <select class="select atk-handling" data-key="${keyPrefix}:handling">${buildOptionsMarkup(ATTACK_HANDLING_OPTIONS, handling)}</select>
               </label>
               <label class="attack-mini-field">
-                <span>BAB usato</span>
-                <input class="small atk-bab-used" data-key="${keyPrefix}:bab_used" type="number" step="1" value="${babUsed}" />
-              </label>
-              <label class="attack-mini-field">
                 <span>Sequenza</span>
                 <select class="select atk-sequence" data-key="${keyPrefix}:sequence">${buildOptionsMarkup(sequenceOptions, sequenceIndex)}</select>
               </label>
+            </div>
+            <div class="attack-card-actions attack-card-actions-bar">
+              <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + TpC">Tiro</button>
+              <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
+              <button type="button" class="roll-btn atk-full-roll-btn" title="Tira la sequenza completa">Full</button>
             </div>
             <div class="attack-row-dmg-host">
               ${dmgHostMarkup}
@@ -2970,6 +2986,44 @@ document.addEventListener("DOMContentLoaded", () => {
     return window.PF1EData?.tables?.skills || null;
   }
 
+  function getCombatFeatConfig() {
+    return window.PF1EData?.feats?.combat || null;
+  }
+
+  function getQuickAttackModifierIds() {
+    return getCombatFeatConfig()?.quickAttackIds || [
+      "atk-quick-power-attack",
+      "atk-quick-furious-focus",
+      "atk-quick-weapon-focus",
+      "atk-quick-weapon-specialization",
+      "atk-quick-morale",
+      "atk-quick-sacred",
+      "atk-quick-luck",
+      "atk-quick-competence",
+      "atk-quick-defensive",
+      "atk-quick-twf",
+      "atk-quick-smite-atk",
+      "atk-quick-smite-dmg",
+      "atk-quick-mythic-atk",
+      "atk-quick-mythic-dmg",
+    ];
+  }
+
+  function getMythicCombatFeatIds() {
+    return getCombatFeatConfig()?.mythicIds || [
+      "mythic-feat-power-attack",
+      "mythic-feat-furious-focus",
+      "mythic-feat-mythic-toughness",
+      "mythic-feat-spell-focus",
+      "mythic-feat-spell-penetration",
+      "mythic-feat-deadly-aim",
+      "mythic-feat-rapid-shot",
+      "mythic-feat-manyshot",
+      "mythic-feat-improved-critical",
+      "mythic-feat-weapon-focus",
+    ];
+  }
+
   function getMythicCombatFeatEffects() {
     return {
       powerAttack: !!document.getElementById("mythic-feat-power-attack")?.checked,
@@ -3599,10 +3653,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const row = atkFullBtn.closest?.(".attack-row");
       if (row) {
         recalcAttackRow(row);
-        const total = parseSignedInt(row.querySelector(".atk-total")?.value);
+        const data = readAttackRowData(row);
         const label = String(row.querySelector(".atk-name")?.value || "").trim() || "Attacco";
-        const babValue = num(document.getElementById("atk-bab")?.value);
-        rollFullAttackSequence(total, babValue, label);
+        rollFullAttackSequence(data, label);
         return;
       }
     }
@@ -4040,20 +4093,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  [
-    "atk-quick-power-attack",
-    "atk-quick-weapon-focus",
-    "atk-quick-morale",
-    "atk-quick-sacred",
-    "atk-quick-luck",
-    "atk-quick-competence",
-    "atk-quick-defensive",
-    "atk-quick-twf",
-    "atk-quick-smite-atk",
-    "atk-quick-smite-dmg",
-    "atk-quick-mythic-atk",
-    "atk-quick-mythic-dmg",
-  ].forEach((id) => {
+  getQuickAttackModifierIds().forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener("input", recalcAllAttacks);
@@ -4122,18 +4162,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.addEventListener("change", recalcHitPoints);
   });
 
-  [
-    "mythic-feat-power-attack",
-    "mythic-feat-furious-focus",
-    "mythic-feat-mythic-toughness",
-    "mythic-feat-spell-focus",
-    "mythic-feat-spell-penetration",
-    "mythic-feat-deadly-aim",
-    "mythic-feat-rapid-shot",
-    "mythic-feat-manyshot",
-    "mythic-feat-improved-critical",
-    "mythic-feat-weapon-focus",
-  ].forEach((id) => {
+  getMythicCombatFeatIds().forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener("input", () => {

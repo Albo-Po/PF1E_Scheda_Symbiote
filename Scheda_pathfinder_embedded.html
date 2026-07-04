@@ -577,29 +577,43 @@
   </div>
 
   <section class="attack-quick-mods" aria-labelledby="attack-quick-mods-title">
-    <div class="attack-quick-head">
-      <div>
-        <h3 id="attack-quick-mods-title" style="margin:0 0 4px;">Modificatori rapidi</h3>
-        <p>Bonus e penalità temporanei applicati automaticamente a tutti gli attacchi della tabella.</p>
+    <details class="attack-quick-panel" open>
+      <summary class="attack-quick-head">
+        <div>
+          <h3 id="attack-quick-mods-title" style="margin:0 0 4px;">Modificatori rapidi</h3>
+          <p>Bonus e penalità temporanei applicati automaticamente a tutti gli attacchi della tabella.</p>
+        </div>
+      </summary>
+      <div class="attack-quick-stack">
+        <details class="attack-quick-collapsible attack-quick-subpanel" open>
+          <summary>Talenti</summary>
+          <div class="attack-quick-grid attack-quick-grid-core">
+            <div class="attack-quick-card">
+              <span>Talenti</span>
+              <label><input id="atk-quick-power-attack" type="checkbox" />Attacco Poderoso</label>
+              <label><input id="atk-quick-furious-focus" type="checkbox" />Furia focalizzata</label>
+              <label><input id="atk-quick-weapon-focus" type="checkbox" />Arma focalizzata</label>
+              <label><input id="atk-quick-weapon-specialization" type="checkbox" />Arma specializzata</label>
+            </div>
+          </div>
+        </details>
+        <details class="attack-quick-collapsible attack-quick-subpanel" open>
+          <summary>Altri modificatori</summary>
+          <div class="attack-quick-grid">
+            <label class="attack-quick-card"><span>Morale</span><input id="atk-quick-morale" class="small" type="number" step="1" value="0" /></label>
+            <label class="attack-quick-card"><span>Sacro / Profano</span><input id="atk-quick-sacred" class="small" type="number" step="1" value="0" /></label>
+            <label class="attack-quick-card"><span>Fortuna</span><input id="atk-quick-luck" class="small" type="number" step="1" value="0" /></label>
+            <label class="attack-quick-card"><span>Competenza</span><input id="atk-quick-competence" class="small" type="number" step="1" value="0" /></label>
+            <label class="attack-quick-card"><span>Combattere sulla difensiva</span><input id="atk-quick-defensive" class="small" type="number" step="1" min="0" value="0" /></label>
+            <label class="attack-quick-card"><span>Due armi</span><input id="atk-quick-twf" class="small" type="number" step="1" min="0" value="0" /></label>
+            <label class="attack-quick-card"><span>Punire il Male / Smite TpC</span><input id="atk-quick-smite-atk" class="small" type="number" step="1" value="0" /></label>
+            <label class="attack-quick-card"><span>Punire il Male / Smite danni</span><input id="atk-quick-smite-dmg" class="small" type="number" step="1" value="0" /></label>
+            <label class="attack-quick-card"><span>Bonus mitici / campagna TpC</span><input id="atk-quick-mythic-atk" class="small" type="number" step="1" value="0" /></label>
+            <label class="attack-quick-card"><span>Bonus mitici / campagna danni</span><input id="atk-quick-mythic-dmg" class="small" type="number" step="1" value="0" /></label>
+          </div>
+        </details>
       </div>
-    </div>
-    <div class="attack-quick-grid">
-      <div class="attack-quick-card">
-        <span>Talenti</span>
-        <label><input id="atk-quick-power-attack" type="checkbox" />Attacco Poderoso</label>
-        <label><input id="atk-quick-weapon-focus" type="checkbox" />Arma focalizzata</label>
-      </div>
-      <label class="attack-quick-card"><span>Morale</span><input id="atk-quick-morale" class="small" type="number" step="1" value="0" /></label>
-      <label class="attack-quick-card"><span>Sacro / Profano</span><input id="atk-quick-sacred" class="small" type="number" step="1" value="0" /></label>
-      <label class="attack-quick-card"><span>Fortuna</span><input id="atk-quick-luck" class="small" type="number" step="1" value="0" /></label>
-      <label class="attack-quick-card"><span>Competenza</span><input id="atk-quick-competence" class="small" type="number" step="1" value="0" /></label>
-      <label class="attack-quick-card"><span>Combattere sulla difensiva</span><input id="atk-quick-defensive" class="small" type="number" step="1" min="0" value="0" /></label>
-      <label class="attack-quick-card"><span>Due armi</span><input id="atk-quick-twf" class="small" type="number" step="1" min="0" value="0" /></label>
-      <label class="attack-quick-card"><span>Punire il Male / Smite TpC</span><input id="atk-quick-smite-atk" class="small" type="number" step="1" value="0" /></label>
-      <label class="attack-quick-card"><span>Punire il Male / Smite danni</span><input id="atk-quick-smite-dmg" class="small" type="number" step="1" value="0" /></label>
-      <label class="attack-quick-card"><span>Bonus mitici / campagna TpC</span><input id="atk-quick-mythic-atk" class="small" type="number" step="1" value="0" /></label>
-      <label class="attack-quick-card"><span>Bonus mitici / campagna danni</span><input id="atk-quick-mythic-dmg" class="small" type="number" step="1" value="0" /></label>
-    </div>
+    </details>
   </section>
 
   <div class="actions" style="margin-top:0;">
@@ -1179,6 +1193,31 @@
 
             <div class="field span-12"><label>Capacità Mitiche</label><textarea placeholder="Capacità base e di percorso..."></textarea></div>
             <div class="field span-12"><label>Cimenti</label><textarea placeholder="Cimenti completati..."></textarea></div>
+
+            <div class="field span-12">
+              <label>Talenti Mitici Rilevanti</label>
+              <div class="attack-quick-grid" style="margin-top:8px;">
+                <div class="attack-quick-card">
+                  <span>Attacchi</span>
+                  <label><input id="mythic-feat-power-attack" type="checkbox" />Attacco Poderoso Mitico</label>
+                  <label><input id="mythic-feat-furious-focus" type="checkbox" />Furia focalizzata Mitica</label>
+                  <label><input id="mythic-feat-weapon-focus" type="checkbox" />Arma focalizzata Mitica</label>
+                </div>
+                <div class="attack-quick-card">
+                  <span>Altri talenti</span>
+                  <label><input id="mythic-feat-mythic-toughness" type="checkbox" />Robustezza Mitica</label>
+                  <label><input id="mythic-feat-spell-focus" type="checkbox" />Incantesimi Focalizzati Mitici</label>
+                  <label><input id="mythic-feat-spell-penetration" type="checkbox" />Penetrazione Magica Mitica</label>
+                </div>
+                <div class="attack-quick-card">
+                  <span>Talenti a distanza</span>
+                  <label><input id="mythic-feat-deadly-aim" type="checkbox" />Mira Letale Mitica</label>
+                  <label><input id="mythic-feat-rapid-shot" type="checkbox" />Tiro Rapido Mitico</label>
+                  <label><input id="mythic-feat-manyshot" type="checkbox" />Tiro Multiplo Mitico</label>
+                  <label><input id="mythic-feat-improved-critical" type="checkbox" />Critico Migliorato Mitico</label>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1627,6 +1666,7 @@
   <script src="./js/pf1e_tables.js" defer></script>
   <script src="./js/pf1e_spells.js" defer></script>
   <script src="./js/pf1e_equipment.js" defer></script>
+  <script src="./js/pf1e_feats.js" defer></script>
   <script src="./scheda_pathfinder.js" defer></script>
 </body>
 </html>
