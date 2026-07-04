@@ -1480,6 +1480,13 @@ document.addEventListener("DOMContentLoaded", () => {
     { value: "touch", label: "Contatto" },
     { value: "ranged_touch", label: "Contatto a distanza" },
   ];
+  const ATTACK_ABILITY_OPTIONS = [
+    { value: "AUTO", label: "Automatico" },
+    { value: "FOR", label: "Forza" },
+    { value: "DES", label: "Destrezza" },
+    { value: "CUSTOM", label: "Altra" },
+    { value: "NONE", label: "Nessuna" },
+  ];
   const ATTACK_HANDLING_OPTIONS = [
     { value: "one_handed", label: "Una mano" },
     { value: "two_handed", label: "Due mani" },
@@ -1496,21 +1503,25 @@ document.addEventListener("DOMContentLoaded", () => {
     { value: "energia", label: "Energia" },
     { value: "misto", label: "Misto" },
   ];
+  const ATTACK_DAMAGE_MULTIPLIERS = [
+    { value: "AUTO", label: "Auto" },
+    { value: "0", label: "x0" },
+    { value: "0.5", label: "x0.5" },
+    { value: "1", label: "x1" },
+    { value: "1.5", label: "x1.5" },
+    { value: "2", label: "x2" },
+  ];
   const ATTACK_PRESETS = [
     {
       name: "Spada lunga +2",
       type: "melee",
       handling: "two_handed",
-      babUsed: 11,
-      hitAbility: "FOR",
       enhancementAttack: 2,
       attackMisc: 0,
       attackPenalty: 0,
       sequenceIndex: 0,
       diceCount: 1,
       dieSize: 8,
-      damageAbility: "FOR",
-      damageAbilityMultiplier: 1.5,
       enhancementDamage: 2,
       damageMisc: 0,
       critRange: 19,
@@ -1524,16 +1535,12 @@ document.addEventListener("DOMContentLoaded", () => {
       name: "Arco lungo composito",
       type: "ranged",
       handling: "ranged",
-      babUsed: 11,
-      hitAbility: "DES",
       enhancementAttack: 0,
       attackMisc: 0,
       attackPenalty: 0,
       sequenceIndex: 0,
       diceCount: 1,
       dieSize: 8,
-      damageAbility: "FOR",
-      damageAbilityMultiplier: 1,
       enhancementDamage: 0,
       damageMisc: 0,
       critRange: 20,
@@ -1572,6 +1579,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const normalized = String(code || "NONE").trim().toUpperCase();
     if (normalized === "FOR") return "Forza";
     if (normalized === "DES") return "Destrezza";
+    if (normalized === "CUSTOM") return "Altra";
+    if (normalized === "AUTO") return "Automatico";
     return "Nessuna";
   }
 
@@ -1609,6 +1618,21 @@ document.addEventListener("DOMContentLoaded", () => {
       mythicDamage: num(document.getElementById("atk-quick-mythic-dmg")?.value),
       globalMisc: num(document.getElementById("atk-misc")?.value),
     };
+  }
+
+  function resolveAttackHitAbilityCode(data) {
+    const selected = String(data.hitAbility || "AUTO").trim().toUpperCase();
+    return selected === "AUTO" ? getAutoHitAbilityCode(data.type) : selected;
+  }
+
+  function resolveAttackDamageAbilityCode(data, profile) {
+    const selected = String(data.damageAbility || "AUTO").trim().toUpperCase();
+    return selected === "AUTO" ? getAutoDamageAbilityCode(profile) : selected;
+  }
+
+  function resolveAttackDamageMultiplier(data, profile) {
+    const selected = String(data.damageAbilityMultiplier ?? "AUTO").trim().toUpperCase();
+    return selected === "AUTO" ? getAutoDamageMultiplier(profile) : num(selected);
   }
 
   function deriveAttackProfile(data) {
@@ -1659,10 +1683,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function calculateAbilityDamageBonus(data, profile) {
-    const abilityCode = String(data.damageAbility || "NONE");
-    const baseMod = readAttackAbilityModifier(abilityCode, 0);
+    const abilityCode = resolveAttackDamageAbilityCode(data, profile);
+    const baseMod = readAttackAbilityModifier(abilityCode, data.damageAbilityCustom);
     if (abilityCode === "NONE") return 0;
-    return Math.floor(baseMod * num(data.damageAbilityMultiplier));
+    return Math.floor(baseMod * resolveAttackDamageMultiplier(data, profile));
   }
 
   function calculatePowerAttackDamageBonus(data, quickMods, profile) {
@@ -1681,7 +1705,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function calculateAttackTotalToHit(data, quickMods, profile) {
-    const hitAbilityBonus = readAttackAbilityModifier(data.hitAbility, data.hitAbilityCustom);
+    const hitAbilityBonus = readAttackAbilityModifier(resolveAttackHitAbilityCode(data), data.hitAbilityCustom);
     let total =
       num(data.babUsed) +
       hitAbilityBonus +
@@ -1760,6 +1784,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getAttackDamageRow(hitRow) {
     if (!hitRow) return null;
+    const inlineHost = hitRow.querySelector(".attack-row-dmg-host");
+    if (inlineHost) return inlineHost;
     const next = hitRow.nextElementSibling;
     return next?.classList?.contains("attack-row-dmg") ? next : null;
   }
@@ -1771,12 +1797,17 @@ document.addEventListener("DOMContentLoaded", () => {
       type: String(tr.querySelector(".atk-type")?.value || "melee"),
       handling: String(tr.querySelector(".atk-handling")?.value || "one_handed"),
       babUsed: Math.max(0, Math.trunc(num(tr.querySelector(".atk-bab-used")?.value || document.getElementById("atk-bab")?.value))),
+      hitAbility: String(tr.querySelector(".atk-hit-ability")?.value || "AUTO"),
+      hitAbilityCustom: num(tr.querySelector(".atk-hit-ability-custom")?.value),
       enhancementAttack: num(tr.querySelector(".atk-enhancement-atk")?.value),
       attackMisc: num(tr.querySelector(".atk-attack-misc")?.value),
       attackPenalty: num(tr.querySelector(".atk-attack-penalty")?.value),
       sequenceIndex: Math.max(0, Math.trunc(num(tr.querySelector(".atk-sequence")?.value))),
       diceCount: Math.max(1, Math.trunc(num(dmgRow?.querySelector(".atk-dice-count")?.value))),
       dieSize: Math.max(2, Math.trunc(num(dmgRow?.querySelector(".atk-die")?.value))),
+      damageAbility: String(dmgRow?.querySelector(".atk-damage-ability")?.value || "AUTO"),
+      damageAbilityCustom: num(dmgRow?.querySelector(".atk-damage-ability-custom")?.value),
+      damageAbilityMultiplier: String(dmgRow?.querySelector(".atk-damage-multiplier")?.value || "AUTO"),
       enhancementDamage: num(dmgRow?.querySelector(".atk-enhancement-dmg")?.value),
       damageMisc: num(dmgRow?.querySelector(".atk-damage-misc")?.value),
       critRange: num(dmgRow?.querySelector(".atk-crit-range")?.value),
@@ -1796,11 +1827,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = readAttackRowData(tr);
     const quickMods = getQuickAttackModifiers();
     const profile = deriveAttackProfile(data);
-    data.hitAbility = getAutoHitAbilityCode(data.type);
-    data.hitAbilityCustom = 0;
-    data.damageAbility = getAutoDamageAbilityCode(profile);
-    data.damageAbilityCustom = 0;
-    data.damageAbilityMultiplier = getAutoDamageMultiplier(profile);
+    const resolvedHitAbility = resolveAttackHitAbilityCode(data);
+    const resolvedDamageAbility = resolveAttackDamageAbilityCode(data, profile);
+    const resolvedDamageMultiplier = resolveAttackDamageMultiplier(data, profile);
     const attackResult = calculateAttackTotalToHit(data, quickMods, profile);
     const damageResult = calculateAttackDamageBonus(data, quickMods, profile);
     const critFormula = formatCritFormula(data.critRange, data.critMult);
@@ -1817,8 +1846,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const hitAbilityOut = tr.querySelector(".atk-hit-ability-bonus");
     if (hitAbilityOut) hitAbilityOut.value = fmtSigned(attackResult.hitAbilityBonus);
-    const hitAbilityLabelOut = tr.querySelector(".atk-hit-ability-label");
-    if (hitAbilityLabelOut) hitAbilityLabelOut.value = getAttackAbilityLabel(data.hitAbility);
     const penaltiesOut = tr.querySelector(".atk-penalties-total");
     if (penaltiesOut) penaltiesOut.value = fmtSigned(-attackResult.penalties);
     const iterativeOut = tr.querySelector(".atk-iterative-seq");
@@ -1828,8 +1855,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const damageAbilityOut = dmgRow.querySelector(".atk-damage-ability-bonus");
     if (damageAbilityOut) damageAbilityOut.value = fmtSigned(damageResult.abilityDamage);
-    const damageAbilityLabelOut = dmgRow.querySelector(".atk-damage-ability-label");
-    if (damageAbilityLabelOut) damageAbilityLabelOut.value = getAttackAbilityLabel(data.damageAbility);
     const damageTotalOut = dmgRow.querySelector(".atk-dmg-total");
     if (damageTotalOut) damageTotalOut.value = damageFormula;
     const damageSummaryOut = tr.querySelector(".atk-dmg-summary");
@@ -1855,6 +1880,25 @@ document.addEventListener("DOMContentLoaded", () => {
       el.hidden = shouldHide;
       el.setAttribute("aria-hidden", String(shouldHide));
     });
+
+    const hitAbilityCustomWrap = tr.querySelector(".atk-hit-ability-custom-wrap");
+    if (hitAbilityCustomWrap) {
+      const showCustom = String(data.hitAbility).toUpperCase() === "CUSTOM";
+      hitAbilityCustomWrap.hidden = !showCustom;
+      hitAbilityCustomWrap.setAttribute("aria-hidden", String(!showCustom));
+    }
+
+    const damageAbilityCustomWrap = dmgRow.querySelector(".atk-damage-ability-custom-wrap");
+    if (damageAbilityCustomWrap) {
+      const showCustom = String(data.damageAbility).toUpperCase() === "CUSTOM";
+      damageAbilityCustomWrap.hidden = !showCustom;
+      damageAbilityCustomWrap.setAttribute("aria-hidden", String(!showCustom));
+    }
+
+    const damageRulesOut = dmgRow.querySelector(".atk-damage-rules");
+    if (damageRulesOut) {
+      damageRulesOut.value = `${getAttackAbilityLabel(resolvedDamageAbility)} ${resolvedDamageMultiplier === 0 ? "x0" : `x${resolvedDamageMultiplier}`}`;
+    }
 
     return { attackTotal: attackResult.total, babUsed: data.babUsed };
   }
@@ -1972,11 +2016,155 @@ document.addEventListener("DOMContentLoaded", () => {
     const notes = preset.notes || "";
     const addStrToRangedDamage = !!preset.addStrToRangedDamage;
     const sequenceOptions = buildAttackSequenceOptionsForBab(babUsed, deriveAttackProfile({ type: attackType, handling }));
+    const hitAbility = preset.hitAbility || "AUTO";
+    const hitAbilityCustom = preset.hitAbilityCustom ?? 0;
+    const damageAbility = preset.damageAbility || "AUTO";
+    const damageAbilityCustom = preset.damageAbilityCustom ?? 0;
+    const damageAbilityMultiplier = preset.damageAbilityMultiplier || "AUTO";
+    const dmgHostMarkup = `
+        <div class="attack-dmg-line">
+          <details class="attack-collapsible" open>
+            <summary>Tiro per colpire</summary>
+            <div class="attack-collapsible-body">
+              <div class="attack-field-grid">
+                <label class="attack-detail-field">
+                  <span>Caratt. per colpire</span>
+                  <select class="select atk-hit-ability" data-key="${keyPrefix}:hit_ability">${buildOptionsMarkup(ATTACK_ABILITY_OPTIONS, hitAbility)}</select>
+                </label>
+                <label class="attack-detail-field atk-hit-ability-custom-wrap"${String(hitAbility).toUpperCase() === "CUSTOM" ? "" : " hidden"}>
+                  <span>Bonus altra caratteristica</span>
+                  <input class="small atk-hit-ability-custom" data-key="${keyPrefix}:hit_ability_custom" type="number" step="1" value="${hitAbilityCustom}" />
+                </label>
+                <label class="attack-detail-field">
+                  <span>Bonus caratteristica</span>
+                  <input class="small atk-hit-ability-bonus" data-key="${keyPrefix}:hit_bonus" type="text" value="+0" readonly />
+                </label>
+                <label class="attack-detail-field">
+                  <span>Potenziamento TpC</span>
+                  <input class="small atk-enhancement-atk" data-key="${keyPrefix}:enh_atk" type="number" step="1" value="${enhancementAttack}" />
+                </label>
+                <label class="attack-detail-field">
+                  <span>Bonus vari TpC</span>
+                  <input class="small atk-attack-misc" data-key="${keyPrefix}:attack_misc" type="number" step="1" value="${attackMisc}" />
+                </label>
+                <label class="attack-detail-field">
+                  <span>Penalita applicate</span>
+                  <input class="small atk-attack-penalty" data-key="${keyPrefix}:attack_penalty" type="number" step="1" value="${attackPenalty}" />
+                </label>
+                <label class="attack-detail-field">
+                  <span>Penalita totali</span>
+                  <input class="small atk-penalties-total" data-key="${keyPrefix}:penalties_total" type="text" value="+0" readonly />
+                </label>
+              </div>
+            </div>
+          </details>
+          <details class="attack-collapsible" open>
+            <summary>Danni</summary>
+            <div class="attack-collapsible-body">
+              <div class="attack-field-grid">
+                <label class="attack-detail-field">
+                  <span>Dadi</span>
+                  <div class="attack-inline-pair">
+                    <input class="small atk-dice-count" data-key="${keyPrefix}:dice_count" type="number" min="1" step="1" value="${diceCount}" />
+                    <select class="select atk-die" data-key="${keyPrefix}:die_size">
+                      <option value="4"${dieSize === 4 ? " selected" : ""}>d4</option>
+                      <option value="6"${dieSize === 6 ? " selected" : ""}>d6</option>
+                      <option value="8"${dieSize === 8 ? " selected" : ""}>d8</option>
+                      <option value="10"${dieSize === 10 ? " selected" : ""}>d10</option>
+                      <option value="12"${dieSize === 12 ? " selected" : ""}>d12</option>
+                    </select>
+                  </div>
+                </label>
+                <label class="attack-detail-field">
+                  <span>Caratt. ai danni</span>
+                  <select class="select atk-damage-ability" data-key="${keyPrefix}:damage_ability">${buildOptionsMarkup(ATTACK_ABILITY_OPTIONS, damageAbility)}</select>
+                </label>
+                <label class="attack-detail-field atk-damage-ability-custom-wrap"${String(damageAbility).toUpperCase() === "CUSTOM" ? "" : " hidden"}>
+                  <span>Bonus altra caratteristica</span>
+                  <input class="small atk-damage-ability-custom" data-key="${keyPrefix}:damage_ability_custom" type="number" step="1" value="${damageAbilityCustom}" />
+                </label>
+                <label class="attack-detail-field">
+                  <span>Moltiplicatore</span>
+                  <select class="select atk-damage-multiplier" data-key="${keyPrefix}:damage_multiplier">${buildOptionsMarkup(ATTACK_DAMAGE_MULTIPLIERS, damageAbilityMultiplier)}</select>
+                </label>
+                <label class="attack-detail-field">
+                  <span>Bonus caratteristica</span>
+                  <input class="small atk-damage-ability-bonus" data-key="${keyPrefix}:dmg_ability_bonus" type="text" value="+0" readonly />
+                </label>
+                <label class="attack-detail-field">
+                  <span>Regola applicata</span>
+                  <input class="small atk-damage-rules" data-key="${keyPrefix}:damage_rule" type="text" value="Forza x1" readonly />
+                </label>
+                <label class="attack-detail-field">
+                  <span>Potenziamento danni</span>
+                  <input class="small atk-enhancement-dmg" data-key="${keyPrefix}:enh_dmg" type="number" step="1" value="${enhancementDamage}" />
+                </label>
+                <label class="attack-detail-field">
+                  <span>Bonus vari danni</span>
+                  <input class="small atk-damage-misc" data-key="${keyPrefix}:dmg_misc" type="number" step="1" value="${damageMisc}" />
+                </label>
+                <label class="attack-detail-field">
+                  <span>Danno totale</span>
+                  <input class="small atk-dmg-total" data-key="${keyPrefix}:dmg_total" type="text" value="1d8+0" readonly />
+                </label>
+                <label class="attack-detail-field">
+                  <span>Range critico</span>
+                  <select class="select atk-crit-range" data-key="${keyPrefix}:crit_range">
+                    <option value="20"${critRange === 20 ? " selected" : ""}>20</option>
+                    <option value="19"${critRange === 19 ? " selected" : ""}>19-20</option>
+                    <option value="18"${critRange === 18 ? " selected" : ""}>18-20</option>
+                    <option value="17"${critRange === 17 ? " selected" : ""}>17-20</option>
+                  </select>
+                </label>
+                <label class="attack-detail-field">
+                  <span>Moltiplicatore critico</span>
+                  <select class="select atk-crit-mult" data-key="${keyPrefix}:crit_mult">
+                    <option value="2"${critMult === 2 ? " selected" : ""}>x2</option>
+                    <option value="3"${critMult === 3 ? " selected" : ""}>x3</option>
+                    <option value="4"${critMult === 4 ? " selected" : ""}>x4</option>
+                  </select>
+                </label>
+                <label class="attack-detail-field">
+                  <span>Critico</span>
+                  <input class="small atk-crit" data-key="${keyPrefix}:crit_display" type="text" value="20/x2" readonly />
+                </label>
+                <label class="attack-detail-field">
+                  <span>Incremento gittata</span>
+                  <input class="small atk-range" data-key="${keyPrefix}:range" type="text" value="${rangeIncrement}" placeholder="Es. 9 m / 30 ft" />
+                </label>
+                <label class="attack-detail-field">
+                  <span>Tipo danno</span>
+                  <select class="select atk-damage-type" data-key="${keyPrefix}:damage_type">${buildOptionsMarkup(ATTACK_DAMAGE_TYPES, damageType)}</select>
+                </label>
+                <label class="attack-detail-field atk-ranged-helper"${!["ranged", "ranged_touch"].includes(attackType) ? " hidden" : ""}>
+                  <span>Eccezione danni a distanza</span>
+                  <label class="attack-inline-check">
+                    <input class="atk-ranged-str" data-key="${keyPrefix}:ranged_str" type="checkbox"${addStrToRangedDamage ? " checked" : ""} />
+                    Aggiunge FOR ai danni
+                  </label>
+                </label>
+                <label class="attack-detail-field attack-detail-field-wide">
+                  <span>Note tattiche</span>
+                  <textarea class="atk-notes" data-key="${keyPrefix}:notes" rows="2" placeholder="Es. ferro freddo, sacra, precisione, furtivo...">${notes}</textarea>
+                </label>
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
 
     return {
       hit: `
         <td class="attack-card-cell" colspan="4">
           <div class="attack-card-shell">
+            <div class="attack-card-top">
+              <input class="atk-name" data-key="${keyPrefix}:name" type="text" value="${attackName}" placeholder="Nome attacco" aria-label="Nome attacco" />
+              <div class="attack-card-actions">
+                <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + TpC">Tiro</button>
+                <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
+                <button type="button" class="roll-btn atk-full-roll-btn" title="Tira la sequenza completa">Full</button>
+              </div>
+            </div>
             <div class="attack-card-summary">
               <label class="attack-summary-chip">
                 <span>TpC</span>
@@ -1994,14 +2182,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span>Iterativi</span>
                 <input class="small atk-iterative-seq" data-key="${keyPrefix}:iteratives" type="text" value="+0" readonly />
               </label>
-            </div>
-            <div class="attack-card-top">
-              <input class="atk-name" data-key="${keyPrefix}:name" type="text" value="${attackName}" placeholder="Nome attacco" aria-label="Nome attacco" />
-              <div class="attack-card-actions">
-                <button type="button" class="roll-btn atk-roll-btn" title="Tira 1d20 + TpC">Tiro</button>
-                <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
-                <button type="button" class="roll-btn atk-full-roll-btn" title="Tira la sequenza completa">Full</button>
-              </div>
             </div>
             <div class="attack-card-config">
               <label class="attack-mini-field">
@@ -2021,125 +2201,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 <select class="select atk-sequence" data-key="${keyPrefix}:sequence">${buildOptionsMarkup(sequenceOptions, sequenceIndex)}</select>
               </label>
             </div>
+            <div class="attack-row-dmg-host">
+              ${dmgHostMarkup}
+            </div>
           </div>
         </td>
       `,
       dmg: `
-        <td colspan="4">
-          <div class="attack-dmg-line">
-            <details class="attack-collapsible" open>
-              <summary>Tiro per colpire</summary>
-              <div class="attack-collapsible-body">
-                <div class="attack-field-grid">
-                  <label class="attack-detail-field">
-                    <span>Caratteristica usata</span>
-                    <input class="small atk-hit-ability-label" type="text" value="${getAttackAbilityLabel(getAutoHitAbilityCode(attackType))}" readonly />
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Bonus caratteristica</span>
-                    <input class="small atk-hit-ability-bonus" data-key="${keyPrefix}:hit_bonus" type="text" value="+0" readonly />
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Potenziamento TpC</span>
-                    <input class="small atk-enhancement-atk" data-key="${keyPrefix}:enh_atk" type="number" step="1" value="${enhancementAttack}" />
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Bonus vari TpC</span>
-                    <input class="small atk-attack-misc" data-key="${keyPrefix}:attack_misc" type="number" step="1" value="${attackMisc}" />
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Penalita applicate</span>
-                    <input class="small atk-attack-penalty" data-key="${keyPrefix}:attack_penalty" type="number" step="1" value="${attackPenalty}" />
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Penalita totali</span>
-                    <input class="small atk-penalties-total" data-key="${keyPrefix}:penalties_total" type="text" value="+0" readonly />
-                  </label>
-                </div>
-              </div>
-            </details>
-            <details class="attack-collapsible" open>
-              <summary>Danni</summary>
-              <div class="attack-collapsible-body">
-                <div class="attack-field-grid">
-                  <label class="attack-detail-field">
-                    <span>Dadi</span>
-                    <div class="attack-inline-pair">
-                      <input class="small atk-dice-count" data-key="${keyPrefix}:dice_count" type="number" min="1" step="1" value="${diceCount}" />
-                      <select class="select atk-die" data-key="${keyPrefix}:die_size">
-                        <option value="4"${dieSize === 4 ? " selected" : ""}>d4</option>
-                        <option value="6"${dieSize === 6 ? " selected" : ""}>d6</option>
-                        <option value="8"${dieSize === 8 ? " selected" : ""}>d8</option>
-                        <option value="10"${dieSize === 10 ? " selected" : ""}>d10</option>
-                        <option value="12"${dieSize === 12 ? " selected" : ""}>d12</option>
-                      </select>
-                    </div>
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Caratt. ai danni</span>
-                    <input class="small atk-damage-ability-label" type="text" value="${getAttackAbilityLabel(getAutoDamageAbilityCode(deriveAttackProfile({ type: attackType, handling, addStrToRangedDamage })))}" readonly />
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Bonus caratteristica</span>
-                    <input class="small atk-damage-ability-bonus" data-key="${keyPrefix}:dmg_ability_bonus" type="text" value="+0" readonly />
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Potenziamento danni</span>
-                    <input class="small atk-enhancement-dmg" data-key="${keyPrefix}:enh_dmg" type="number" step="1" value="${enhancementDamage}" />
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Bonus vari danni</span>
-                    <input class="small atk-damage-misc" data-key="${keyPrefix}:dmg_misc" type="number" step="1" value="${damageMisc}" />
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Danno totale</span>
-                    <input class="small atk-dmg-total" data-key="${keyPrefix}:dmg_total" type="text" value="1d8+0" readonly />
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Range critico</span>
-                    <select class="select atk-crit-range" data-key="${keyPrefix}:crit_range">
-                      <option value="20"${critRange === 20 ? " selected" : ""}>20</option>
-                      <option value="19"${critRange === 19 ? " selected" : ""}>19-20</option>
-                      <option value="18"${critRange === 18 ? " selected" : ""}>18-20</option>
-                      <option value="17"${critRange === 17 ? " selected" : ""}>17-20</option>
-                    </select>
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Moltiplicatore critico</span>
-                    <select class="select atk-crit-mult" data-key="${keyPrefix}:crit_mult">
-                      <option value="2"${critMult === 2 ? " selected" : ""}>x2</option>
-                      <option value="3"${critMult === 3 ? " selected" : ""}>x3</option>
-                      <option value="4"${critMult === 4 ? " selected" : ""}>x4</option>
-                    </select>
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Critico</span>
-                    <input class="small atk-crit" data-key="${keyPrefix}:crit_display" type="text" value="20/x2" readonly />
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Incremento gittata</span>
-                    <input class="small atk-range" data-key="${keyPrefix}:range" type="text" value="${rangeIncrement}" placeholder="Es. 9 m / 30 ft" />
-                  </label>
-                  <label class="attack-detail-field">
-                    <span>Tipo danno</span>
-                    <select class="select atk-damage-type" data-key="${keyPrefix}:damage_type">${buildOptionsMarkup(ATTACK_DAMAGE_TYPES, damageType)}</select>
-                  </label>
-                  <label class="attack-detail-field atk-ranged-helper"${!["ranged", "ranged_touch"].includes(attackType) ? " hidden" : ""}>
-                    <span>Eccezione danni a distanza</span>
-                    <label class="attack-inline-check">
-                      <input class="atk-ranged-str" data-key="${keyPrefix}:ranged_str" type="checkbox"${addStrToRangedDamage ? " checked" : ""} />
-                      Aggiunge FOR ai danni
-                    </label>
-                  </label>
-                  <label class="attack-detail-field attack-detail-field-wide">
-                    <span>Note tattiche</span>
-                    <textarea class="atk-notes" data-key="${keyPrefix}:notes" rows="2" placeholder="Es. ferro freddo, sacra, precisione, furtivo...">${notes}</textarea>
-                  </label>
-                </div>
-              </div>
-            </details>
-          </div>
-        </td>
+        <td colspan="4" hidden></td>
       `,
     };
   }

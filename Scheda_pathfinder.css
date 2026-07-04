@@ -2227,6 +2227,7 @@ td .roll-btn + .roll-btn{
 
 .attack-summary-chip span,
 .attack-mini-field span{
+  display:block;
   font-size:10px;
   font-weight:800;
   letter-spacing:.45px;
@@ -2235,6 +2236,8 @@ td .roll-btn + .roll-btn{
 }
 
 .attack-summary-chip input{
+  display:block;
+  width:100%;
   border:0 !important;
   background:transparent !important;
   padding:0 !important;
@@ -2328,11 +2331,24 @@ td .roll-btn + .roll-btn{
   background:transparent;
 }
 
+#attacks-table .attack-row-dmg-host{
+  padding:0 14px 14px;
+}
+
+#attacks-table .attack-row-dmg-host .attack-dmg-line{
+  grid-template-columns:1fr;
+  width:100%;
+  padding:0;
+  border:0;
+  border-radius:0;
+}
+
 .attack-collapsible{
   border:1px solid rgba(74, 58, 39, .12);
   border-radius:12px;
   background:var(--surface);
   overflow:hidden;
+  width:100%;
 }
 
 .attack-collapsible > summary{
