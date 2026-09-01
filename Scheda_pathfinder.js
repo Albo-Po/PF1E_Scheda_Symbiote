@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const ATK_STORAGE_KEY = "pf1e_attacks_extra_rows_v1";
   const COMP_ATK_STORAGE_KEY = "pf1e_comp_attacks_extra_rows_v1";
   const SPELLS_EXTRA_KEY = "pf1e_spells_extra_rows_v1";
+  const SYMBIOTE_STORAGE_VERSION = 1;
   const MAX_CHARACTER_LEVEL = 20;
   const storage = (() => {
     try {
@@ -41,6 +42,38 @@ document.addEventListener("DOMContentLoaded", () => {
       return null;
     }
   })();
+  const symbioteStorage = window?.TS?.localStorage?.campaign;
+  const symbioteStorageState = (() => {
+    try {
+      const raw = symbioteStorage?.getBlob?.();
+      if (typeof raw !== "string") return {};
+      const parsed = JSON.parse(raw);
+      return parsed?.version === SYMBIOTE_STORAGE_VERSION && parsed?.values
+        ? parsed.values
+        : {};
+    } catch (err) {
+      console.warn("Impossibile leggere il salvataggio TaleSpire:", err);
+      return {};
+    }
+  })();
+  let symbioteStorageTimer = null;
+
+  function persistSymbioteStorage() {
+    if (typeof symbioteStorage?.setBlob !== "function") return;
+    try {
+      symbioteStorage.setBlob(
+        JSON.stringify({ version: SYMBIOTE_STORAGE_VERSION, values: symbioteStorageState })
+      );
+    } catch (err) {
+      console.warn("Impossibile salvare lo stato in TaleSpire:", err);
+    }
+  }
+
+  function scheduleSymbioteStorageSave() {
+    if (typeof symbioteStorage?.setBlob !== "function") return;
+    clearTimeout(symbioteStorageTimer);
+    symbioteStorageTimer = setTimeout(persistSymbioteStorage, 250);
+  }
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -53,20 +86,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
   const storageGet = (key, fallback = null) => {
     try {
-      return storage?.getItem(key) ?? fallback;
+      return storage?.getItem(key) ?? symbioteStorageState[key] ?? fallback;
     } catch {
-      return fallback;
+      return symbioteStorageState[key] ?? fallback;
     }
   };
   const storageSet = (key, value) => {
+    const serializedValue = String(value);
     try {
-      storage?.setItem(key, String(value));
+      storage?.setItem(key, serializedValue);
     } catch {}
+    symbioteStorageState[key] = serializedValue;
+    scheduleSymbioteStorageSave();
   };
   const storageRemove = (key) => {
     try {
       storage?.removeItem(key);
     } catch {}
+    delete symbioteStorageState[key];
+    scheduleSymbioteStorageSave();
   };
 
   const fmtSigned = (n) => {
@@ -81,7 +119,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const d20 = () => Math.floor(Math.random() * 20) + 1;
-  const pendingTsRolls = [];
+  const pendingTsRolls = new Map();
+  let saveCurrentState = () => {};
 
   function toast(msg) {
     let el = document.getElementById("toast");
@@ -150,75 +189,50 @@ document.addEventListener("DOMContentLoaded", () => {
     return mod === 0 ? "1d20" : `1d20${fmtSigned(mod)}`;
   }
 
+  function getTaleSpireRollEvent(payload) {
+    const event = payload?.payload && typeof payload.payload === "object"
+      ? { ...payload.payload, kind: payload.kind ?? payload.payload.kind }
+      : payload ?? {};
+    const kind = event.kind ?? (Array.isArray(event.resultsGroups) ? "rollResults" : "rollRemoved");
+    return { ...event, kind };
+  }
+
   function tryTaleSpireDiceRoll(formula, cleanLabel, mod, trackResult = true) {
     const diceApi = window?.TS?.dice;
-    if (!diceApi) return false;
+    if (
+      !diceApi ||
+      typeof diceApi.makeRollDescriptors !== "function" ||
+      typeof diceApi.putDiceInTray !== "function"
+    ) {
+      return false;
+    }
     const queueEntry =
       trackResult === false ? null : { label: cleanLabel, mod, kind: trackResult === "formula" ? "formula" : "d20" };
 
-    if (typeof diceApi.putDiceInTray === "function") {
-      const legacyTrayRequest = [{ name: cleanLabel, roll: String(formula).toUpperCase() }];
-      try {
-        if (queueEntry) pendingTsRolls.push(queueEntry);
-        diceApi.putDiceInTray(legacyTrayRequest);
-        toast(`${cleanLabel}: inviato nel tray TaleSpire (${formula})`);
-        return true;
-      } catch (err) {
-        if (queueEntry) pendingTsRolls.pop();
-        console.error("Errore con TS.dice.putDiceInTray (legacy):", err);
+    try {
+      if (
+        typeof diceApi.isValidRollString === "function" &&
+        !diceApi.isValidRollString(formula)
+      ) {
+        console.warn("Formula TS non valida:", formula);
+        return false;
       }
-    }
 
-    const hasDescriptorsApi =
-      typeof diceApi.makeRollDescriptors === "function" &&
-      typeof diceApi.putDiceInTray === "function";
+      const descriptors = diceApi.makeRollDescriptors(formula);
+      if (!Array.isArray(descriptors) || descriptors.length === 0) return false;
 
-    if (hasDescriptorsApi) {
-      try {
-        if (
-          typeof diceApi.isValidRollString === "function" &&
-          !diceApi.isValidRollString(formula)
-        ) {
-          console.warn("Formula TS non valida:", formula);
-          return false;
-        }
-
-        const descriptors = diceApi.makeRollDescriptors(formula);
-        if (!Array.isArray(descriptors) || descriptors.length === 0) return false;
-
-        if (queueEntry) pendingTsRolls.push(queueEntry);
-        diceApi.putDiceInTray(descriptors, false);
-        toast(`${cleanLabel}: inviato nel tray TaleSpire (${formula})`);
-        return true;
-      } catch (err) {
-        if (queueEntry) pendingTsRolls.pop();
-        console.error("Errore con TS.dice.makeRollDescriptors/putDiceInTray:", err);
+      const rollId = diceApi.putDiceInTray(descriptors, false);
+      if (typeof rollId !== "string" || !rollId) {
+        throw new Error("TaleSpire non ha restituito un rollId per il lancio.");
       }
+
+      if (queueEntry) pendingTsRolls.set(rollId, queueEntry);
+      toast(`${cleanLabel}: inviato nel tray TaleSpire (${formula})`);
+      return true;
+    } catch (err) {
+      console.error("Errore con le API dadi di TaleSpire:", err);
+      return false;
     }
-
-    const callSpecs = [
-      { method: "roll", mode: "roll" },
-      { method: "rollDice", mode: "roll" },
-    ];
-
-    for (const spec of callSpecs) {
-      const fn = diceApi?.[spec.method];
-      if (typeof fn !== "function") continue;
-
-      try {
-        if (queueEntry) pendingTsRolls.push(queueEntry);
-        fn.call(diceApi, formula);
-        const action =
-          spec.mode === "roll" ? "tirato in TaleSpire" : "inviato nel tray TaleSpire";
-        toast(`${cleanLabel}: ${action} (${formula})`);
-        return true;
-      } catch (err) {
-        if (queueEntry) pendingTsRolls.pop();
-        console.error(`Errore con TS.dice.${spec.method}:`, err);
-      }
-    }
-
-    return false;
   }
 
   function rollViaTaleSpire(total, label) {
@@ -247,23 +261,30 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   window.handleRollResult = async (payload) => {
-    if (payload?.kind === "rollRemoved") {
-      const removed = pendingTsRolls.shift();
+    const event = getTaleSpireRollEvent(payload);
+    const rollId = event.rollId;
+    if (!rollId || !pendingTsRolls.has(rollId)) return;
+
+    if (event.kind === "rollRemoved") {
+      const removed = pendingTsRolls.get(rollId);
+      pendingTsRolls.delete(rollId);
       toast(`${removed?.label || "Un tiro"}: rimosso dal tray`);
       return;
     }
 
-    const ctx = pendingTsRolls.shift();
+    if (event.kind !== "rollResults") return;
+
+    const ctx = pendingTsRolls.get(rollId);
+    pendingTsRolls.delete(rollId);
     const label = ctx?.label || "Tiro";
     const mod = ctx?.mod ?? 0;
-    let total = extractRollTotal(payload);
+    let total = null;
 
     if (
-      total == null &&
-      payload?.kind === "rollResults" &&
+      Array.isArray(event.resultsGroups) &&
       typeof window?.TS?.dice?.evaluateDiceResultsGroup === "function"
     ) {
-      const group = payload?.payload?.resultsGroups?.[0] ?? payload?.resultsGroups?.[0];
+      const group = event.resultsGroups[0];
       if (group != null) {
         try {
           const evaluated = await window.TS.dice.evaluateDiceResultsGroup(group);
@@ -273,6 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     }
+    if (total == null) total = extractRollTotal(event);
 
     if (total == null) {
       toast(`${label}: risultato TaleSpire ricevuto`);
@@ -291,11 +313,13 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   window.logSymbioteEvent = (event) => {
-    void event;
+    if (event?.kind === "hasBecomeHidden") saveCurrentState();
   };
 
   window.onStateChangeEvent = (event) => {
-    void event;
+    if (event?.kind === "willEnterBackground" || event?.kind === "willShutdown") {
+      saveCurrentState();
+    }
   };
 
   const pendingRollResults = Array.isArray(window.__pf1e_pending_roll_results)
@@ -304,13 +328,6 @@ document.addEventListener("DOMContentLoaded", () => {
   pendingRollResults.forEach((payload) => {
     Promise.resolve(window.handleRollResult(payload)).catch(() => {});
   });
-  if (Array.isArray(window.__pf1e_pending_visibility_events)) {
-    window.__pf1e_pending_visibility_events.splice(0);
-  }
-  if (Array.isArray(window.__pf1e_pending_state_events)) {
-    window.__pf1e_pending_state_events.splice(0);
-  }
-
   /* =========================
      Tabs
   ========================= */
@@ -516,6 +533,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const state = loadState();
+  saveCurrentState = () => {
+    saveState(state);
+    persistSymbioteStorage();
+  };
+
+  const pendingVisibilityEvents = Array.isArray(window.__pf1e_pending_visibility_events)
+    ? window.__pf1e_pending_visibility_events.splice(0)
+    : [];
+  pendingVisibilityEvents.forEach((event) => window.logSymbioteEvent(event));
+  const pendingStateEvents = Array.isArray(window.__pf1e_pending_state_events)
+    ? window.__pf1e_pending_state_events.splice(0)
+    : [];
+  pendingStateEvents.forEach((event) => window.onStateChangeEvent(event));
 
   function domPathKey(el) {
     const page = el.closest(".page");
