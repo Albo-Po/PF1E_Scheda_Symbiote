@@ -302,12 +302,50 @@ body{
   transition: all .2s ease;
   position:absolute;
   top:12px;
-  right:12px;
+  right:58px;
   z-index:2;
 }
 
 .top-refresh-btn:hover{
   transform: translateY(-1px);
+}
+
+.top-popup-btn{
+  appearance:none;
+  display:grid;
+  place-items:center;
+  width:36px;
+  height:36px;
+  border:2px solid var(--line);
+  background:var(--surface-2);
+  color:var(--text);
+  border-radius:50%;
+  cursor:pointer;
+  position:absolute;
+  top:12px;
+  right:12px;
+  z-index:2;
+  transition:transform .2s ease, background .2s ease;
+}
+
+.top-popup-btn:hover{
+  transform:translateY(-1px);
+  background:var(--surface);
+}
+
+.top-popup-btn:focus-visible{
+  outline:3px solid var(--c-identita);
+  outline-offset:2px;
+}
+
+.top-popup-btn svg{
+  width:18px;
+  height:18px;
+  fill:none;
+  stroke:currentColor;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-width:2;
 }
 
 /* Switch (slider) */
