@@ -413,7 +413,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const classicThemeLabel = document.getElementById("classic-theme-label");
   const themeState = document.getElementById("theme-state");
   const refreshPageBtn = document.getElementById("refresh-page");
-  const openSheetPopupBtn = document.getElementById("open-sheet-popup");
+  const copySheetLinkBtn = document.getElementById("copy-sheet-link");
   const themeSwitch = themeToggle?.closest(".switch") || null;
   let previousThemeBeforeVariant = null;
 
@@ -519,18 +519,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (openSheetPopupBtn) {
-    openSheetPopupBtn.addEventListener("click", () => {
-      const width = Math.min(1440, Math.max(900, Math.round(window.screen.availWidth * 0.8)));
-      const height = Math.min(1100, Math.max(700, Math.round(window.screen.availHeight * 0.85)));
-      const left = Math.max(0, Math.round((window.screen.availWidth - width) / 2));
-      const top = Math.max(0, Math.round((window.screen.availHeight - height) / 2));
-      const popup = window.open(
-        window.location.href,
-        "_blank",
-        `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
-      );
-      popup?.focus();
+  if (copySheetLinkBtn) {
+    const externalSheetUrl = "https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder_embedded.html?v=1.1.1";
+    const originalTitle = copySheetLinkBtn.title;
+
+    copySheetLinkBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(externalSheetUrl);
+        copySheetLinkBtn.title = "Link copiato: incollalo nel browser";
+        setTimeout(() => { copySheetLinkBtn.title = originalTitle; }, 2500);
+      } catch {
+        window.prompt("Copia questo link e incollalo nel browser:", externalSheetUrl);
+      }
     });
   }
 
