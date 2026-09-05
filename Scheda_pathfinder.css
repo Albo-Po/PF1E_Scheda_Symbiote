@@ -742,6 +742,28 @@ body{
   text-align:center;
 }
 
+.spell-description-field{
+  display:grid;
+  gap:5px;
+}
+
+.spell-description{
+  min-height:72px;
+  resize:vertical;
+}
+
+#page-incantesimi .spell-level-actions .btn,
+#page-incantesimi .spell-entry-toggle{
+  padding:5px 8px;
+  font-size:10px;
+}
+
+#page-incantesimi .spell-roll-btn{
+  min-width:58px;
+  padding:4px 7px;
+  font-size:10px;
+}
+
 .spell-levels{
   display:grid;
   gap:10px;
@@ -891,7 +913,7 @@ body{
   }
 
   .spell-offensive-group:last-child .spell-roll-btn{
-    flex:1 1 78px;
+    flex:1 1 62px;
   }
 }
 

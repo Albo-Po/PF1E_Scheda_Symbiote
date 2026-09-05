@@ -1124,6 +1124,11 @@ document.addEventListener("DOMContentLoaded", () => {
             <input class="small spell-range-summary" type="text" value="8 m" readonly title="Raggio calcolato da LI" />
           </div>
         </div>
+
+        <label class="spell-description-field">
+          <span>Descrizione</span>
+          <textarea class="spell-description" data-key="spell:${level}:${index}:description" rows="3" placeholder="Effetto, durata, bersaglio, componenti..."></textarea>
+        </label>
       </div>
     `;
     return row;
