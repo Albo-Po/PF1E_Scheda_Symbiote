@@ -4462,15 +4462,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function downloadSheetFile(content, filename, type) {
+    if (typeof URL === "undefined" || typeof URL.createObjectURL !== "function") {
+      throw new Error("Questo ambiente non supporta il salvataggio di file.");
+    }
     const blob = new Blob([content], { type });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.download = filename;
+    link.style.position = "fixed";
+    link.style.left = "-10000px";
     document.body.appendChild(link);
     link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+    // Nei browser incorporati il download viene avviato in modo asincrono: revocare
+    // subito il Blob annulla silenziosamente il file prima che venga creato.
+    window.setTimeout(() => {
+      link.remove();
+      URL.revokeObjectURL(url);
+    }, 60000);
   }
 
   function collectBackupPayload() {
@@ -4537,22 +4546,32 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   exportBackupBtn?.addEventListener("click", () => {
-    const backup = collectBackupPayload();
-    downloadSheetFile(
-      `${JSON.stringify(backup, null, 2)}\n`,
-      `${getSheetFilenameStem()}-backup-${timestampForFilename()}.json`,
-      "application/json;charset=utf-8"
-    );
-    toast("Backup della scheda scaricato.");
+    try {
+      const backup = collectBackupPayload();
+      downloadSheetFile(
+        `${JSON.stringify(backup, null, 2)}\n`,
+        `${getSheetFilenameStem()}-backup-${timestampForFilename()}.json`,
+        "application/json;charset=utf-8"
+      );
+      toast("Backup creato: controlla la cartella Download.");
+    } catch (err) {
+      console.warn("Esportazione backup non riuscita:", err);
+      toast(err instanceof Error ? err.message : "Impossibile creare il backup.");
+    }
   });
 
   exportTextBtn?.addEventListener("click", () => {
-    downloadSheetFile(
-      createReadableSheetText(),
-      `${getSheetFilenameStem()}-${timestampForFilename()}.txt`,
-      "text/plain;charset=utf-8"
-    );
-    toast("Copia testuale della scheda scaricata.");
+    try {
+      downloadSheetFile(
+        createReadableSheetText(),
+        `${getSheetFilenameStem()}-${timestampForFilename()}.txt`,
+        "text/plain;charset=utf-8"
+      );
+      toast("Copia testuale creata: controlla la cartella Download.");
+    } catch (err) {
+      console.warn("Esportazione testo non riuscita:", err);
+      toast(err instanceof Error ? err.message : "Impossibile creare la copia testuale.");
+    }
   });
 
   importBackupBtn?.addEventListener("click", () => importBackupFile?.click());
