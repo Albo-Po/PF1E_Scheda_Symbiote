@@ -34,11 +34,6 @@
 
           <span class="hint" id="theme-state">Light ?</span>
           <button type="button" id="refresh-page" class="top-refresh-btn" title="Ricarica la pagina">Refresh</button>
-          <button type="button" id="copy-sheet-link" class="top-popup-btn" title="Copia il link per aprire la scheda nel browser" aria-label="Copia il link per aprire la scheda nel browser">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M14 4h6v6M20 4l-8 8M19 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5" />
-            </svg>
-          </button>
         </div>
       </div>
 
@@ -295,48 +290,51 @@
             </div>
           </div>
 
-          <div class="fields ability-increases">
+          <details class="ability-increases">
+            <summary>Aumenti di caratteristica</summary>
+            <div class="fields">
             <div class="field span-4">
               <label for="ability-increase-4">Aumento al 4° livello</label>
               <select id="ability-increase-4" class="select level-ability-pick" data-level="4">
                 <option value="" selected>— Seleziona caratteristica —</option>
-                <option value="FOR">FOR</option><option value="DES">DES</option><option value="COS">COS</option>
-                <option value="INT">INT</option><option value="SAG">SAG</option><option value="CAR">CAR</option>
+                <optgroup label="Caratteristiche fisiche"><option value="FOR">FOR</option><option value="DES">DES</option><option value="COS">COS</option></optgroup>
+                <optgroup label="Caratteristiche mentali"><option value="INT">INT</option><option value="SAG">SAG</option><option value="CAR">CAR</option></optgroup>
               </select>
             </div>
             <div class="field span-4">
               <label for="ability-increase-8">Aumento all'8° livello</label>
               <select id="ability-increase-8" class="select level-ability-pick" data-level="8">
                 <option value="" selected>— Seleziona caratteristica —</option>
-                <option value="FOR">FOR</option><option value="DES">DES</option><option value="COS">COS</option>
-                <option value="INT">INT</option><option value="SAG">SAG</option><option value="CAR">CAR</option>
+                <optgroup label="Caratteristiche fisiche"><option value="FOR">FOR</option><option value="DES">DES</option><option value="COS">COS</option></optgroup>
+                <optgroup label="Caratteristiche mentali"><option value="INT">INT</option><option value="SAG">SAG</option><option value="CAR">CAR</option></optgroup>
               </select>
             </div>
             <div class="field span-4">
               <label for="ability-increase-12">Aumento al 12° livello</label>
               <select id="ability-increase-12" class="select level-ability-pick" data-level="12">
                 <option value="" selected>— Seleziona caratteristica —</option>
-                <option value="FOR">FOR</option><option value="DES">DES</option><option value="COS">COS</option>
-                <option value="INT">INT</option><option value="SAG">SAG</option><option value="CAR">CAR</option>
+                <optgroup label="Caratteristiche fisiche"><option value="FOR">FOR</option><option value="DES">DES</option><option value="COS">COS</option></optgroup>
+                <optgroup label="Caratteristiche mentali"><option value="INT">INT</option><option value="SAG">SAG</option><option value="CAR">CAR</option></optgroup>
               </select>
             </div>
             <div class="field span-6">
               <label for="ability-increase-16">Aumento al 16° livello</label>
               <select id="ability-increase-16" class="select level-ability-pick" data-level="16">
                 <option value="" selected>— Seleziona caratteristica —</option>
-                <option value="FOR">FOR</option><option value="DES">DES</option><option value="COS">COS</option>
-                <option value="INT">INT</option><option value="SAG">SAG</option><option value="CAR">CAR</option>
+                <optgroup label="Caratteristiche fisiche"><option value="FOR">FOR</option><option value="DES">DES</option><option value="COS">COS</option></optgroup>
+                <optgroup label="Caratteristiche mentali"><option value="INT">INT</option><option value="SAG">SAG</option><option value="CAR">CAR</option></optgroup>
               </select>
             </div>
             <div class="field span-6">
               <label for="ability-increase-20">Aumento al 20° livello</label>
               <select id="ability-increase-20" class="select level-ability-pick" data-level="20">
                 <option value="" selected>— Seleziona caratteristica —</option>
-                <option value="FOR">FOR</option><option value="DES">DES</option><option value="COS">COS</option>
-                <option value="INT">INT</option><option value="SAG">SAG</option><option value="CAR">CAR</option>
+                <optgroup label="Caratteristiche fisiche"><option value="FOR">FOR</option><option value="DES">DES</option><option value="COS">COS</option></optgroup>
+                <optgroup label="Caratteristiche mentali"><option value="INT">INT</option><option value="SAG">SAG</option><option value="CAR">CAR</option></optgroup>
               </select>
             </div>
-          </div>
+            </div>
+          </details>
 
         </div>
       </div>
@@ -1707,7 +1705,7 @@
   <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_tables.js?v=1.0.8" defer></script>
   <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_spells.js?v=1.0.8" defer></script>
   <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_equipment.js?v=1.0.8" defer></script>
-  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder.js?v=1.1.3" defer></script>
+  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder.js?v=1.1.4" defer></script>
   <!--<script src="./js/pf1e_tables.js" defer></script>
   <script src="./js/pf1e_spells.js" defer></script>
   <script src="./js/pf1e_equipment.js" defer></script>

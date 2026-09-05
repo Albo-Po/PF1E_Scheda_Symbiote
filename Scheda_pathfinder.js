@@ -413,7 +413,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const classicThemeLabel = document.getElementById("classic-theme-label");
   const themeState = document.getElementById("theme-state");
   const refreshPageBtn = document.getElementById("refresh-page");
-  const copySheetLinkBtn = document.getElementById("copy-sheet-link");
   const themeSwitch = themeToggle?.closest(".switch") || null;
   let previousThemeBeforeVariant = null;
 
@@ -516,21 +515,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (refreshPageBtn) {
     refreshPageBtn.addEventListener("click", () => {
       location.reload();
-    });
-  }
-
-  if (copySheetLinkBtn) {
-    const externalSheetUrl = "https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder_embedded.html?v=1.1.3";
-    const originalTitle = copySheetLinkBtn.title;
-
-    copySheetLinkBtn.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(externalSheetUrl);
-        copySheetLinkBtn.title = "Link copiato: incollalo nel browser";
-        setTimeout(() => { copySheetLinkBtn.title = originalTitle; }, 2500);
-      } catch {
-        window.prompt("Copia questo link e incollalo nel browser:", externalSheetUrl);
-      }
     });
   }
 
