@@ -1061,6 +1061,9 @@ document.addEventListener("DOMContentLoaded", () => {
     row.innerHTML = `
       <div class="spell-entry-head">
         <div class="spell-entry-title">
+          <button type="button" class="spell-entry-toggle" aria-expanded="true" title="Mostra/nascondi dettagli incantesimo">
+            Dettagli
+          </button>
           <input
             class="spell-name${isExtra ? " spell-name-extra" : ""}"
             data-key="spell:${level}:${index}:name"
@@ -1069,9 +1072,6 @@ document.addEventListener("DOMContentLoaded", () => {
           />
         </div>
         <div class="spell-entry-controls">
-          <button type="button" class="spell-entry-toggle" aria-expanded="true" title="Mostra/nascondi dettagli incantesimo">
-            Dettagli
-          </button>
           <label class="spell-offensive-toggle">
             <input class="spell-offensive" data-key="spell:${level}:${index}:offensive" type="checkbox" />
             Offensivo
