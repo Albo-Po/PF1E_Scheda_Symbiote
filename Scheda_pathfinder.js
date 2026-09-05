@@ -4425,6 +4425,153 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================
+     Backup e ripristino scheda
+  ========================= */
+  const BACKUP_FORMAT = "pf1e-sheet-backup";
+  const BACKUP_VERSION = 1;
+  const exportBackupBtn = document.getElementById("export-sheet-backup");
+  const exportTextBtn = document.getElementById("export-sheet-text");
+  const importBackupBtn = document.getElementById("import-sheet-backup");
+  const importBackupFile = document.getElementById("import-sheet-backup-file");
+
+  function isSafeBackupKey(key) {
+    return key !== "__proto__" && key !== "prototype" && key !== "constructor";
+  }
+
+  function sanitizeBackupValues(values) {
+    if (!values || typeof values !== "object" || Array.isArray(values)) return null;
+    const clean = {};
+    Object.entries(values).forEach(([key, value]) => {
+      if (!isSafeBackupKey(key)) return;
+      if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") clean[key] = value;
+    });
+    return clean;
+  }
+
+  function normalizeBackupCount(value) {
+    return clamp(Math.trunc(num(value)), 0, 100);
+  }
+
+  function getSheetFilenameStem() {
+    const name = document.querySelector("#page-identita .field input")?.value?.trim() || "scheda-pathfinder";
+    return name.replace(/[\\/:*?\"<>|]/g, "-").replace(/\s+/g, "-").slice(0, 60) || "scheda-pathfinder";
+  }
+
+  function timestampForFilename() {
+    return new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  }
+
+  function downloadSheetFile(content, filename, type) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function collectBackupPayload() {
+    $$(".page input, .page textarea, .page select").forEach((el) => {
+      if (el.type === "button" || el.type === "submit" || el.id === "theme-toggle") return;
+      state[keyFor(el)] = el.type === "checkbox" ? !!el.checked : el.value;
+    });
+    saveState(state);
+    return {
+      format: BACKUP_FORMAT,
+      version: BACKUP_VERSION,
+      exportedAt: new Date().toISOString(),
+      values: { ...state },
+      dynamicRows: {
+        skills: getExtraRowsCount(),
+        attacks: getAtkExtraCount(),
+        companionAttacks: getCompAtkExtraCount(),
+        spells: loadSpellExtraMap(),
+      },
+      theme: storageGet(THEME_KEY) || "",
+    };
+  }
+
+  function getTextFieldLabel(el) {
+    const wrapper = el.closest(".field, .attack-detail-field, .spell-description-field, label");
+    const label = wrapper?.querySelector(":scope > label, :scope > span");
+    return String(label?.textContent || el.getAttribute("title") || keyFor(el)).trim();
+  }
+
+  function createReadableSheetText() {
+    const lines = ["SCHEDA PERSONAGGIO — PATHFINDER 1E", `Esportata: ${new Date().toLocaleString("it-IT")}`, ""];
+    $$(".page").forEach((page) => {
+      const heading = page.querySelector("h1, h2")?.textContent?.trim() || page.id;
+      const entries = [];
+      $$("input, textarea, select", page).forEach((el) => {
+        if (el.type === "button" || el.type === "submit" || el.type === "hidden" || el.id === "theme-toggle") return;
+        const value = el.type === "checkbox" ? (el.checked ? "Sì" : "No") : el.value.trim();
+        if (!value) return;
+        entries.push(`${getTextFieldLabel(el)}: ${value.replace(/\n/g, " ")}`);
+      });
+      if (entries.length) lines.push(`## ${heading}`, ...entries, "");
+    });
+    return lines.join("\n");
+  }
+
+  function applyBackupPayload(backup) {
+    if (backup?.format !== BACKUP_FORMAT || backup?.version !== BACKUP_VERSION) {
+      throw new Error("Il file non è un backup compatibile della scheda.");
+    }
+    const values = sanitizeBackupValues(backup.values);
+    if (!values) throw new Error("Il backup non contiene dati validi.");
+    const rows = backup.dynamicRows && typeof backup.dynamicRows === "object" ? backup.dynamicRows : {};
+    const spellRows = rows.spells && typeof rows.spells === "object" ? rows.spells : {};
+
+    Object.keys(state).forEach((key) => delete state[key]);
+    Object.assign(state, values);
+    saveState(state);
+    setExtraRowsCount(normalizeBackupCount(rows.skills));
+    setAtkExtraCount(normalizeBackupCount(rows.attacks));
+    setCompAtkExtraCount(normalizeBackupCount(rows.companionAttacks));
+    for (let level = 0; level <= 9; level++) setSpellExtraCount(level, normalizeBackupCount(spellRows[level]));
+    if (backup.theme === "dark" || backup.theme === "light") storageSet(THEME_KEY, backup.theme);
+    persistSymbioteStorage();
+  }
+
+  exportBackupBtn?.addEventListener("click", () => {
+    const backup = collectBackupPayload();
+    downloadSheetFile(
+      `${JSON.stringify(backup, null, 2)}\n`,
+      `${getSheetFilenameStem()}-backup-${timestampForFilename()}.json`,
+      "application/json;charset=utf-8"
+    );
+    toast("Backup della scheda scaricato.");
+  });
+
+  exportTextBtn?.addEventListener("click", () => {
+    downloadSheetFile(
+      createReadableSheetText(),
+      `${getSheetFilenameStem()}-${timestampForFilename()}.txt`,
+      "text/plain;charset=utf-8"
+    );
+    toast("Copia testuale della scheda scaricata.");
+  });
+
+  importBackupBtn?.addEventListener("click", () => importBackupFile?.click());
+  importBackupFile?.addEventListener("change", async () => {
+    const file = importBackupFile.files?.[0];
+    importBackupFile.value = "";
+    if (!file) return;
+    try {
+      const backup = JSON.parse(await file.text());
+      if (!confirm("Ripristinare questo backup? I dati attuali della scheda verranno sostituiti.")) return;
+      applyBackupPayload(backup);
+      window.location.reload();
+    } catch (err) {
+      console.warn("Importazione backup non riuscita:", err);
+      toast(err instanceof Error ? err.message : "Impossibile importare il backup.");
+    }
+  });
+
+  /* =========================
      Reset (preserva tema)
   ========================= */
   const resetBtn = document.getElementById("reset-storage");

@@ -413,12 +413,41 @@ body{
   cursor:pointer;
   font-weight:700;
   transition: all .2s ease;
-  margin-left:auto;
+  margin-left:0;
 }
 
 .tab-reset-alert:hover{
   background:#991b1b;
   transform: translateY(-2px);
+}
+
+.sheet-backup-actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-left:auto;
+}
+
+.tab-backup-btn{
+  appearance:none;
+  border:2px solid var(--line);
+  background:transparent;
+  color:var(--text);
+  font-family:var(--font-display);
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:10px;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  cursor:pointer;
+  font-weight:700;
+  transition:all .2s ease;
+}
+
+.tab-backup-btn:hover{
+  border-color:var(--c-identita);
+  color:var(--c-identita);
+  transform:translateY(-2px);
 }
 
 /* Tab attiva */
