@@ -1902,9 +1902,10 @@ td input{
   width:100%;
   border-radius:999px;
   border:1px solid rgba(74, 58, 39, .18);
-  min-width:74px;
-  min-height:40px;
-  padding:7px 10px;
+  min-width:62px;
+  min-height:30px;
+  padding:4px 7px;
+  font-size:11px;
   font-weight:700;
   letter-spacing:.3px;
   box-shadow: 0 2px 6px rgba(0,0,0,.06);
@@ -2318,9 +2319,10 @@ td .roll-btn + .roll-btn{
 }
 
 .attack-card-actions .roll-btn{
-  min-width:72px;
-  min-height:38px;
-  padding:8px 10px;
+  min-width:62px;
+  min-height:30px;
+  padding:4px 7px;
+  font-size:11px;
 }
 
 .attack-roll-line-detail{
@@ -2676,6 +2678,27 @@ td .roll-btn + .roll-btn{
   accent-color:var(--c-identita);
 }
 
+.attack-quick-modifiers-grid{
+  grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.attack-quick-modifiers-grid .attack-quick-card{
+  flex-direction:row;
+  align-items:center;
+  gap:8px;
+  padding:7px 8px;
+}
+
+.attack-quick-modifiers-grid .attack-quick-card span{
+  flex:1 1 auto;
+  min-width:0;
+}
+
+.attack-quick-modifiers-grid .attack-quick-card input{
+  flex:0 0 54px;
+  width:54px;
+}
+
 @media (max-width: 1040px){
   .attack-dmg-line-rich,
   .attack-quick-grid{
@@ -2693,7 +2716,17 @@ td .roll-btn + .roll-btn{
     grid-template-columns:1fr;
   }
 
+  .attack-quick-modifiers-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+
   .attack-inline-pair{
     grid-template-columns:1fr 1fr;
+  }
+}
+
+@media (max-width: 480px){
+  .attack-quick-modifiers-grid{
+    grid-template-columns:1fr;
   }
 }
