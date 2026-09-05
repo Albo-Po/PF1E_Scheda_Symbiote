@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Cormorant+Garamond:wght@400;600;700&family=Crimson+Text:wght@400;600;700&family=IM+Fell+English+SC&family=Space+Grotesk:wght@400;500;700&family=Uncial+Antiqua&display=swap" rel="stylesheet">
 
   <!-- GitHub: disattivato per sviluppo locale -->
-   <link rel="stylesheet" href="https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder.css?v=1.2.0">
+   <link rel="stylesheet" href="https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder.css?v=1.2.1">
   <!-- <link rel="stylesheet" href="./scheda_pathfinder.css"> -->
  
 </head>
@@ -41,24 +41,50 @@
 
     <!-- TABS -->
     <nav class="tabs" role="tablist" aria-label="Pagine scheda personaggio">
-      <button type="button" class="tab" role="tab" aria-selected="true"  aria-controls="page-identita"      id="tab-identita"      data-target="page-identita">Personaggio</button>
-      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-mitico"        id="tab-mitico"        data-target="page-mitico"> Rango Mitico</button>
-      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-abilita"       id="tab-abilita"       data-target="page-abilita">Abilità</button>
-      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-talenti"       id="tab-talenti"       data-target="page-talenti">Talenti</button>
-      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-combattimento" id="tab-combattimento" data-target="page-combattimento">Combattimento</button>
-      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-cdp"           id="tab-cdp"           data-target="page-cdp" hidden>Classe di Prestigio</button>
-      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-incantesimi"   id="tab-incantesimi"   data-target="page-incantesimi" hidden>Incantesimi</button>
-      <button type="button" class="tab" role="tab"  aria-selected="false"  aria-controls="page-compagno"   id="tab-compagno"      data-target="page-compagno" hidden>Compagno Animale</button>
-      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-equip"         id="tab-equip"         data-target="page-equip">Equipaggiamento</button>
-      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-note"          id="tab-note"          data-target="page-note">Note</button>
-      <div class="sheet-backup-actions" aria-label="Backup della scheda">
-        <button type="button" class="tab-backup-btn" id="export-sheet-backup" title="Scarica una copia completa e ripristinabile della scheda">Backup</button>
-        <button type="button" class="tab-backup-btn" id="export-sheet-text" title="Scarica una copia testuale leggibile della scheda">Testo</button>
-        <button type="button" class="tab-backup-btn" id="import-sheet-backup" title="Ripristina una scheda da un backup JSON">Ripristina</button>
-        <input id="import-sheet-backup-file" type="file" accept="application/json,.json" hidden />
-      </div>
-      <button type="button" class="tab-reset-alert" id="reset-storage" title="Cancella tutti i dati salvati in questo browser">Resetta scheda</button>
+      <button type="button" class="tab" role="tab" aria-selected="true"  aria-controls="page-identita"      id="tab-identita"      data-target="page-identita">👤 Personaggio</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-mitico"        id="tab-mitico"        data-target="page-mitico">✨ Rango Mitico</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-abilita"       id="tab-abilita"       data-target="page-abilita">🧠 Abilità</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-talenti"       id="tab-talenti"       data-target="page-talenti">🏅 Talenti</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-combattimento" id="tab-combattimento" data-target="page-combattimento">⚔️ Combattimento</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-cdp"           id="tab-cdp"           data-target="page-cdp" hidden>🏛️ Classe di Prestigio</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-incantesimi"   id="tab-incantesimi"   data-target="page-incantesimi" hidden>🔮 Incantesimi</button>
+      <button type="button" class="tab" role="tab"  aria-selected="false" aria-controls="page-compagno"     id="tab-compagno"      data-target="page-compagno" hidden>🐾 Compagno Animale</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-equip"         id="tab-equip"         data-target="page-equip">🎒 Equipaggiamento</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-note"          id="tab-note"          data-target="page-note">📝 Note</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="page-impostazioni"  id="tab-impostazioni"  data-target="page-impostazioni">⚙️ Impostazioni</button>
     </nav>
+    <input id="import-sheet-backup-file" type="file" accept="application/json,.json" hidden />
+
+    <section class="page" id="page-impostazioni" role="tabpanel" aria-labelledby="tab-impostazioni">
+      <div class="grid">
+        <div class="card settings-card">
+          <h2>⚙️ Impostazioni e backup</h2>
+          <p class="hint">Il backup JSON conserva tutti i dati e può essere ripristinato. Il file di testo è pensato per lettura o stampa.</p>
+          <div class="settings-actions">
+            <div class="settings-action">
+              <h3>Backup completo</h3>
+              <p>Scarica una copia completa e ripristinabile della scheda.</p>
+              <button type="button" class="settings-action-btn" id="export-sheet-backup">Scarica backup JSON</button>
+            </div>
+            <div class="settings-action">
+              <h3>Copia testuale</h3>
+              <p>Scarica una versione leggibile in formato testo.</p>
+              <button type="button" class="settings-action-btn" id="export-sheet-text">Scarica testo</button>
+            </div>
+            <div class="settings-action settings-action-danger">
+              <h3>Reset della scheda</h3>
+              <p>Cancella tutti i dati locali. Fai prima un backup se vuoi conservarli.</p>
+              <button type="button" class="tab-reset-alert" id="reset-storage">Resetta scheda</button>
+            </div>
+          </div>
+          <div class="settings-import">
+            <h3>Ripristina backup</h3>
+            <p>Importa un file JSON creato con il backup completo.</p>
+            <button type="button" class="settings-action-btn" id="import-sheet-backup">Scegli file di backup</button>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- PAGE: IDENTITÀ -->
     <section class="page active" id="page-identita" role="tabpanel" aria-labelledby="tab-identita">
@@ -1714,7 +1740,7 @@
   <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_tables.js?v=1.0.8" defer></script>
   <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_spells.js?v=1.0.8" defer></script>
   <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/js/pf1e_equipment.js?v=1.0.8" defer></script>
-  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder.js?v=1.2.0" defer></script>
+  <script src="https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder.js?v=1.2.1" defer></script>
   <!--<script src="./js/pf1e_tables.js" defer></script>
   <script src="./js/pf1e_spells.js" defer></script>
   <script src="./js/pf1e_equipment.js" defer></script>
