@@ -811,6 +811,33 @@ document.addEventListener("DOMContentLoaded", () => {
     return bonus;
   }
 
+  function getLevelAbilityBonusFor(code) {
+    const characterLevel = Math.max(0, Math.trunc(num(document.getElementById("pc-level-total")?.value)));
+    return $$(".level-ability-pick").reduce((bonus, select) => {
+      const requiredLevel = Math.max(0, Math.trunc(num(select.dataset.level)));
+      return bonus + (requiredLevel <= characterLevel && select.value === code ? 1 : 0);
+    }, 0);
+  }
+
+  function updateLevelAbilityPickAvailability() {
+    const characterLevel = Math.max(0, Math.trunc(num(document.getElementById("pc-level-total")?.value)));
+    $$(".level-ability-pick").forEach((select) => {
+      const requiredLevel = Math.max(0, Math.trunc(num(select.dataset.level)));
+      const available = characterLevel >= requiredLevel;
+      select.disabled = !available;
+      select.closest(".field")?.classList.toggle("is-locked", !available);
+    });
+  }
+
+  $$(".level-ability-pick").forEach((select) => {
+    const applyLevelAbilityIncrease = () => {
+      applyMythicAbilityBonusToScores();
+      recalcDerived();
+    };
+    select.addEventListener("input", applyLevelAbilityIncrease);
+    select.addEventListener("change", applyLevelAbilityIncrease);
+  });
+
   function applyMythicAbilityBonusToScores() {
     let changed = false;
 
@@ -820,6 +847,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!scoreEl) return;
 
       const mythicBonus = getMythicAbilityBonusFor(code);
+      const levelBonus = getLevelAbilityBonusFor(code);
       const sizeScoreBonus = getSizeAbilityScoreBonus(code);
       const equipBonus = getEquipAbilityBonusFor(code);
       const min = num(scoreEl.min || 1);
@@ -827,11 +855,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (scoreEl.dataset.baseScore === undefined) {
         const currentVisible = num(scoreEl.value);
-        scoreEl.dataset.baseScore = String(currentVisible - mythicBonus - sizeScoreBonus - equipBonus);
+        scoreEl.dataset.baseScore = String(currentVisible - mythicBonus - levelBonus - sizeScoreBonus - equipBonus);
       }
 
       const base = num(scoreEl.dataset.baseScore);
-      const total = clamp(base + mythicBonus + sizeScoreBonus + equipBonus, min, max);
+      const total = clamp(base + mythicBonus + levelBonus + sizeScoreBonus + equipBonus, min, max);
       const nextValue = String(total);
 
       if (scoreEl.value !== nextValue) {
@@ -852,9 +880,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const code = String(statEl.dataset.ability || "");
     const mythicBonus = getMythicAbilityBonusFor(code);
+    const levelBonus = getLevelAbilityBonusFor(code);
     const sizeScoreBonus = getSizeAbilityScoreBonus(code);
     const equipBonus = getEquipAbilityBonusFor(code);
-    scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus - equipBonus);
+    scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - levelBonus - sizeScoreBonus - equipBonus);
   }
 
   function syncAllAbilityBaseFromVisibleScores() {
@@ -863,9 +892,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!scoreEl) return;
       const code = String(statEl.dataset.ability || "");
       const mythicBonus = getMythicAbilityBonusFor(code);
+      const levelBonus = getLevelAbilityBonusFor(code);
       const sizeScoreBonus = getSizeAbilityScoreBonus(code);
       const equipBonus = getEquipAbilityBonusFor(code);
-      scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - sizeScoreBonus - equipBonus);
+      scoreEl.dataset.baseScore = String(num(scoreEl.value) - mythicBonus - levelBonus - sizeScoreBonus - equipBonus);
     });
   }
 
@@ -907,13 +937,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (scoreEl) {
         const code = String(stat?.dataset?.ability || "");
         const mythicBonus = getMythicAbilityBonusFor(code);
+        const levelBonus = getLevelAbilityBonusFor(code);
         const sizeScoreBonus = getSizeAbilityScoreBonus(code);
         const equipBonus = getEquipAbilityBonusFor(code);
         const desired = scoreFromPfMod(num(t.value));
         const min = num(scoreEl.min || 1);
         const max = num(scoreEl.max || 50);
         const total = clamp(desired, min, max);
-        scoreEl.dataset.baseScore = String(total - mythicBonus - sizeScoreBonus - equipBonus);
+        scoreEl.dataset.baseScore = String(total - mythicBonus - levelBonus - sizeScoreBonus - equipBonus);
         scoreEl.value = String(total);
         updateAbilityBlock(stat);
       }
@@ -2619,6 +2650,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "Mystic Theurge",
     "Pathfinder Chronicler",
     "Red Mantis Assassin",
+    "Scar Seeker",
     "Sentinel",
     "Shadowdancer",
   ];
@@ -2638,6 +2670,25 @@ document.addEventListener("DOMContentLoaded", () => {
     "Mystic Theurge": { bab: "half", hitDie: 6, skillPoints: 2, saves: { fort: "poor", ref: "poor", will: "good" }, classSkills: "Conoscenze (arcane), Conoscenze (religioni), Professione, Sapienza Magica", featuresByLevel: {} },
     "Pathfinder Chronicler": { bab: "three_quarters", hitDie: 8, skillPoints: 6, saves: { fort: "poor", ref: "good", will: "good" }, classSkills: "Diplomazia, Furtività, Intrattenere, Linguistica, Percezione, Professione, Sapienza Magica, Utilizzare Congegni Magici", featuresByLevel: {} },
     "Red Mantis Assassin": { bab: "three_quarters", hitDie: 8, skillPoints: 4, saves: { fort: "poor", ref: "good", will: "poor" }, classSkills: "Acrobazia, Camuffare, Furtività, Intimidire, Percezione, Raggirare, Scalare", featuresByLevel: {} },
+    "Scar Seeker": {
+      bab: "full",
+      hitDie: 10,
+      skillPoints: 2,
+      saves: { fort: "good", ref: "poor", will: "good" },
+      classSkills: "Guarire, Intimidire, Conoscenze (religioni), Intuizione, Sapienza Magica",
+      featuresByLevel: {
+        1: "Cicatrice duratura, purificazione dolorosa",
+        2: "Imposizione delle mani; +1 livello in una classe incantatrice esistente",
+        3: "Cicatrice duratura",
+        4: "Punire il male 1/giorno; +1 livello in una classe incantatrice esistente",
+        5: "Cicatrice duratura",
+        6: "Sacrificio sanguigno; +1 livello in una classe incantatrice esistente",
+        7: "Cicatrice duratura",
+        8: "Punire il male 2/giorno; +1 livello in una classe incantatrice esistente",
+        9: "Cicatrice duratura",
+        10: "Vero martire; +1 livello in una classe incantatrice esistente",
+      },
+    },
     Sentinel: { bab: "full", hitDie: 10, skillPoints: 2, saves: { fort: "good", ref: "poor", will: "good" }, classSkills: "Cavalcare, Diplomazia, Guarire, Intimidire, Percezione, Professione, Intuizione, Sopravvivenza", featuresByLevel: {} },
     Shadowdancer: { bab: "three_quarters", hitDie: 8, skillPoints: 4, saves: { fort: "poor", ref: "good", will: "poor" }, classSkills: "Acrobazia, Artista della Fuga, Furtività, Percezione, Rapidità di Mano, Sapienza Magica", featuresByLevel: {} },
   };
@@ -2961,6 +3012,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (classSummaryEl) classSummaryEl.value = summary;
     if (totalLevelEl) totalLevelEl.value = String(totalLevel);
     if (hpLevelsEl) hpLevelsEl.value = String(totalLevel);
+
+    updateLevelAbilityPickAvailability();
+    applyMythicAbilityBonusToScores();
 
     if (skillsSummaryEl) {
       skillsSummaryEl.value = summary || "";
