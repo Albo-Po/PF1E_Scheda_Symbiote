@@ -1156,10 +1156,6 @@ input:focus, textarea:focus, .select:focus{
   border-top:1px solid var(--line);
 }
 
-.ability-increases .field.is-locked{
-  opacity:.55;
-}
-
 /* ===== Combat helpers ===== */
 .triple{
   display:grid;

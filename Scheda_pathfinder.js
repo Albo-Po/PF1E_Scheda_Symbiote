@@ -520,7 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (copySheetLinkBtn) {
-    const externalSheetUrl = "https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder_embedded.html?v=1.1.2";
+    const externalSheetUrl = "https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder_embedded.html?v=1.1.3";
     const originalTitle = copySheetLinkBtn.title;
 
     copySheetLinkBtn.addEventListener("click", async () => {
@@ -817,16 +817,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const requiredLevel = Math.max(0, Math.trunc(num(select.dataset.level)));
       return bonus + (requiredLevel <= characterLevel && select.value === code ? 1 : 0);
     }, 0);
-  }
-
-  function updateLevelAbilityPickAvailability() {
-    const characterLevel = Math.max(0, Math.trunc(num(document.getElementById("pc-level-total")?.value)));
-    $$(".level-ability-pick").forEach((select) => {
-      const requiredLevel = Math.max(0, Math.trunc(num(select.dataset.level)));
-      const available = characterLevel >= requiredLevel;
-      select.disabled = !available;
-      select.closest(".field")?.classList.toggle("is-locked", !available);
-    });
   }
 
   $$(".level-ability-pick").forEach((select) => {
@@ -3013,7 +3003,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (totalLevelEl) totalLevelEl.value = String(totalLevel);
     if (hpLevelsEl) hpLevelsEl.value = String(totalLevel);
 
-    updateLevelAbilityPickAvailability();
     applyMythicAbilityBonusToScores();
 
     if (skillsSummaryEl) {
