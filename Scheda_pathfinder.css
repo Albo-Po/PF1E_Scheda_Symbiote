@@ -369,35 +369,38 @@ body{
 .tabs{
   display:grid;
   grid-template-columns:repeat(6, minmax(0, 1fr));
-  gap:8px;
+  gap:3px;
   margin: 10px 0 12px 0;
-  padding:8px;
-  border:2px solid var(--line);
-  border-radius:14px;
+  padding:4px 4px 0;
+  border:1px solid var(--line);
+  border-bottom:3px solid var(--line);
+  border-radius:10px 10px 0 0;
   background: var(--surface-2);
 }
 
 .tab{
   appearance:none;
-  border:2px solid var(--line);
-  background: transparent;
+  border:1px solid color-mix(in srgb, var(--line) 82%, var(--text) 18%);
+  border-bottom:0;
+  background:color-mix(in srgb, var(--surface-2) 86%, var(--text) 14%);
   color: var(--text);
   font-family:var(--font-display);
-  border-radius:999px;
-  padding:8px 12px;
-  font-size:12px;
-  letter-spacing:.5px;
+  border-radius:6px 6px 0 0;
+  padding:9px 8px;
+  font-size:11px;
+  letter-spacing:.25px;
   text-transform:uppercase;
   cursor:pointer;
   transition: all .2s ease;
   font-weight:600;
   white-space:normal;
   line-height:1.1;
-  min-height:42px;
+  min-height:40px;
 }
 
 .tab:hover{
-  transform: translateY(-2px);
+  background:var(--surface);
+  transform:translateY(-1px);
 }
 
 .tab-reset-alert{
@@ -491,21 +494,26 @@ body{
 
 /* Tab attiva */
 .tab[aria-selected="true"]{
-  color:#fff;
-  border-color:transparent;
+  color:var(--text);
+  background:var(--surface);
+  border:2px solid var(--tab-accent, var(--c-identita));
+  border-bottom-color:var(--surface);
+  box-shadow:inset 0 3px 0 var(--tab-accent, var(--c-identita));
+  transform:translateY(1px);
 }
 
 /* Colori per sezione (tab attiva) */
-#tab-identita[aria-selected="true"]{ background:var(--c-identita); }
-#tab-combattimento[aria-selected="true"]{ background:var(--c-combattimento); }
-#tab-abilita[aria-selected="true"]{ background:var(--c-abilita); }
-#tab-incantesimi[aria-selected="true"]{ background:var(--c-incantesimi); }
-#tab-talenti[aria-selected="true"]{ background:var(--c-talenti); }
-#tab-equip[aria-selected="true"]{ background:var(--c-equip); }
-#tab-mitico[aria-selected="true"]{ background:var(--c-mitico); }
-#tab-cdp[aria-selected="true"]{ background:var(--c-cdp); }
-#tab-note[aria-selected="true"]{ background:var(--c-note); }
-#tab-compagno[aria-selected="true"]{ background:var(--c-compagno); }
+#tab-identita[aria-selected="true"]{ --tab-accent:var(--c-identita); }
+#tab-combattimento[aria-selected="true"]{ --tab-accent:var(--c-combattimento); }
+#tab-abilita[aria-selected="true"]{ --tab-accent:var(--c-abilita); }
+#tab-incantesimi[aria-selected="true"]{ --tab-accent:var(--c-incantesimi); }
+#tab-talenti[aria-selected="true"]{ --tab-accent:var(--c-talenti); }
+#tab-equip[aria-selected="true"]{ --tab-accent:var(--c-equip); }
+#tab-mitico[aria-selected="true"]{ --tab-accent:var(--c-mitico); }
+#tab-cdp[aria-selected="true"]{ --tab-accent:var(--c-cdp); }
+#tab-note[aria-selected="true"]{ --tab-accent:var(--c-note); }
+#tab-compagno[aria-selected="true"]{ --tab-accent:var(--c-compagno); }
+#tab-impostazioni[aria-selected="true"]{ --tab-accent:var(--c-identita); }
 
 /* Mitico disabilitata */
 .tab.is-disabled{
