@@ -602,11 +602,11 @@ body{
   align-self:flex-start;
 }
 
-.spell-entry-controls{
+.spell-entry-title-actions{
   display:inline-flex;
   align-items:center;
   gap:8px;
-  flex:0 1 auto;
+  align-self:flex-start;
   justify-content:flex-start;
   flex-wrap:nowrap;
   max-width:100%;
@@ -836,9 +836,7 @@ body{
     width:100%;
   }
 
-  .spell-entry-controls{
-    width:100%;
-    justify-content:flex-start;
+  .spell-entry-title-actions{
     gap:10px;
   }
 
@@ -878,7 +876,7 @@ body{
 }
 
 @media (max-width: 520px){
-  .spell-entry-controls{
+  .spell-entry-title-actions{
     gap:8px;
   }
 

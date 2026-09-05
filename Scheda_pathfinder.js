@@ -1061,21 +1061,21 @@ document.addEventListener("DOMContentLoaded", () => {
     row.innerHTML = `
       <div class="spell-entry-head">
         <div class="spell-entry-title">
-          <button type="button" class="spell-entry-toggle" aria-expanded="true" title="Mostra/nascondi dettagli incantesimo">
-            Dettagli
-          </button>
+          <div class="spell-entry-title-actions">
+            <button type="button" class="spell-entry-toggle" aria-expanded="true" title="Mostra/nascondi dettagli incantesimo">
+              Dettagli
+            </button>
+            <label class="spell-offensive-toggle">
+              <input class="spell-offensive" data-key="spell:${level}:${index}:offensive" type="checkbox" />
+              Offensivo
+            </label>
+          </div>
           <input
             class="spell-name${isExtra ? " spell-name-extra" : ""}"
             data-key="spell:${level}:${index}:name"
             type="text"
             placeholder="Incantesimo livello ${level}"
           />
-        </div>
-        <div class="spell-entry-controls">
-          <label class="spell-offensive-toggle">
-            <input class="spell-offensive" data-key="spell:${level}:${index}:offensive" type="checkbox" />
-            Offensivo
-          </label>
         </div>
       </div>
 
