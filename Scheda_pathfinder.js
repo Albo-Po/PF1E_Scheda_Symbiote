@@ -520,7 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (copySheetLinkBtn) {
-    const externalSheetUrl = "https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder_embedded.html?v=1.1.1";
+    const externalSheetUrl = "https://albo-po.github.io/PF1E_Scheda_Symbiote/Scheda_pathfinder_embedded.html?v=1.1.2";
     const originalTitle = copySheetLinkBtn.title;
 
     copySheetLinkBtn.addEventListener("click", async () => {
