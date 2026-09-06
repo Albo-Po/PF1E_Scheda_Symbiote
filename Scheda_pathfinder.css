@@ -2641,6 +2641,16 @@ td .roll-btn + .roll-btn{
   text-transform:none;
 }
 
+.attack-feat-grid .attack-feat-name{
+  display:block;
+  overflow-wrap:anywhere;
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:12px;
+  font-weight:700;
+  line-height:1.2;
+}
+
 .attack-feat-grid input[type="checkbox"]{
   flex:0 0 auto;
   width:16px;

@@ -2362,11 +2362,11 @@ document.addEventListener("DOMContentLoaded", () => {
           </details>
           <details class="attack-collapsible attack-feat-panel">
             <summary>Talenti attivi per questo attacco</summary>
-            <div class="attack-collapsible-body attack-feat-grid">
-              <label><input class="atk-feat-power-attack" data-key="${keyPrefix}:feat_power_attack" type="checkbox" />Attacco Poderoso</label>
-              <label><input class="atk-feat-furious-focus" data-key="${keyPrefix}:feat_furious_focus" type="checkbox" />Furia focalizzata</label>
-              <label><input class="atk-feat-weapon-focus" data-key="${keyPrefix}:feat_weapon_focus" type="checkbox" />Arma focalizzata</label>
-              <label><input class="atk-feat-weapon-specialization" data-key="${keyPrefix}:feat_weapon_specialization" type="checkbox" />Arma specializzata</label>
+              <div class="attack-collapsible-body attack-feat-grid">
+              <label><input class="atk-feat-power-attack" data-key="${keyPrefix}:feat_power_attack" type="checkbox" /><span class="attack-feat-name">Attacco Poderoso</span></label>
+              <label><input class="atk-feat-furious-focus" data-key="${keyPrefix}:feat_furious_focus" type="checkbox" /><span class="attack-feat-name">Furia focalizzata</span></label>
+              <label><input class="atk-feat-weapon-focus" data-key="${keyPrefix}:feat_weapon_focus" type="checkbox" /><span class="attack-feat-name">Arma focalizzata</span></label>
+              <label><input class="atk-feat-weapon-specialization" data-key="${keyPrefix}:feat_weapon_specialization" type="checkbox" /><span class="attack-feat-name">Arma specializzata</span></label>
             </div>
           </details>
         </div>
@@ -3354,7 +3354,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const mythicTotal = mythicTier * getMythicHitPointsPerTier();
     const mythicFeatEffects = getMythicCombatFeatEffects();
     const toughnessTotal = hpToughnessEl.checked ? Math.max(3, levels) : 0;
-    const mythicToughnessBonus = mythicFeatEffects.mythicToughness ? Math.max(3, levels) : 0;
+    // Robustezza Mitica potenzia Robustezza: non assegna un secondo bonus se
+    // il talento base non è attivo sulla scheda.
+    const mythicToughnessBonus = hpToughnessEl.checked && mythicFeatEffects.mythicToughness ? toughnessTotal : 0;
     const robustnessTotal = toughnessTotal + mythicToughnessBonus;
     const favoredBonus = Math.max(0, Math.trunc(num(hpFavoredBonusEl.value)));
     const miscBonus = Math.trunc(num(hpMiscBonusEl.value));
@@ -3511,6 +3513,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const bonusPointsEl = document.getElementById("skills-bonus-points");
 
     let totalPoints = 0;
+    let isFirstCharacterLevel = true;
     summaryEntries.forEach((entry) => {
       const level = Math.max(0, Math.trunc(num(entry.level)));
       if (level <= 0) return;
@@ -3519,7 +3522,15 @@ document.addEventListener("DOMContentLoaded", () => {
         ? Math.max(1, Math.trunc(num(entry.skillPoints || 2)))
         : Math.max(1, Math.trunc(num(skillApi?.getPointsByClass?.(entry.className) || 2)));
       const perLevelPoints = Math.max(1, classBasePoints + intMod);
-      totalPoints += perLevelPoints * level;
+      // In PF1 il primo Dado Vita assegna quattro volte i punti abilità
+      // per livello, compreso il modificatore di INT.
+      if (isFirstCharacterLevel) {
+        totalPoints += perLevelPoints * 4;
+        totalPoints += perLevelPoints * Math.max(0, level - 1);
+        isFirstCharacterLevel = false;
+      } else {
+        totalPoints += perLevelPoints * level;
+      }
     });
 
     const bonusPoints = Math.max(0, Math.trunc(num(bonusPointsEl?.value)));
