@@ -2825,7 +2825,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { name: "Conoscenze (Piani)", abil: "INT", acp: false },
     { name: "Conoscenze (Religioni)", abil: "INT", acp: false },
     { name: "Diplomazia", abil: "CAR", acp: false },
-    { name: "Disattivare Congegni", abil: "DES", acp: false },
+    { name: "Disattivare Congegni", abil: "DES", acp: true },
     { name: "Furtività", abil: "DES", acp: true },
     { name: "Guarire", abil: "SAG", acp: false },
     { name: "Intimidire", abil: "CAR", acp: false },
@@ -2836,7 +2836,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { name: "Percezione", abil: "SAG", acp: false },
     { name: "Professione (Soldato)", abil: "SAG", acp: false },
     { name: "Raggirare", abil: "CAR", acp: false },
-    { name: "Rapidità di Mano", abil: "DES", acp: false },
+    { name: "Rapidità di Mano", abil: "DES", acp: true },
     { name: "Sapienza Magica", abil: "INT", acp: false },
     { name: "Scalare", abil: "FOR", acp: true },
     { name: "Sopravvivenza", abil: "SAG", acp: false },
@@ -3400,11 +3400,16 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateSkillPointsTotal() {
     const outEl = document.getElementById("skills-points-total");
     if (!outEl) return;
+    outEl.value = String(getAvailableSkillPoints());
+  }
+
+  function getAvailableSkillPoints() {
     const skillApi = getSkillPointApi();
     const entries = getClassEntries();
     const prestigeEntry = getPrestigeEntry();
     const summaryEntries = prestigeEntry ? [...entries, prestigeEntry] : entries;
     const intMod = Math.trunc(getAbilityModByCode("INT"));
+    const bonusPointsEl = document.getElementById("skills-bonus-points");
 
     let totalPoints = 0;
     summaryEntries.forEach((entry) => {
@@ -3418,7 +3423,41 @@ document.addEventListener("DOMContentLoaded", () => {
       totalPoints += perLevelPoints * level;
     });
 
-    outEl.value = String(Math.max(0, totalPoints));
+    const bonusPoints = Math.max(0, Math.trunc(num(bonusPointsEl?.value)));
+    if (bonusPointsEl) bonusPointsEl.value = String(bonusPoints);
+    return Math.max(0, totalPoints + bonusPoints);
+  }
+
+  function getSkillRankCap() {
+    const prestigeEntry = getPrestigeEntry();
+    const classLevels = getClassEntries().reduce((sum, entry) => sum + entry.level, 0);
+    return Math.max(0, classLevels + (prestigeEntry?.level || 0));
+  }
+
+  function normalizeSkillRanks(preferredRankEl = null) {
+    const rankEls = $$("#skills-tbody tr.skill-row .skill-ranks");
+    const rankCap = getSkillRankCap();
+    const budget = getAvailableSkillPoints();
+    const values = new Map(
+      rankEls.map((el) => [el, clamp(Math.trunc(num(el.value)), 0, rankCap)])
+    );
+
+    let spent = Array.from(values.values()).reduce((sum, ranks) => sum + ranks, 0);
+    const ordered = [preferredRankEl, ...rankEls.slice().reverse()].filter(
+      (el, index, arr) => el && arr.indexOf(el) === index
+    );
+    ordered.forEach((el) => {
+      if (spent <= budget) return;
+      const current = values.get(el) || 0;
+      const reduction = Math.min(current, spent - budget);
+      values.set(el, current - reduction);
+      spent -= reduction;
+    });
+
+    rankEls.forEach((el) => {
+      el.max = String(rankCap);
+      el.value = String(values.get(el) || 0);
+    });
   }
 
   function updateSkillRanksSpent() {
@@ -3431,7 +3470,8 @@ document.addEventListener("DOMContentLoaded", () => {
     outEl.value = String(spentRanks);
   }
 
-  function recalcAllSkills() {
+  function recalcAllSkills(preferredRankEl = null) {
+    normalizeSkillRanks(preferredRankEl);
     $$("#skills-tbody tr.skill-row").forEach(recalcSkillRow);
     updateSkillPointsTotal();
     updateSkillRanksSpent();
@@ -3466,20 +3506,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const tr = document.createElement("tr");
     tr.className = isExtra ? "skill-row skill-row-extra" : "skill-row";
+    const abilityOptions = ["FOR", "DES", "COS", "INT", "SAG", "CAR"]
+      .map((code) => `<option value="${code}"${code === ability ? " selected" : ""}>${code}</option>`)
+      .join("");
+    const abilityControl = isExtra
+      ? `<select class="select skill-abil-select" aria-label="Caratteristica dell'abilità">${abilityOptions}</select>
+         <input class="skill-abil" type="hidden" value="${ability}" />`
+      : `<input class="small skill-abil-fixed" type="text" value="${ability}" readonly />
+         <input class="skill-abil" type="hidden" value="${ability}" />`;
+    const acpControl = `<input class="skill-acp" type="checkbox" ${acp ? "checked" : ""}${isExtra ? "" : " disabled"} />`;
     tr.innerHTML = `
       <td class="td-center"><input class="skill-cs" type="checkbox" /></td>
       <td><input class="skill-name" type="text" value="${name}" placeholder="${placeholder}" /></td>
-      <td>
-        <input class="small skill-abil-fixed" type="text" value="${ability}" readonly />
-        <input class="skill-abil" type="hidden" value="${ability}" />
-      </td>
-      <td class="td-center"><input class="skill-acp" type="checkbox" ${acp ? "checked" : ""} /></td>
+      <td>${abilityControl}</td>
+      <td class="td-center">${acpControl}</td>
       <td><input class="small skill-ranks" type="number" step="1" min="0" value="0" /></td>
       <td><input class="small skill-misc" type="number" step="1" value="0" /></td>
       <td><input class="small skill-total" type="text" value="+0" readonly /></td>
       <td class="td-center"><button type="button" class="roll-btn" title="Tira 1d20 + Tot">Tiro</button></td>
     `;
     return tr;
+  }
+
+  function restoreSkillAbilityPicker(tr) {
+    const picker = tr?.querySelector(".skill-abil-select");
+    const hiddenAbility = tr?.querySelector(".skill-abil");
+    if (!picker || !hiddenAbility) return;
+
+    // Le schede salvate prima del selettore conservano il valore nel campo nascosto.
+    // Le schede nuove privilegiano invece il valore del selettore visibile.
+    if (Object.prototype.hasOwnProperty.call(state, keyFor(picker))) {
+      hiddenAbility.value = picker.value;
+    } else if (Array.from(picker.options).some((option) => option.value === hiddenAbility.value)) {
+      picker.value = hiddenAbility.value;
+    }
   }
 
   function buildBaseSkillRows() {
@@ -3494,6 +3554,8 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       skillsTbody.appendChild(tr);
       applySavedValues(tr);
+      tr.querySelector(".skill-acp").checked = !!sk.acp;
+      restoreSkillAbilityPicker(tr);
       wireAutosave(tr);
     });
   }
@@ -3514,6 +3576,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const tr = makeSkillRow({ isExtra: true });
       skillsTbody.appendChild(tr);
       applySavedValues(tr);
+      restoreSkillAbilityPicker(tr);
       wireAutosave(tr);
     }
   }
@@ -3526,6 +3589,7 @@ document.addEventListener("DOMContentLoaded", () => {
       skillsTbody.appendChild(tr);
       setExtraRowsCount(getExtraRowsCount() + 1);
       applySavedValues(tr);
+      restoreSkillAbilityPicker(tr);
       wireAutosave(tr);
       applyAutoClassSkills();
       recalcSkillRow(tr);
@@ -3545,6 +3609,7 @@ document.addEventListener("DOMContentLoaded", () => {
       skillsTbody.appendChild(tr);
       setExtraRowsCount(getExtraRowsCount() + 1);
       applySavedValues(tr);
+      restoreSkillAbilityPicker(tr);
       wireAutosave(tr);
       applyAutoClassSkills();
       recalcSkillRow(tr);
@@ -3575,8 +3640,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!t) return;
 
     const tr = t.closest?.("tr.skill-row");
-    if (tr && t.matches(".skill-cs, .skill-abil, .skill-acp, .skill-ranks, .skill-misc")) {
-      recalcSkillRow(tr);
+    if (tr && t.matches(".skill-cs, .skill-abil, .skill-abil-select, .skill-acp, .skill-ranks, .skill-misc")) {
+      if (t.matches(".skill-abil-select")) {
+        const hiddenAbility = tr.querySelector(".skill-abil");
+        if (hiddenAbility) {
+          hiddenAbility.value = t.value;
+          state[keyFor(hiddenAbility)] = t.value;
+          saveState(state);
+        }
+      }
+      if (t.matches(".skill-ranks")) recalcAllSkills(t);
+      else recalcSkillRow(tr);
     }
 
     if (t.id === "skills-acp") recalcAllSkills();
@@ -3591,6 +3665,15 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("change", (e) => {
     const t = e.target;
     if (!t) return;
+    if (t.matches?.(".skill-abil-select")) {
+      const hiddenAbility = t.closest("tr.skill-row")?.querySelector(".skill-abil");
+      if (hiddenAbility) {
+        hiddenAbility.value = t.value;
+        state[keyFor(hiddenAbility)] = t.value;
+        saveState(state);
+      }
+      recalcSkillRow(t.closest("tr.skill-row"));
+    }
     if (t.id === "spellcaster-class") {
       updateSpellcastingClassFields();
       updateSpellLevelsVisibility();
@@ -3605,6 +3688,12 @@ document.addEventListener("DOMContentLoaded", () => {
     el.addEventListener("input", applySkillFilters);
     el.addEventListener("change", applySkillFilters);
   });
+
+  const skillsBonusPointsEl = document.getElementById("skills-bonus-points");
+  if (skillsBonusPointsEl) {
+    skillsBonusPointsEl.addEventListener("input", () => recalcAllSkills());
+    skillsBonusPointsEl.addEventListener("change", () => recalcAllSkills());
+  }
 
   function getLinkedHitRowFromButton(btnEl, hitRowClass, dmgRowClass) {
     if (!btnEl) return null;

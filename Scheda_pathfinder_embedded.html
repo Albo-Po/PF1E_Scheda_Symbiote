@@ -786,7 +786,7 @@
                 <strong>Mostra solo class skill (CS)</strong>
               </label>
             </div>
-            <div class="field span-6 skills-filters-col skills-trained-filter-col">
+            <div class="field span-3 skills-filters-col skills-trained-filter-col">
               <label class="skills-filter-label">
                 <input id="filter-trained" type="checkbox" />
                 <strong>Mostra solo abilità con gradi &gt; 0</strong>
@@ -795,6 +795,10 @@
             <div class="field span-3">
               <label>Punti abilità spesi</label>
               <input id="skills-ranks-spent" class="small" type="text" value="0" readonly />
+            </div>
+            <div class="field span-3">
+              <label>Bonus punti (razza / preferita)</label>
+              <input id="skills-bonus-points" class="small" type="number" min="0" step="1" value="0" />
             </div>
           </div>
           <table aria-label="Tabella Abilità" id="skills-table">
