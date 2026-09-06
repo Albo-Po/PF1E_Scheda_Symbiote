@@ -1461,6 +1461,58 @@ document.addEventListener("DOMContentLoaded", () => {
     acDexEl.readOnly = true;
   }
 
+  function getPaladinLevel() {
+    return getClassEntries().reduce(
+      (total, entry) => total + (entry.className === "Paladino" ? entry.level : 0),
+      0
+    );
+  }
+
+  function getPaladinSmiteBonuses() {
+    const paladinLevel = getPaladinLevel();
+    return {
+      available: paladinLevel > 0,
+      attack: Math.max(0, getAbilityModByCode("CAR")),
+      damage: paladinLevel,
+      deflection: Math.max(0, getAbilityModByCode("CAR")),
+    };
+  }
+
+  function updatePaladinSmiteUI() {
+    const bonuses = getPaladinSmiteBonuses();
+    const attackPanel = document.getElementById("combat-paladin-smite-attack-panel");
+    const attackToggleWrap = document.getElementById("combat-paladin-smite-toggle");
+    const attackToggle = document.getElementById("combat-paladin-smite-active");
+    const attackBonusOut = document.getElementById("combat-paladin-smite-attack");
+    const damageBonusOut = document.getElementById("combat-paladin-smite-damage");
+    const acToggle = document.getElementById("ac-paladin-smite-active");
+    const deflectionOut = document.getElementById("ac-paladin-smite-deflection");
+
+    if (attackPanel) attackPanel.hidden = !bonuses.available;
+    if (attackToggleWrap) attackToggleWrap.hidden = !bonuses.available;
+    if (attackToggle) attackToggle.disabled = !bonuses.available;
+    if (attackBonusOut) attackBonusOut.value = fmtSigned(bonuses.attack);
+    if (damageBonusOut) damageBonusOut.value = fmtSigned(bonuses.damage);
+    if (deflectionOut) deflectionOut.value = fmtSigned(bonuses.deflection);
+
+    const automaticAttackActive = !!attackToggle?.checked && bonuses.available;
+    ["atk-quick-smite-atk", "atk-quick-smite-dmg"].forEach((id) => {
+      const input = document.getElementById(id);
+      if (input) input.disabled = automaticAttackActive;
+    });
+
+    [acToggle, deflectionOut].forEach((el) => {
+      const field = el?.closest(".field");
+      if (field) field.hidden = !bonuses.available;
+    });
+    if (acToggle) acToggle.disabled = !bonuses.available;
+
+    if (!bonuses.available) {
+      if (attackToggle) attackToggle.checked = false;
+      if (acToggle) acToggle.checked = false;
+    }
+  }
+
   function recalcAC() {
     const armorEl = document.getElementById("ac-armor");
     const shieldEl = document.getElementById("ac-shield");
@@ -1470,6 +1522,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const dexMaxEl = document.getElementById("ac-dex-max");
     const miscEl = document.getElementById("ac-misc");
     const shieldOffEl = document.getElementById("shield-off");
+    const smiteActiveEl = document.getElementById("ac-paladin-smite-active");
 
     const totalEl = document.getElementById("ac-total");
     const touchEl = document.getElementById("ac-touch");
@@ -1488,14 +1541,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const dexApplied = hasDexMax ? Math.min(dex, num(dexMaxRaw)) : dex;
     const size = getCurrentSizeMods().acAtk;
     const misc = num(miscEl.value);
+    const smiteDeflection = smiteActiveEl?.checked ? getPaladinSmiteBonuses().deflection : 0;
 
     const shieldActive = !(shieldOffEl && shieldOffEl.checked);
     const shield = shieldActive ? shieldBase + shieldEnhancement : 0;
     const armorTotal = armor + armorEnhancement;
 
-    totalEl.value = String(10 + armorTotal + shield + dexApplied + size + misc);
-    touchEl.value = String(10 + dexApplied + size + misc);
-    ffEl.value = String(10 + armorTotal + shield + size + misc);
+    totalEl.value = String(10 + armorTotal + shield + dexApplied + size + misc + smiteDeflection);
+    touchEl.value = String(10 + dexApplied + size + misc + smiteDeflection);
+    ffEl.value = String(10 + armorTotal + shield + size + misc + smiteDeflection);
 
     if (shieldOffEl) {
       shieldEl.disabled = !!shieldOffEl.checked;
@@ -1665,6 +1719,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getQuickAttackModifiers() {
     const mythicFeatEffects = getMythicCombatFeatEffects();
+    const automaticSmite = getPaladinSmiteBonuses();
+    const automaticSmiteActive = !!document.getElementById("combat-paladin-smite-active")?.checked && automaticSmite.available;
     return {
       powerAttack: !!document.getElementById("atk-quick-power-attack")?.checked,
       furiousFocus: !!document.getElementById("atk-quick-furious-focus")?.checked,
@@ -1679,8 +1735,8 @@ document.addEventListener("DOMContentLoaded", () => {
       competence: num(document.getElementById("atk-quick-competence")?.value),
       defensivePenalty: Math.max(0, num(document.getElementById("atk-quick-defensive")?.value)),
       twoWeaponPenalty: Math.max(0, num(document.getElementById("atk-quick-twf")?.value)),
-      smiteAttack: num(document.getElementById("atk-quick-smite-atk")?.value),
-      smiteDamage: num(document.getElementById("atk-quick-smite-dmg")?.value),
+      smiteAttack: automaticSmiteActive ? automaticSmite.attack : num(document.getElementById("atk-quick-smite-atk")?.value),
+      smiteDamage: automaticSmiteActive ? automaticSmite.damage : num(document.getElementById("atk-quick-smite-dmg")?.value),
       mythicAttack: num(document.getElementById("atk-quick-mythic-atk")?.value),
       mythicDamage: num(document.getElementById("atk-quick-mythic-dmg")?.value),
       globalMisc: num(document.getElementById("atk-misc")?.value),
@@ -3792,7 +3848,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // iniziativa
     recalcInitiative();
 
-    // CA: DES -> ac-dex -> recalc
+    // Punire il Male e CA: DES -> ac-dex -> recalc
+    updatePaladinSmiteUI();
     syncDexToAC();
     recalcAC();
 
@@ -4143,7 +4200,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.addEventListener("change", recalcInitiative);
   });
 
-  ["ac-armor", "ac-shield", "ac-armor-enhancement", "ac-shield-enhancement", "ac-dex-max", "ac-misc", "shield-off"].forEach((id) => {
+  ["ac-armor", "ac-shield", "ac-armor-enhancement", "ac-shield-enhancement", "ac-dex-max", "ac-misc", "shield-off", "ac-paladin-smite-active"].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener("input", recalcAC);
@@ -4184,6 +4241,12 @@ document.addEventListener("DOMContentLoaded", () => {
     el.addEventListener("input", recalcAllAttacks);
     el.addEventListener("change", recalcAllAttacks);
   });
+
+  const paladinSmiteAttackToggle = document.getElementById("combat-paladin-smite-active");
+  if (paladinSmiteAttackToggle) {
+    paladinSmiteAttackToggle.addEventListener("input", recalcDerived);
+    paladinSmiteAttackToggle.addEventListener("change", recalcDerived);
+  }
 
   const spellcasterLevelEl = document.getElementById("spellcaster-level");
   if (spellcasterLevelEl) {
@@ -4269,7 +4332,7 @@ document.addEventListener("DOMContentLoaded", () => {
       syncClassSummaryFields();
       applyAutoClassSkills();
       applyAutoBabFromClass();
-      recalcHitPoints();
+      recalcDerived();
     });
     el.addEventListener("change", () => {
       if (el.classList.contains("class-row-level")) {
@@ -4279,7 +4342,7 @@ document.addEventListener("DOMContentLoaded", () => {
       syncClassSummaryFields();
       applyAutoClassSkills();
       applyAutoBabFromClass();
-      recalcHitPoints();
+      recalcDerived();
     });
   });
 

@@ -1944,9 +1944,9 @@ td input{
   grid-template-columns: repeat(4, 1fr);
 }
 
-/* Riga 3: Note */
+/* Riga 3: Punire il Male + Note */
 #ac-components .ac-row.row-3{
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr 2fr;
 }
 
 .ac-bonus-stack{
@@ -2313,7 +2313,9 @@ td .roll-btn + .roll-btn{
 @media (max-width: 520px){
   #ac-components .ac-row.row-1{ grid-template-columns: 1fr; }
   #ac-components .ac-row.row-2{ grid-template-columns: 1fr 1fr; }
+  #ac-components .ac-row.row-3{ grid-template-columns: 1fr; }
   #ac-components .field.wide{ grid-column: span 2 !important; }
+  #ac-components .ac-row.row-3 .field.wide{ grid-column: span 1 !important; }
 }
 
 /* ===== Attacchi: layout piatto ===== */
