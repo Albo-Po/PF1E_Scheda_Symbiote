@@ -1304,6 +1304,23 @@ input:focus, textarea:focus, .select:focus{
   min-width:58px;
 }
 
+.save-calc-card{
+  gap:8px;
+  padding:8px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:color-mix(in srgb, var(--surface) 82%, var(--bg));
+}
+
+.save-calc-card > label{
+  color:var(--text);
+  font-family:var(--font-display);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.45px;
+  text-align:center;
+}
+
 .save-calc-grid{
   display:grid;
   grid-template-columns:repeat(3, minmax(0, 1fr));
@@ -1330,6 +1347,15 @@ input:focus, textarea:focus, .select:focus{
 .save-calc-grid .small{
   min-width:0;
   padding:6px 3px;
+  text-align:center;
+}
+
+.save-calc-card .save-roll-inline{
+  margin-top:auto;
+}
+
+.save-calc-card .save-roll-value{
+  font-weight:700;
   text-align:center;
 }
 
