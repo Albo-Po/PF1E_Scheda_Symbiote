@@ -526,6 +526,12 @@ body{
 .page{ display:none; }
 .page.active{ display:block; }
 
+/* Lo spazio extra permette ai menu nativi in fondo alla pagina Personaggio
+   di aprirsi senza essere tagliati dal contenitore incorporato. */
+#page-identita{
+  padding-bottom:320px;
+}
+
 /* ===== Action buttons (Add row, Reset, ecc.) ===== */
 .actions{
   display:flex;

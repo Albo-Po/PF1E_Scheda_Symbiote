@@ -808,6 +808,13 @@ document.addEventListener("DOMContentLoaded", () => {
       applyMythicAbilityBonusToScores();
       recalcDerived();
     };
+
+    const revealAbilityPicker = () => {
+      select.scrollIntoView({ block: "center", inline: "nearest" });
+    };
+
+    select.addEventListener("pointerdown", revealAbilityPicker);
+    select.addEventListener("focus", revealAbilityPicker);
     select.addEventListener("input", applyLevelAbilityIncrease);
     select.addEventListener("change", applyLevelAbilityIncrease);
   });
