@@ -1304,6 +1304,35 @@ input:focus, textarea:focus, .select:focus{
   min-width:58px;
 }
 
+.save-calc-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:6px;
+  margin-bottom:6px;
+}
+
+.save-calc-grid > div{
+  min-width:0;
+}
+
+.save-calc-grid span{
+  display:block;
+  margin-bottom:3px;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.35px;
+  line-height:1.1;
+  text-align:center;
+  text-transform:uppercase;
+}
+
+.save-calc-grid .small{
+  min-width:0;
+  padding:6px 3px;
+  text-align:center;
+}
+
 .companion-toggle{
   margin-top:8px;
   font-size:13px;

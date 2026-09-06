@@ -1483,6 +1483,45 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================
+     Combattimento — Tiri Salvezza
+     Base per ogni classe/CdP + caratteristica + modificatori vari
+  ========================= */
+  function getSaveProgressionForClass(className, saveKey) {
+    return BASE_CLASS_SAVE_PROGRESSIONS[String(className || "").trim()]?.[saveKey] || "poor";
+  }
+
+  function getBaseSaveTotal(saveKey) {
+    const classBonus = getClassEntries().reduce(
+      (total, entry) => total + getSaveBonusByProgression(entry.level, getSaveProgressionForClass(entry.className, saveKey)),
+      0
+    );
+    const prestigeEntry = getPrestigeEntry();
+    if (!prestigeEntry) return classBonus;
+    return classBonus + getSaveBonusByProgression(prestigeEntry.level, prestigeEntry.saves?.[saveKey] || "poor");
+  }
+
+  function recalcSaves() {
+    [
+      { key: "fort", ability: "COS" },
+      { key: "ref", ability: "DES" },
+      { key: "will", ability: "SAG" },
+    ].forEach(({ key, ability }) => {
+      const base = getBaseSaveTotal(key);
+      const abilityBonus = getAbilityModByCode(ability);
+      const miscEl = document.getElementById(`save-${key}-misc`);
+      const misc = Math.trunc(num(miscEl?.value));
+      const baseEl = document.getElementById(`save-${key}-base`);
+      const abilityEl = document.getElementById(`save-${key}-ability`);
+      const totalEl = document.getElementById(`save-${key}`);
+
+      if (miscEl && miscEl.value !== String(misc)) miscEl.value = String(misc);
+      if (baseEl) baseEl.value = fmtSigned(base);
+      if (abilityEl) abilityEl.value = fmtSigned(abilityBonus);
+      if (totalEl) totalEl.value = fmtSigned(base + abilityBonus + misc);
+    });
+  }
+
+  /* =========================
      Combattimento — CA
   ========================= */
   function syncDexToAC() {
@@ -2708,6 +2747,24 @@ document.addEventListener("DOMContentLoaded", () => {
     Stregone: ["artigianato","conoscenze (arcane)","professione","sapienza magica","utilizzare congegni magici"],
   };
 
+  // Progressioni PF1 delle classi base. Ogni classe viene calcolata
+  // separatamente: in caso di multiclasse i bonus base si sommano, senza
+  // applicare la progressione sul livello complessivo del personaggio.
+  const BASE_CLASS_SAVE_PROGRESSIONS = {
+    Barbaro: { fort: "good", ref: "poor", will: "poor" },
+    Bardo: { fort: "poor", ref: "good", will: "good" },
+    Chierico: { fort: "good", ref: "poor", will: "good" },
+    Druido: { fort: "good", ref: "poor", will: "good" },
+    Guerriero: { fort: "good", ref: "poor", will: "poor" },
+    Ladro: { fort: "poor", ref: "good", will: "poor" },
+    Mago: { fort: "poor", ref: "poor", will: "good" },
+    Monaco: { fort: "good", ref: "good", will: "good" },
+    Oracolo: { fort: "poor", ref: "poor", will: "good" },
+    Paladino: { fort: "good", ref: "poor", will: "good" },
+    Ranger: { fort: "good", ref: "good", will: "poor" },
+    Stregone: { fort: "poor", ref: "poor", will: "good" },
+  };
+
   const PRESTIGE_CLASS_OPTIONS = [
     "Arcane Archer",
     "Arcane Trickster",
@@ -2896,6 +2953,7 @@ document.addEventListener("DOMContentLoaded", () => {
       level,
       babProgression: data?.bab || "half",
       hitDie: data?.hitDie || 8,
+      saves: data?.saves || null,
       isPrestige: true,
     };
   }
@@ -3094,6 +3152,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     recalcCompanionEffectiveLevel();
+    recalcSaves();
     refreshClassLevelCaps();
     updateTalentLevelMarkers(summaryEntries);
   }
@@ -3968,6 +4027,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // iniziativa
     recalcInitiative();
 
+    // tiri salvezza: progressioni, caratteristica e bonus vari
+    recalcSaves();
+
     // Punire il Male e CA: DES -> ac-dex -> recalc
     updatePaladinSmiteUI();
     syncDexToAC();
@@ -4428,6 +4490,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!el) return;
     el.addEventListener("input", recalcHitPoints);
     el.addEventListener("change", recalcHitPoints);
+  });
+
+  ["save-fort-misc", "save-ref-misc", "save-will-misc"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", recalcSaves);
+    el.addEventListener("change", recalcSaves);
   });
 
   getMythicCombatFeatIds().forEach((id) => {

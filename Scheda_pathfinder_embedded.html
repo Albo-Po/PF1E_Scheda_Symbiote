@@ -522,27 +522,42 @@
           <div class="fields">
             <div class="field span-4">
               <label>Tempra</label>
+              <div class="save-calc-grid">
+                <div><span>Base classi</span><input id="save-fort-base" class="small" type="text" value="+0" readonly /></div>
+                <div><span>COS</span><input id="save-fort-ability" class="small" type="text" value="+0" readonly /></div>
+                <div><span>Varie</span><input id="save-fort-misc" class="small" type="number" step="1" value="0" aria-label="Modificatori vari Tempra" /></div>
+              </div>
               <div class="save-roll-inline">
-                <input id="save-fort" class="small save-roll-value" type="text" value="+0" aria-label="Tiro Salvezza Tempra" />
+                <input id="save-fort" class="small save-roll-value" type="text" value="+0" aria-label="Tiro Salvezza Tempra" readonly />
                 <button type="button" class="roll-btn save-roll-btn" data-target="save-fort" data-label="Tempra" title="Tira 1d20 + Tempra">Tiro</button>
               </div>
             </div>
             <div class="field span-4">
               <label>Riflessi</label>
+              <div class="save-calc-grid">
+                <div><span>Base classi</span><input id="save-ref-base" class="small" type="text" value="+0" readonly /></div>
+                <div><span>DES</span><input id="save-ref-ability" class="small" type="text" value="+0" readonly /></div>
+                <div><span>Varie</span><input id="save-ref-misc" class="small" type="number" step="1" value="0" aria-label="Modificatori vari Riflessi" /></div>
+              </div>
               <div class="save-roll-inline">
-                <input id="save-ref" class="small save-roll-value" type="text" value="+0" aria-label="Tiro Salvezza Riflessi" />
+                <input id="save-ref" class="small save-roll-value" type="text" value="+0" aria-label="Tiro Salvezza Riflessi" readonly />
                 <button type="button" class="roll-btn save-roll-btn" data-target="save-ref" data-label="Riflessi" title="Tira 1d20 + Riflessi">Tiro</button>
               </div>
             </div>
             <div class="field span-4">
               <label>Volontà</label>
+              <div class="save-calc-grid">
+                <div><span>Base classi</span><input id="save-will-base" class="small" type="text" value="+0" readonly /></div>
+                <div><span>SAG</span><input id="save-will-ability" class="small" type="text" value="+0" readonly /></div>
+                <div><span>Varie</span><input id="save-will-misc" class="small" type="number" step="1" value="0" aria-label="Modificatori vari Volontà" /></div>
+              </div>
               <div class="save-roll-inline">
-                <input id="save-will" class="small save-roll-value" type="text" value="+0" aria-label="Tiro Salvezza Volontà" />
+                <input id="save-will" class="small save-roll-value" type="text" value="+0" aria-label="Tiro Salvezza Volontà" readonly />
                 <button type="button" class="roll-btn save-roll-btn" data-target="save-will" data-label="Volontà" title="Tira 1d20 + Volontà">Tiro</button>
               </div>
             </div>
           </div>
-          <div class="hint">Inserisci il totale di ciascun tiro salvezza; il pulsante effettua 1d20 più il valore indicato.</div>
+          <div class="hint">Base = progressioni delle singole classi e della CdP; Tempra usa COS, Riflessi DES e Volontà SAG. Inserisci in Varie bonus o penalità aggiuntivi.</div>
         </details>
 
         <!-- CA (già calcolata automaticamente) -->
