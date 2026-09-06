@@ -647,6 +647,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getSizeAbilityScoreBonus(code) {
+    // La taglia del personaggio influenza CA, attacchi, Furtività, BMC e DMC,
+    // ma non assegna di per sé modificatori alle caratteristiche in PF1.
+    // Eventuali effetti di metamorfosi o di taglia sono gestiti separatamente.
+    return 0;
+  }
+
+  function getLegacySizeAbilityScoreBonus(code) {
     const size = getCurrentSizeKey();
     const adjustmentsBySize = {
       small: { FOR: -2, DES: 2 },
@@ -714,6 +721,30 @@ document.addEventListener("DOMContentLoaded", () => {
     sel.addEventListener("change", onSizeChange);
   });
   setAllSizeSelectors(getCurrentSizeKey());
+
+  function migrateLegacySizeAbilityBonuses() {
+    const migrationKey = "pf1e_migrated_size_ability_scores_v1";
+    if (state[migrationKey]) return;
+
+    $$(".stat[data-ability]").forEach((statEl) => {
+      const scoreEl = $(".ability-score", statEl);
+      if (!scoreEl) return;
+      const legacyBonus = getLegacySizeAbilityScoreBonus(statEl.dataset.ability);
+      const min = num(scoreEl.min || 1);
+      const max = num(scoreEl.max || 50);
+      const correctedScore = clamp(num(scoreEl.value) - legacyBonus, min, max);
+      const code = String(statEl.dataset.ability || "");
+      const baseScore = correctedScore - getMythicAbilityBonusFor(code) - getLevelAbilityBonusFor(code) - getEquipAbilityBonusFor(code);
+      scoreEl.value = String(correctedScore);
+      scoreEl.dataset.baseScore = String(baseScore);
+      state[keyFor(scoreEl)] = String(correctedScore);
+    });
+
+    state[migrationKey] = true;
+    saveState(state);
+  }
+
+  migrateLegacySizeAbilityBonuses();
 
   /* =========================
      Ability score <-> mod (bidirezionale)
