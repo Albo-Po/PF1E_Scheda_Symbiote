@@ -517,6 +517,34 @@
           <div class="hint">Calcolo automatico: 1° livello a DV massimo, livelli successivi a media fissa, poi COS, bonus mitici, classe preferita e bonus vari.</div>
         </details>
 
+        <details class="combat-hp-calc" open>
+          <summary>Tiri Salvezza</summary>
+          <div class="fields">
+            <div class="field span-4">
+              <label>Tempra</label>
+              <div class="save-roll-inline">
+                <input id="save-fort" class="small save-roll-value" type="text" value="+0" aria-label="Tiro Salvezza Tempra" />
+                <button type="button" class="roll-btn save-roll-btn" data-target="save-fort" data-label="Tempra" title="Tira 1d20 + Tempra">Tiro</button>
+              </div>
+            </div>
+            <div class="field span-4">
+              <label>Riflessi</label>
+              <div class="save-roll-inline">
+                <input id="save-ref" class="small save-roll-value" type="text" value="+0" aria-label="Tiro Salvezza Riflessi" />
+                <button type="button" class="roll-btn save-roll-btn" data-target="save-ref" data-label="Riflessi" title="Tira 1d20 + Riflessi">Tiro</button>
+              </div>
+            </div>
+            <div class="field span-4">
+              <label>Volontà</label>
+              <div class="save-roll-inline">
+                <input id="save-will" class="small save-roll-value" type="text" value="+0" aria-label="Tiro Salvezza Volontà" />
+                <button type="button" class="roll-btn save-roll-btn" data-target="save-will" data-label="Volontà" title="Tira 1d20 + Volontà">Tiro</button>
+              </div>
+            </div>
+          </div>
+          <div class="hint">Inserisci il totale di ciascun tiro salvezza; il pulsante effettua 1d20 più il valore indicato.</div>
+        </details>
+
         <!-- CA (già calcolata automaticamente) -->
         <div class="card" style="padding:10px;">
           <h2 style="margin-bottom:8px;">Classe Armatura (CA)</h2>
