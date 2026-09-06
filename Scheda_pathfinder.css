@@ -1250,6 +1250,23 @@ input:focus, textarea:focus, .select:focus{
   margin-top:12px;
 }
 
+/* I selettori hanno un testo introduttivo lungo: tre colonne li comprimono
+   troppo e fanno sparire parte dell'etichetta. */
+.ability-increases > .fields > .field{
+  grid-column:span 6;
+}
+
+.ability-increases > .fields > .field:last-child{
+  grid-column:span 12;
+}
+
+@media (max-width:520px){
+  .ability-increases > .fields > .field,
+  .ability-increases > .fields > .field:last-child{
+    grid-column:span 12;
+  }
+}
+
 /* ===== Combat helpers ===== */
 .triple{
   display:grid;
