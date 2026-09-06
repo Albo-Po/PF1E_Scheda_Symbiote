@@ -2620,7 +2620,7 @@ td .roll-btn + .roll-btn{
 }
 
 .attack-feat-panel{
-  margin:0 14px 10px;
+  margin:0;
 }
 
 .attack-feat-grid{
@@ -2688,11 +2688,6 @@ td .roll-btn + .roll-btn{
 
   #attacks-table .attack-dmg-line{
     padding:12px;
-  }
-
-  .attack-feat-panel{
-    margin-left:10px;
-    margin-right:10px;
   }
 
   .attack-feat-grid{

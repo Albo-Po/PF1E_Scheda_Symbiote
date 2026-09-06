@@ -2360,6 +2360,15 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
             </div>
           </details>
+          <details class="attack-collapsible attack-feat-panel">
+            <summary>Talenti attivi per questo attacco</summary>
+            <div class="attack-collapsible-body attack-feat-grid">
+              <label><input class="atk-feat-power-attack" data-key="${keyPrefix}:feat_power_attack" type="checkbox" />Attacco Poderoso</label>
+              <label><input class="atk-feat-furious-focus" data-key="${keyPrefix}:feat_furious_focus" type="checkbox" />Furia focalizzata</label>
+              <label><input class="atk-feat-weapon-focus" data-key="${keyPrefix}:feat_weapon_focus" type="checkbox" />Arma focalizzata</label>
+              <label><input class="atk-feat-weapon-specialization" data-key="${keyPrefix}:feat_weapon_specialization" type="checkbox" />Arma specializzata</label>
+            </div>
+          </details>
         </div>
       `;
 
@@ -2407,15 +2416,6 @@ document.addEventListener("DOMContentLoaded", () => {
               <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
               <button type="button" class="roll-btn atk-full-roll-btn" title="Tira la sequenza completa">Full</button>
             </div>
-            <details class="attack-collapsible attack-feat-panel">
-              <summary>Talenti attivi per questo attacco</summary>
-              <div class="attack-collapsible-body attack-feat-grid">
-                <label><input class="atk-feat-power-attack" data-key="${keyPrefix}:feat_power_attack" type="checkbox" />Attacco Poderoso</label>
-                <label><input class="atk-feat-furious-focus" data-key="${keyPrefix}:feat_furious_focus" type="checkbox" />Furia focalizzata</label>
-                <label><input class="atk-feat-weapon-focus" data-key="${keyPrefix}:feat_weapon_focus" type="checkbox" />Arma focalizzata</label>
-                <label><input class="atk-feat-weapon-specialization" data-key="${keyPrefix}:feat_weapon_specialization" type="checkbox" />Arma specializzata</label>
-              </div>
-            </details>
             <div class="attack-row-dmg-host">
               ${dmgHostMarkup}
             </div>
