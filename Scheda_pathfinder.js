@@ -2236,7 +2236,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const damageAbilityMultiplier = preset.damageAbilityMultiplier || "AUTO";
     const dmgHostMarkup = `
         <div class="attack-dmg-line">
-          <details class="attack-collapsible" open>
+          <details class="attack-collapsible">
             <summary>Tiro per colpire</summary>
             <div class="attack-collapsible-body">
               <div class="attack-field-grid">
@@ -2267,7 +2267,7 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
             </div>
           </details>
-          <details class="attack-collapsible" open>
+          <details class="attack-collapsible">
             <summary>Danni</summary>
             <div class="attack-collapsible-body">
               <div class="attack-field-grid">
