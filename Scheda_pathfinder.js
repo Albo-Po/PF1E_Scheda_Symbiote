@@ -1787,18 +1787,19 @@ document.addEventListener("DOMContentLoaded", () => {
     return 1;
   }
 
-  function getQuickAttackModifiers() {
+  function getQuickAttackModifiers(attackRow = null) {
     const mythicFeatEffects = getMythicCombatFeatEffects();
     const automaticSmite = getPaladinSmiteBonuses();
     const automaticSmiteActive = !!document.getElementById("combat-paladin-smite-active")?.checked && automaticSmite.available;
+    const hasFeat = (className) => !!attackRow?.querySelector(`.${className}`)?.checked;
     return {
-      powerAttack: !!document.getElementById("atk-quick-power-attack")?.checked,
-      furiousFocus: !!document.getElementById("atk-quick-furious-focus")?.checked,
-      mythicPowerAttack: mythicFeatEffects.powerAttack,
-      mythicFuriousFocus: mythicFeatEffects.furiousFocus,
-      weaponFocus: !!document.getElementById("atk-quick-weapon-focus")?.checked,
-      mythicWeaponFocus: mythicFeatEffects.weaponFocus,
-      weaponSpecialization: !!document.getElementById("atk-quick-weapon-specialization")?.checked,
+      powerAttack: hasFeat("atk-feat-power-attack"),
+      furiousFocus: hasFeat("atk-feat-furious-focus"),
+      mythicPowerAttack: hasFeat("atk-feat-power-attack") && mythicFeatEffects.powerAttack,
+      mythicFuriousFocus: hasFeat("atk-feat-furious-focus") && mythicFeatEffects.furiousFocus,
+      weaponFocus: hasFeat("atk-feat-weapon-focus"),
+      mythicWeaponFocus: hasFeat("atk-feat-weapon-focus") && mythicFeatEffects.weaponFocus,
+      weaponSpecialization: hasFeat("atk-feat-weapon-specialization"),
       morale: num(document.getElementById("atk-quick-morale")?.value),
       sacred: num(document.getElementById("atk-quick-sacred")?.value),
       luck: num(document.getElementById("atk-quick-luck")?.value),
@@ -2044,7 +2045,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!dmgRow) return { attackTotal: 0 };
 
     const data = readAttackRowData(tr);
-    const quickMods = getQuickAttackModifiers();
+    const quickMods = getQuickAttackModifiers(tr);
     const profile = deriveAttackProfile(data);
     const primaryAttackData = { ...data, sequenceIndex: 0 };
     const resolvedHitAbility = resolveAttackHitAbilityCode(data);
@@ -2189,8 +2190,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function rollFullAttackSequence(data, label) {
-    const quickMods = getQuickAttackModifiers();
+  function rollFullAttackSequence(data, label, attackRow) {
+    const quickMods = getQuickAttackModifiers(attackRow);
     const profile = deriveAttackProfile(data);
     const bonuses = buildFullAttackBonusesFromData(data, quickMods, profile);
     bonuses.forEach((bonus, idx) => {
@@ -2406,6 +2407,15 @@ document.addEventListener("DOMContentLoaded", () => {
               <button type="button" class="roll-btn atk-dmg-roll-btn" title="Tira danni">Danni</button>
               <button type="button" class="roll-btn atk-full-roll-btn" title="Tira la sequenza completa">Full</button>
             </div>
+            <details class="attack-collapsible attack-feat-panel">
+              <summary>Talenti attivi per questo attacco</summary>
+              <div class="attack-collapsible-body attack-feat-grid">
+                <label><input class="atk-feat-power-attack" data-key="${keyPrefix}:feat_power_attack" type="checkbox" />Attacco Poderoso</label>
+                <label><input class="atk-feat-furious-focus" data-key="${keyPrefix}:feat_furious_focus" type="checkbox" />Furia focalizzata</label>
+                <label><input class="atk-feat-weapon-focus" data-key="${keyPrefix}:feat_weapon_focus" type="checkbox" />Arma focalizzata</label>
+                <label><input class="atk-feat-weapon-specialization" data-key="${keyPrefix}:feat_weapon_specialization" type="checkbox" />Arma specializzata</label>
+              </div>
+            </details>
             <div class="attack-row-dmg-host">
               ${dmgHostMarkup}
             </div>
@@ -2449,6 +2459,9 @@ document.addEventListener("DOMContentLoaded", () => {
     applySavedValues(dmgRow);
     wireAutosave(hitRow);
     wireAutosave(dmgRow);
+    hitRow.querySelectorAll(".atk-feat-power-attack, .atk-feat-furious-focus, .atk-feat-weapon-focus, .atk-feat-weapon-specialization").forEach((el) => {
+      el.addEventListener("change", () => recalcAttackRow(hitRow));
+    });
     return { hitRow, dmgRow };
   }
 
@@ -3223,10 +3236,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getQuickAttackModifierIds() {
     return getCombatFeatConfig()?.quickAttackIds || [
-      "atk-quick-power-attack",
-      "atk-quick-furious-focus",
-      "atk-quick-weapon-focus",
-      "atk-quick-weapon-specialization",
       "atk-quick-morale",
       "atk-quick-sacred",
       "atk-quick-luck",
@@ -3975,7 +3984,7 @@ document.addEventListener("DOMContentLoaded", () => {
         recalcAttackRow(row);
         const data = readAttackRowData(row);
         const label = String(row.querySelector(".atk-name")?.value || "").trim() || "Attacco";
-        rollFullAttackSequence(data, label);
+        rollFullAttackSequence(data, label, row);
         return;
       }
     }
